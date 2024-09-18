@@ -1,65 +1,47 @@
 package net.minecraft.world.level.block.state.properties;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import net.minecraft.util.StringRepresentable;
 
-public class EnumProperty<T extends Enum<T> & StringRepresentable> extends Property<T> {
-	private static final int UNABLE_TO_USE_ORDINALS = -1;
+public final class EnumProperty<T extends Enum<T> & StringRepresentable> extends Property<T> {
 	private final List<T> values;
-	private final Map<String, T> names = Maps.<String, T>newHashMap();
-	@VisibleForTesting
-	protected int minOffset;
-	@VisibleForTesting
-	protected final int maxUsableOrdinal;
+	private final Map<String, T> names;
+	private final int[] ordinalToIndex;
 
-	protected EnumProperty(String string, Class<T> class_, List<T> list) {
+	private EnumProperty(String string, Class<T> class_, List<T> list) {
 		super(string, class_);
 		if (list.isEmpty()) {
 			throw new IllegalArgumentException("Trying to make empty EnumProperty '" + string + "'");
 		} else {
-			int[] is = new int[]{-1};
-			if (IntStream.range(0, list.size()).allMatch(i -> {
-				int j = ((Enum)list.get(i)).ordinal() - i;
-				if (is[0] == -1) {
-					is[0] = j;
-				}
+			this.values = List.copyOf(list);
+			T[] enums = (T[])class_.getEnumConstants();
+			this.ordinalToIndex = new int[enums.length];
 
-				return j == is[0];
-			})) {
-				this.values = Collections.unmodifiableList(list);
-				this.maxUsableOrdinal = ((Enum)list.getLast()).ordinal();
-				this.minOffset = is[0];
-			} else {
-				this.values = new ReferenceArrayList<>(list);
-				this.maxUsableOrdinal = -1;
-				this.minOffset = -1;
+			for (T enum_ : enums) {
+				this.ordinalToIndex[enum_.ordinal()] = list.indexOf(enum_);
 			}
 
-			for (T enum_ : list) {
-				String string2 = enum_.getSerializedName();
-				if (this.names.containsKey(string2)) {
-					throw new IllegalArgumentException("Multiple values have the same name '" + string2 + "'");
-				}
+			Builder<String, T> builder = ImmutableMap.builder();
 
-				this.names.put(string2, enum_);
+			for (T enum2 : list) {
+				String string2 = enum2.getSerializedName();
+				builder.put(string2, enum2);
 			}
+
+			this.names = builder.buildOrThrow();
 		}
 	}
 
 	@Override
 	public List<T> getPossibleValues() {
-		return this.maxUsableOrdinal == -1 ? Collections.unmodifiableList(this.values) : this.values;
+		return this.values;
 	}
 
 	@Override
@@ -72,8 +54,7 @@ public class EnumProperty<T extends Enum<T> & StringRepresentable> extends Prope
 	}
 
 	public int getInternalIndex(T enum_) {
-		int i = enum_.ordinal();
-		return i <= this.maxUsableOrdinal ? i - this.minOffset : this.values.indexOf(enum_);
+		return this.ordinalToIndex[enum_.ordinal()];
 	}
 
 	@Override
@@ -82,7 +63,7 @@ public class EnumProperty<T extends Enum<T> & StringRepresentable> extends Prope
 			return true;
 		} else {
 			if (object instanceof EnumProperty<?> enumProperty && super.equals(object)) {
-				return this.values.equals(enumProperty.values) && this.names.equals(enumProperty.names);
+				return this.values.equals(enumProperty.values);
 			}
 
 			return false;
@@ -92,8 +73,7 @@ public class EnumProperty<T extends Enum<T> & StringRepresentable> extends Prope
 	@Override
 	public int generateHashCode() {
 		int i = super.generateHashCode();
-		i = 31 * i + this.values.hashCode();
-		return 31 * i + this.names.hashCode();
+		return 31 * i + this.values.hashCode();
 	}
 
 	public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String string, Class<T> class_) {
@@ -104,8 +84,9 @@ public class EnumProperty<T extends Enum<T> & StringRepresentable> extends Prope
 		return create(string, class_, (List<T>)Arrays.stream((Enum[])class_.getEnumConstants()).filter(predicate).collect(Collectors.toList()));
 	}
 
+	@SafeVarargs
 	public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String string, Class<T> class_, T... enums) {
-		return create(string, class_, Lists.<T>newArrayList(enums));
+		return create(string, class_, List.of(enums));
 	}
 
 	public static <T extends Enum<T> & StringRepresentable> EnumProperty<T> create(String string, Class<T> class_, List<T> list) {

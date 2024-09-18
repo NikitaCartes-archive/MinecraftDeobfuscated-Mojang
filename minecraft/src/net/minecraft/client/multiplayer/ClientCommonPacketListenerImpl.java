@@ -81,10 +81,6 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 	@Nullable
 	protected final Screen postDisconnectScreen;
 	protected boolean isTransferring;
-	@Deprecated(
-		forRemoval = true
-	)
-	protected final boolean strictErrorHandling;
 	private final List<ClientCommonPacketListenerImpl.DeferredPacket> deferredPackets = new ArrayList();
 	protected final Map<ResourceLocation, byte[]> serverCookies;
 	protected Map<String, String> customReportDetails;
@@ -98,20 +94,17 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 		this.telemetryManager = commonListenerCookie.telemetryManager();
 		this.postDisconnectScreen = commonListenerCookie.postDisconnectScreen();
 		this.serverCookies = commonListenerCookie.serverCookies();
-		this.strictErrorHandling = commonListenerCookie.strictErrorHandling();
 		this.customReportDetails = commonListenerCookie.customReportDetails();
 		this.serverLinks = commonListenerCookie.serverLinks();
 	}
 
 	@Override
 	public void onPacketError(Packet packet, Exception exception) {
-		LOGGER.error("Failed to handle packet {}", packet, exception);
+		LOGGER.error("Failed to handle packet {}, disconnecting", packet, exception);
 		ClientCommonPacketListener.super.onPacketError(packet, exception);
 		Optional<Path> optional = this.storeDisconnectionReport(packet, exception);
 		Optional<URI> optional2 = this.serverLinks.findKnownType(ServerLinks.KnownLinkType.BUG_REPORT).map(ServerLinks.Entry::link);
-		if (this.strictErrorHandling) {
-			this.connection.disconnect(new DisconnectionDetails(Component.translatable("disconnect.packetError"), optional, optional2));
-		}
+		this.connection.disconnect(new DisconnectionDetails(Component.translatable("disconnect.packetError"), optional, optional2));
 	}
 
 	@Override

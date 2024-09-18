@@ -781,7 +781,7 @@ public class RealmsMainScreen extends RealmsScreen {
 						.setMessage(Component.translatable("mco.snapshot.createSnapshotPopup.text"))
 						.addButton(
 							Component.translatable("mco.selectServer.create"),
-							popupScreen -> RealmsMainScreen.this.minecraft.setScreen(new RealmsCreateRealmScreen(RealmsMainScreen.this, this.parent.id))
+							popupScreen -> RealmsMainScreen.this.minecraft.setScreen(new RealmsCreateRealmScreen(RealmsMainScreen.this, this.parent, true))
 						)
 						.addButton(CommonComponents.GUI_CANCEL, PopupScreen::onClose)
 						.build()
@@ -1244,7 +1244,7 @@ public class RealmsMainScreen extends RealmsScreen {
 
 		private void createUnitializedRealm() {
 			RealmsMainScreen.this.minecraft.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-			RealmsCreateRealmScreen realmsCreateRealmScreen = new RealmsCreateRealmScreen(RealmsMainScreen.this, this.serverData);
+			RealmsCreateRealmScreen realmsCreateRealmScreen = new RealmsCreateRealmScreen(RealmsMainScreen.this, this.serverData, this.serverData.isSnapshotRealm());
 			RealmsMainScreen.this.minecraft.setScreen(realmsCreateRealmScreen);
 		}
 

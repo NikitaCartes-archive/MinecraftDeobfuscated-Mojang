@@ -373,21 +373,27 @@ public class StructureTemplate {
 	public static void updateShapeAtEdge(LevelAccessor levelAccessor, int i, DiscreteVoxelShape discreteVoxelShape, int j, int k, int l) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 		BlockPos.MutableBlockPos mutableBlockPos2 = new BlockPos.MutableBlockPos();
-		discreteVoxelShape.forAllFaces((direction, m, n, o) -> {
-			mutableBlockPos.set(j + m, k + n, l + o);
-			mutableBlockPos2.setWithOffset(mutableBlockPos, direction);
-			BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
-			BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos2);
-			BlockState blockState3 = blockState.updateShape(direction, blockState2, levelAccessor, mutableBlockPos, mutableBlockPos2);
-			if (blockState != blockState3) {
-				levelAccessor.setBlock(mutableBlockPos, blockState3, i & -2);
-			}
+		discreteVoxelShape.forAllFaces(
+			(direction, m, n, o) -> {
+				mutableBlockPos.set(j + m, k + n, l + o);
+				mutableBlockPos2.setWithOffset(mutableBlockPos, direction);
+				BlockState blockState = levelAccessor.getBlockState(mutableBlockPos);
+				BlockState blockState2 = levelAccessor.getBlockState(mutableBlockPos2);
+				BlockState blockState3 = blockState.updateShape(
+					levelAccessor, levelAccessor, mutableBlockPos, direction, mutableBlockPos2, blockState2, levelAccessor.getRandom()
+				);
+				if (blockState != blockState3) {
+					levelAccessor.setBlock(mutableBlockPos, blockState3, i & -2);
+				}
 
-			BlockState blockState4 = blockState2.updateShape(direction.getOpposite(), blockState3, levelAccessor, mutableBlockPos2, mutableBlockPos);
-			if (blockState2 != blockState4) {
-				levelAccessor.setBlock(mutableBlockPos2, blockState4, i & -2);
+				BlockState blockState4 = blockState2.updateShape(
+					levelAccessor, levelAccessor, mutableBlockPos2, direction.getOpposite(), mutableBlockPos, blockState3, levelAccessor.getRandom()
+				);
+				if (blockState2 != blockState4) {
+					levelAccessor.setBlock(mutableBlockPos2, blockState4, i & -2);
+				}
 			}
-		});
+		);
 	}
 
 	public static List<StructureTemplate.StructureBlockInfo> processBlockInfos(

@@ -11,6 +11,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.NetherPortalBlock;
@@ -20,6 +21,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.apache.commons.lang3.mutable.MutableInt;
 
 public class PortalShape {
 	private static final int MIN_WIDTH = 2;
@@ -29,79 +31,86 @@ public class PortalShape {
 	private static final BlockBehaviour.StatePredicate FRAME = (blockState, blockGetter, blockPos) -> blockState.is(Blocks.OBSIDIAN);
 	private static final float SAFE_TRAVEL_MAX_ENTITY_XY = 4.0F;
 	private static final double SAFE_TRAVEL_MAX_VERTICAL_DELTA = 1.0;
-	private final LevelAccessor level;
 	private final Direction.Axis axis;
 	private final Direction rightDir;
-	private int numPortalBlocks;
-	@Nullable
-	private BlockPos bottomLeft;
-	private int height;
+	private final int numPortalBlocks;
+	private final BlockPos bottomLeft;
+	private final int height;
 	private final int width;
+
+	private PortalShape(Direction.Axis axis, int i, Direction direction, BlockPos blockPos, int j, int k) {
+		this.axis = axis;
+		this.numPortalBlocks = i;
+		this.rightDir = direction;
+		this.bottomLeft = blockPos;
+		this.width = j;
+		this.height = k;
+	}
 
 	public static Optional<PortalShape> findEmptyPortalShape(LevelAccessor levelAccessor, BlockPos blockPos, Direction.Axis axis) {
 		return findPortalShape(levelAccessor, blockPos, portalShape -> portalShape.isValid() && portalShape.numPortalBlocks == 0, axis);
 	}
 
 	public static Optional<PortalShape> findPortalShape(LevelAccessor levelAccessor, BlockPos blockPos, Predicate<PortalShape> predicate, Direction.Axis axis) {
-		Optional<PortalShape> optional = Optional.of(new PortalShape(levelAccessor, blockPos, axis)).filter(predicate);
+		Optional<PortalShape> optional = Optional.of(findAnyShape(levelAccessor, blockPos, axis)).filter(predicate);
 		if (optional.isPresent()) {
 			return optional;
 		} else {
 			Direction.Axis axis2 = axis == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
-			return Optional.of(new PortalShape(levelAccessor, blockPos, axis2)).filter(predicate);
+			return Optional.of(findAnyShape(levelAccessor, blockPos, axis2)).filter(predicate);
 		}
 	}
 
-	public PortalShape(LevelAccessor levelAccessor, BlockPos blockPos, Direction.Axis axis) {
-		this.level = levelAccessor;
-		this.axis = axis;
-		this.rightDir = axis == Direction.Axis.X ? Direction.WEST : Direction.SOUTH;
-		this.bottomLeft = this.calculateBottomLeft(blockPos);
-		if (this.bottomLeft == null) {
-			this.bottomLeft = blockPos;
-			this.width = 1;
-			this.height = 1;
+	public static PortalShape findAnyShape(BlockGetter blockGetter, BlockPos blockPos, Direction.Axis axis) {
+		Direction direction = axis == Direction.Axis.X ? Direction.WEST : Direction.SOUTH;
+		BlockPos blockPos2 = calculateBottomLeft(blockGetter, direction, blockPos);
+		if (blockPos2 == null) {
+			return new PortalShape(axis, 0, direction, blockPos, 0, 0);
 		} else {
-			this.width = this.calculateWidth();
-			if (this.width > 0) {
-				this.height = this.calculateHeight();
+			int i = calculateWidth(blockGetter, blockPos2, direction);
+			if (i == 0) {
+				return new PortalShape(axis, 0, direction, blockPos2, 0, 0);
+			} else {
+				MutableInt mutableInt = new MutableInt();
+				int j = calculateHeight(blockGetter, blockPos2, direction, i, mutableInt);
+				return new PortalShape(axis, mutableInt.getValue(), direction, blockPos2, i, j);
 			}
 		}
 	}
 
 	@Nullable
-	private BlockPos calculateBottomLeft(BlockPos blockPos) {
-		int i = Math.max(this.level.getMinY(), blockPos.getY() - 21);
+	private static BlockPos calculateBottomLeft(BlockGetter blockGetter, Direction direction, BlockPos blockPos) {
+		int i = Math.max(blockGetter.getMinY(), blockPos.getY() - 21);
 
-		while (blockPos.getY() > i && isEmpty(this.level.getBlockState(blockPos.below()))) {
+		while (blockPos.getY() > i && isEmpty(blockGetter.getBlockState(blockPos.below()))) {
 			blockPos = blockPos.below();
 		}
 
-		Direction direction = this.rightDir.getOpposite();
-		int j = this.getDistanceUntilEdgeAboveFrame(blockPos, direction) - 1;
-		return j < 0 ? null : blockPos.relative(direction, j);
+		Direction direction2 = direction.getOpposite();
+		int j = getDistanceUntilEdgeAboveFrame(blockGetter, blockPos, direction2) - 1;
+		return j < 0 ? null : blockPos.relative(direction2, j);
 	}
 
-	private int calculateWidth() {
-		int i = this.getDistanceUntilEdgeAboveFrame(this.bottomLeft, this.rightDir);
+	private static int calculateWidth(BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
+		int i = getDistanceUntilEdgeAboveFrame(blockGetter, blockPos, direction);
 		return i >= 2 && i <= 21 ? i : 0;
 	}
 
-	private int getDistanceUntilEdgeAboveFrame(BlockPos blockPos, Direction direction) {
+	private static int getDistanceUntilEdgeAboveFrame(BlockGetter blockGetter, BlockPos blockPos, Direction direction) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
 
 		for (int i = 0; i <= 21; i++) {
 			mutableBlockPos.set(blockPos).move(direction, i);
-			BlockState blockState = this.level.getBlockState(mutableBlockPos);
+			BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
 			if (!isEmpty(blockState)) {
-				if (FRAME.test(blockState, this.level, mutableBlockPos)) {
+				if (FRAME.test(blockState, blockGetter, mutableBlockPos)) {
 					return i;
 				}
 				break;
 			}
 
-			BlockState blockState2 = this.level.getBlockState(mutableBlockPos.move(Direction.DOWN));
-			if (!FRAME.test(blockState2, this.level, mutableBlockPos)) {
+			BlockState blockState2 = blockGetter.getBlockState(mutableBlockPos.move(Direction.DOWN));
+			if (!FRAME.test(blockState2, blockGetter, mutableBlockPos)) {
 				break;
 			}
 		}
@@ -109,16 +118,16 @@ public class PortalShape {
 		return 0;
 	}
 
-	private int calculateHeight() {
+	private static int calculateHeight(BlockGetter blockGetter, BlockPos blockPos, Direction direction, int i, MutableInt mutableInt) {
 		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		int i = this.getDistanceUntilTop(mutableBlockPos);
-		return i >= 3 && i <= 21 && this.hasTopFrame(mutableBlockPos, i) ? i : 0;
+		int j = getDistanceUntilTop(blockGetter, blockPos, direction, mutableBlockPos, i, mutableInt);
+		return j >= 3 && j <= 21 && hasTopFrame(blockGetter, blockPos, direction, mutableBlockPos, i, j) ? j : 0;
 	}
 
-	private boolean hasTopFrame(BlockPos.MutableBlockPos mutableBlockPos, int i) {
-		for (int j = 0; j < this.width; j++) {
-			BlockPos.MutableBlockPos mutableBlockPos2 = mutableBlockPos.set(this.bottomLeft).move(Direction.UP, i).move(this.rightDir, j);
-			if (!FRAME.test(this.level.getBlockState(mutableBlockPos2), this.level, mutableBlockPos2)) {
+	private static boolean hasTopFrame(BlockGetter blockGetter, BlockPos blockPos, Direction direction, BlockPos.MutableBlockPos mutableBlockPos, int i, int j) {
+		for (int k = 0; k < i; k++) {
+			BlockPos.MutableBlockPos mutableBlockPos2 = mutableBlockPos.set(blockPos).move(Direction.UP, j).move(direction, k);
+			if (!FRAME.test(blockGetter.getBlockState(mutableBlockPos2), blockGetter, mutableBlockPos2)) {
 				return false;
 			}
 		}
@@ -126,27 +135,29 @@ public class PortalShape {
 		return true;
 	}
 
-	private int getDistanceUntilTop(BlockPos.MutableBlockPos mutableBlockPos) {
-		for (int i = 0; i < 21; i++) {
-			mutableBlockPos.set(this.bottomLeft).move(Direction.UP, i).move(this.rightDir, -1);
-			if (!FRAME.test(this.level.getBlockState(mutableBlockPos), this.level, mutableBlockPos)) {
-				return i;
+	private static int getDistanceUntilTop(
+		BlockGetter blockGetter, BlockPos blockPos, Direction direction, BlockPos.MutableBlockPos mutableBlockPos, int i, MutableInt mutableInt
+	) {
+		for (int j = 0; j < 21; j++) {
+			mutableBlockPos.set(blockPos).move(Direction.UP, j).move(direction, -1);
+			if (!FRAME.test(blockGetter.getBlockState(mutableBlockPos), blockGetter, mutableBlockPos)) {
+				return j;
 			}
 
-			mutableBlockPos.set(this.bottomLeft).move(Direction.UP, i).move(this.rightDir, this.width);
-			if (!FRAME.test(this.level.getBlockState(mutableBlockPos), this.level, mutableBlockPos)) {
-				return i;
+			mutableBlockPos.set(blockPos).move(Direction.UP, j).move(direction, i);
+			if (!FRAME.test(blockGetter.getBlockState(mutableBlockPos), blockGetter, mutableBlockPos)) {
+				return j;
 			}
 
-			for (int j = 0; j < this.width; j++) {
-				mutableBlockPos.set(this.bottomLeft).move(Direction.UP, i).move(this.rightDir, j);
-				BlockState blockState = this.level.getBlockState(mutableBlockPos);
+			for (int k = 0; k < i; k++) {
+				mutableBlockPos.set(blockPos).move(Direction.UP, j).move(direction, k);
+				BlockState blockState = blockGetter.getBlockState(mutableBlockPos);
 				if (!isEmpty(blockState)) {
-					return i;
+					return j;
 				}
 
 				if (blockState.is(Blocks.NETHER_PORTAL)) {
-					this.numPortalBlocks++;
+					mutableInt.increment();
 				}
 			}
 		}
@@ -159,13 +170,13 @@ public class PortalShape {
 	}
 
 	public boolean isValid() {
-		return this.bottomLeft != null && this.width >= 2 && this.width <= 21 && this.height >= 3 && this.height <= 21;
+		return this.width >= 2 && this.width <= 21 && this.height >= 3 && this.height <= 21;
 	}
 
-	public void createPortalBlocks() {
+	public void createPortalBlocks(LevelAccessor levelAccessor) {
 		BlockState blockState = Blocks.NETHER_PORTAL.defaultBlockState().setValue(NetherPortalBlock.AXIS, this.axis);
 		BlockPos.betweenClosed(this.bottomLeft, this.bottomLeft.relative(Direction.UP, this.height - 1).relative(this.rightDir, this.width - 1))
-			.forEach(blockPos -> this.level.setBlock(blockPos, blockState, 18));
+			.forEach(blockPos -> levelAccessor.setBlock(blockPos, blockState, 18));
 	}
 
 	public boolean isComplete() {

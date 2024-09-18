@@ -520,10 +520,14 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	public void lavaHurt() {
 		if (!this.fireImmune()) {
 			this.igniteForSeconds(15.0F);
-			if (this.hurt(this.damageSources().lava(), 4.0F)) {
+			if (this.hurt(this.damageSources().lava(), 4.0F) && this.shouldPlayLavaHurtSound()) {
 				this.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + this.random.nextFloat() * 0.4F);
 			}
 		}
+	}
+
+	protected boolean shouldPlayLavaHurtSound() {
+		return true;
 	}
 
 	public final void igniteForSeconds(float f) {
@@ -1576,19 +1580,19 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	public float getViewXRot(float f) {
-		return f == 1.0F ? this.getXRot() : Mth.lerp(f, this.xRotO, this.getXRot());
+		return this.getXRot(f);
 	}
 
 	public float getViewYRot(float f) {
-		return f == 1.0F ? this.getYRot() : Mth.lerp(f, this.yRotO, this.getYRot());
+		return this.getYRot(f);
 	}
 
 	public float getXRot(float f) {
-		return Mth.lerp(f, this.xRotO, this.getXRot());
+		return f == 1.0F ? this.getXRot() : Mth.lerp(f, this.xRotO, this.getXRot());
 	}
 
 	public float getYRot(float f) {
-		return Mth.rotLerp(f, this.yRotO, this.getYRot());
+		return f == 1.0F ? this.getYRot() : Mth.rotLerp(f, this.yRotO, this.getYRot());
 	}
 
 	public final Vec3 calculateViewVector(float f, float g) {

@@ -14,11 +14,12 @@ import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -117,12 +118,19 @@ public abstract class MultifaceBlock extends Block {
 
 	@Override
 	protected BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+		BlockState blockState,
+		LevelReader levelReader,
+		ScheduledTickAccess scheduledTickAccess,
+		BlockPos blockPos,
+		Direction direction,
+		BlockPos blockPos2,
+		BlockState blockState2,
+		RandomSource randomSource
 	) {
 		if (!hasAnyFace(blockState)) {
 			return Blocks.AIR.defaultBlockState();
 		} else {
-			return hasFace(blockState, direction) && !canAttachTo(levelAccessor, direction, blockPos2, blockState2)
+			return hasFace(blockState, direction) && !canAttachTo(levelReader, direction, blockPos2, blockState2)
 				? removeFace(blockState, getFaceProperty(direction))
 				: blockState;
 		}

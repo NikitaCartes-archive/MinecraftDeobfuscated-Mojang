@@ -15,8 +15,8 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.piston.MovingPistonBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,13 +46,20 @@ public class FarmBlock extends Block {
 
 	@Override
 	protected BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+		BlockState blockState,
+		LevelReader levelReader,
+		ScheduledTickAccess scheduledTickAccess,
+		BlockPos blockPos,
+		Direction direction,
+		BlockPos blockPos2,
+		BlockState blockState2,
+		RandomSource randomSource
 	) {
-		if (direction == Direction.UP && !blockState.canSurvive(levelAccessor, blockPos)) {
-			levelAccessor.scheduleTick(blockPos, this, 1);
+		if (direction == Direction.UP && !blockState.canSurvive(levelReader, blockPos)) {
+			scheduledTickAccess.scheduleTick(blockPos, this, 1);
 		}
 
-		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+		return super.updateShape(blockState, levelReader, scheduledTickAccess, blockPos, direction, blockPos2, blockState2, randomSource);
 	}
 
 	@Override

@@ -851,7 +851,7 @@ public class Boat extends VehicleEntity implements Leashable, VariantHolder<Boat
 
 	public static enum Type implements StringRepresentable {
 		OAK(() -> Items.OAK_BOAT, "oak", "item.minecraft.oak_boat"),
-		SPRUCE(() -> Items.SPRUCE_BOAT, "spruce", "item.minecaft.spruce_boat"),
+		SPRUCE(() -> Items.SPRUCE_BOAT, "spruce", "item.minecraft.spruce_boat"),
 		BIRCH(() -> Items.BIRCH_BOAT, "birch", "item.minecraft.birch_boat"),
 		JUNGLE(() -> Items.JUNGLE_BOAT, "jungle", "item.minecraft.jungle_boat"),
 		ACACIA(() -> Items.ACACIA_BOAT, "acacia", "item.minecraft.acacia_boat"),

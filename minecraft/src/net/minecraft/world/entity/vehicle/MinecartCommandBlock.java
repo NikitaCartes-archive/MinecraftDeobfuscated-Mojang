@@ -13,6 +13,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.Level;
@@ -31,13 +32,14 @@ public class MinecartCommandBlock extends AbstractMinecart {
 		super(entityType, level);
 	}
 
-	public MinecartCommandBlock(Level level, double d, double e, double f) {
-		super(EntityType.COMMAND_BLOCK_MINECART, level, d, e, f);
-	}
-
 	@Override
 	protected Item getDropItem() {
 		return Items.MINECART;
+	}
+
+	@Override
+	public ItemStack getPickResult() {
+		return new ItemStack(Items.COMMAND_BLOCK_MINECART);
 	}
 
 	@Override
@@ -59,11 +61,6 @@ public class MinecartCommandBlock extends AbstractMinecart {
 	protected void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
 		this.commandBlock.save(compoundTag, this.registryAccess());
-	}
-
-	@Override
-	public AbstractMinecart.Type getMinecartType() {
-		return AbstractMinecart.Type.COMMAND_BLOCK;
 	}
 
 	@Override

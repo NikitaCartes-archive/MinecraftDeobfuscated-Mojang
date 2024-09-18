@@ -56,7 +56,9 @@ public class GameTestServer extends MinecraftServer {
 	private static final int PROGRESS_REPORT_INTERVAL = 20;
 	private static final int TEST_POSITION_RANGE = 14999992;
 	private static final Services NO_SERVICES = new Services(null, ServicesKeySet.EMPTY, null, null);
-	private static final FeatureFlagSet ENABLED_FEATURES = FeatureFlags.REGISTRY.allFlags().subtract(FeatureFlagSet.of(FeatureFlags.REDSTONE_EXPERIMENTS));
+	private static final FeatureFlagSet ENABLED_FEATURES = FeatureFlags.REGISTRY
+		.allFlags()
+		.subtract(FeatureFlagSet.of(FeatureFlags.REDSTONE_EXPERIMENTS, FeatureFlags.MINECART_IMPROVEMENTS));
 	private final LocalSampleLogger sampleLogger = new LocalSampleLogger(4);
 	private List<GameTestBatch> testBatches = new ArrayList();
 	private final List<TestFunction> testFunctions;

@@ -214,7 +214,7 @@ public abstract class EntityRenderer<T extends Entity, S extends EntityRenderSta
 			float g = (float)(-font.width(component) / 2);
 			font.drawInBatch(component, g, (float)j, -2130706433, false, matrix4f, multiBufferSource, bl ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, k, i);
 			if (bl) {
-				font.drawInBatch(component, g, (float)j, -1, false, matrix4f, multiBufferSource, Font.DisplayMode.NORMAL, 0, i);
+				font.drawInBatch(component, g, (float)j, -1, false, matrix4f, multiBufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.lightCoordsWithEmission(i, 2));
 			}
 
 			poseStack.popPose();

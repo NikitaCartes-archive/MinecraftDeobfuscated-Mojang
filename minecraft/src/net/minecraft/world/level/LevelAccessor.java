@@ -19,15 +19,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.redstone.NeighborUpdater;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.ticks.LevelTickAccess;
 import net.minecraft.world.ticks.ScheduledTick;
 import net.minecraft.world.ticks.TickPriority;
 
-public interface LevelAccessor extends CommonLevelAccessor, LevelTimeAccess {
+public interface LevelAccessor extends CommonLevelAccessor, LevelTimeAccess, ScheduledTickAccess {
 	@Override
 	default long dayTime() {
 		return this.getLevelData().getDayTime();
@@ -35,32 +33,14 @@ public interface LevelAccessor extends CommonLevelAccessor, LevelTimeAccess {
 
 	long nextSubTickCount();
 
-	LevelTickAccess<Block> getBlockTicks();
-
-	private <T> ScheduledTick<T> createTick(BlockPos blockPos, T object, int i, TickPriority tickPriority) {
+	@Override
+	default <T> ScheduledTick<T> createTick(BlockPos blockPos, T object, int i, TickPriority tickPriority) {
 		return new ScheduledTick<>(object, blockPos, this.getLevelData().getGameTime() + (long)i, tickPriority, this.nextSubTickCount());
 	}
 
-	private <T> ScheduledTick<T> createTick(BlockPos blockPos, T object, int i) {
+	@Override
+	default <T> ScheduledTick<T> createTick(BlockPos blockPos, T object, int i) {
 		return new ScheduledTick<>(object, blockPos, this.getLevelData().getGameTime() + (long)i, this.nextSubTickCount());
-	}
-
-	default void scheduleTick(BlockPos blockPos, Block block, int i, TickPriority tickPriority) {
-		this.getBlockTicks().schedule(this.createTick(blockPos, block, i, tickPriority));
-	}
-
-	default void scheduleTick(BlockPos blockPos, Block block, int i) {
-		this.getBlockTicks().schedule(this.createTick(blockPos, block, i));
-	}
-
-	LevelTickAccess<Fluid> getFluidTicks();
-
-	default void scheduleTick(BlockPos blockPos, Fluid fluid, int i, TickPriority tickPriority) {
-		this.getFluidTicks().schedule(this.createTick(blockPos, fluid, i, tickPriority));
-	}
-
-	default void scheduleTick(BlockPos blockPos, Fluid fluid, int i) {
-		this.getFluidTicks().schedule(this.createTick(blockPos, fluid, i));
 	}
 
 	LevelData getLevelData();

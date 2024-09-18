@@ -74,8 +74,13 @@ public class ArmorStand extends LivingEntity {
 	public static final EntityDataAccessor<Rotations> DATA_RIGHT_ARM_POSE = SynchedEntityData.defineId(ArmorStand.class, EntityDataSerializers.ROTATIONS);
 	public static final EntityDataAccessor<Rotations> DATA_LEFT_LEG_POSE = SynchedEntityData.defineId(ArmorStand.class, EntityDataSerializers.ROTATIONS);
 	public static final EntityDataAccessor<Rotations> DATA_RIGHT_LEG_POSE = SynchedEntityData.defineId(ArmorStand.class, EntityDataSerializers.ROTATIONS);
-	private static final Predicate<Entity> RIDABLE_MINECARTS = entity -> entity instanceof AbstractMinecart
-			&& ((AbstractMinecart)entity).getMinecartType() == AbstractMinecart.Type.RIDEABLE;
+	private static final Predicate<Entity> RIDABLE_MINECARTS = entity -> {
+		if (entity instanceof AbstractMinecart abstractMinecart && abstractMinecart.isRideable()) {
+			return true;
+		}
+
+		return false;
+	};
 	private final NonNullList<ItemStack> handItems = NonNullList.withSize(2, ItemStack.EMPTY);
 	private final NonNullList<ItemStack> armorItems = NonNullList.withSize(4, ItemStack.EMPTY);
 	private boolean invisible;

@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
-public class IntegerProperty extends Property<Integer> {
+public final class IntegerProperty extends Property<Integer> {
 	private final IntImmutableList values;
 	private final int min;
 	private final int max;
 
-	protected IntegerProperty(String string, int i, int j) {
+	private IntegerProperty(String string, int i, int j) {
 		super(string, Integer.class);
 		if (i < 0) {
 			throw new IllegalArgumentException("Min value of " + string + " must be 0 or greater");
@@ -53,8 +53,8 @@ public class IntegerProperty extends Property<Integer> {
 	@Override
 	public Optional<Integer> getValue(String string) {
 		try {
-			Integer integer = Integer.valueOf(string);
-			return integer >= this.min && integer <= this.max ? Optional.of(integer) : Optional.empty();
+			int i = Integer.parseInt(string);
+			return i >= this.min && i <= this.max ? Optional.of(i) : Optional.empty();
 		} catch (NumberFormatException var3) {
 			return Optional.empty();
 		}

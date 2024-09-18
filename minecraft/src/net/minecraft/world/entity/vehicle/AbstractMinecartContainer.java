@@ -29,10 +29,6 @@ public abstract class AbstractMinecartContainer extends AbstractMinecart impleme
 		super(entityType, level);
 	}
 
-	protected AbstractMinecartContainer(EntityType<?> entityType, double d, double e, double f, Level level) {
-		super(entityType, level, d, e, f);
-	}
-
 	@Override
 	public void destroy(DamageSource damageSource) {
 		super.destroy(damageSource);

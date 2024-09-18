@@ -12,8 +12,8 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -146,17 +146,22 @@ public class BambooStalkBlock extends Block implements BonemealableBlock {
 
 	@Override
 	protected BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+		BlockState blockState,
+		LevelReader levelReader,
+		ScheduledTickAccess scheduledTickAccess,
+		BlockPos blockPos,
+		Direction direction,
+		BlockPos blockPos2,
+		BlockState blockState2,
+		RandomSource randomSource
 	) {
-		if (!blockState.canSurvive(levelAccessor, blockPos)) {
-			levelAccessor.scheduleTick(blockPos, this, 1);
+		if (!blockState.canSurvive(levelReader, blockPos)) {
+			scheduledTickAccess.scheduleTick(blockPos, this, 1);
 		}
 
-		if (direction == Direction.UP && blockState2.is(Blocks.BAMBOO) && (Integer)blockState2.getValue(AGE) > (Integer)blockState.getValue(AGE)) {
-			levelAccessor.setBlock(blockPos, blockState.cycle(AGE), 2);
-		}
-
-		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+		return direction == Direction.UP && blockState2.is(Blocks.BAMBOO) && blockState2.getValue(AGE) > blockState.getValue(AGE)
+			? blockState.cycle(AGE)
+			: super.updateShape(blockState, levelReader, scheduledTickAccess, blockPos, direction, blockPos2, blockState2, randomSource);
 	}
 
 	@Override

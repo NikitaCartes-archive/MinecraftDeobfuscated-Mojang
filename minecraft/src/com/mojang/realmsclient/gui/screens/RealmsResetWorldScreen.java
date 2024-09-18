@@ -2,14 +2,13 @@ package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.client.RealmsClient;
+import com.mojang.realmsclient.client.worldupload.RealmsCreateWorldFlow;
 import com.mojang.realmsclient.dto.RealmsServer;
 import com.mojang.realmsclient.dto.WorldTemplate;
 import com.mojang.realmsclient.dto.WorldTemplatePaginatedList;
 import com.mojang.realmsclient.exception.RealmsServiceException;
-import com.mojang.realmsclient.util.WorldGenerationInfo;
 import com.mojang.realmsclient.util.task.LongRunningTask;
 import com.mojang.realmsclient.util.task.RealmCreationTask;
-import com.mojang.realmsclient.util.task.ResettingGeneratedWorldTask;
 import com.mojang.realmsclient.util.task.ResettingTemplateWorldTask;
 import com.mojang.realmsclient.util.task.SwitchSlotTask;
 import java.util.ArrayList;
@@ -43,6 +42,7 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 	private static final Component CREATE_REALM_SUBTITLE = Component.translatable("mco.selectServer.create.subtitle");
 	private static final Component CREATE_WORLD_TITLE = Component.translatable("mco.configure.world.switch.slot");
 	private static final Component CREATE_WORLD_SUBTITLE = Component.translatable("mco.configure.world.switch.slot.subtitle");
+	private static final Component GENERATE_NEW_WORLD = Component.translatable("mco.reset.world.generate");
 	private static final Component RESET_WORLD_TITLE = Component.translatable("mco.reset.world.title");
 	private static final Component RESET_WORLD_SUBTITLE = Component.translatable("mco.reset.world.warning");
 	public static final Component CREATE_WORLD_RESET_TASK_TITLE = Component.translatable("mco.create.world.reset.title");
@@ -156,9 +156,9 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 		rowHelper.addChild(
 			new RealmsResetWorldScreen.FrameButton(
 				this.minecraft.font,
-				RealmsResetNormalWorldScreen.TITLE,
+				GENERATE_NEW_WORLD,
 				NEW_WORLD_LOCATION,
-				button -> this.minecraft.setScreen(new RealmsResetNormalWorldScreen(this::generationSelectionCallback, this.title))
+				button -> RealmsCreateWorldFlow.createWorld(this.minecraft, this.lastScreen, this, this.serverData, this.realmCreationTask)
 			)
 		);
 		rowHelper.addChild(
@@ -234,13 +234,6 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 		this.minecraft.setScreen(this);
 		if (worldTemplate != null) {
 			this.runResetTasks(new ResettingTemplateWorldTask(worldTemplate, this.serverData.id, this.resetTaskTitle, this.resetWorldRunnable));
-		}
-	}
-
-	private void generationSelectionCallback(@Nullable WorldGenerationInfo worldGenerationInfo) {
-		this.minecraft.setScreen(this);
-		if (worldGenerationInfo != null) {
-			this.runResetTasks(new ResettingGeneratedWorldTask(worldGenerationInfo, this.serverData.id, this.resetTaskTitle, this.resetWorldRunnable));
 		}
 	}
 

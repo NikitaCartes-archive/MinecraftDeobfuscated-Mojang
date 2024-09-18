@@ -1,19 +1,20 @@
 package net.minecraft.world.level.block.state.properties;
 
-import com.google.common.collect.ImmutableList;
 import java.util.List;
 import java.util.Optional;
 
-public class BooleanProperty extends Property<Boolean> {
-	private final ImmutableList<Boolean> values = ImmutableList.of(true, false);
+public final class BooleanProperty extends Property<Boolean> {
+	private static final List<Boolean> VALUES = List.of(true, false);
+	private static final int TRUE_INDEX = 0;
+	private static final int FALSE_INDEX = 1;
 
-	protected BooleanProperty(String string) {
+	private BooleanProperty(String string) {
 		super(string, Boolean.class);
 	}
 
 	@Override
 	public List<Boolean> getPossibleValues() {
-		return this.values;
+		return VALUES;
 	}
 
 	public static BooleanProperty create(String string) {
@@ -22,7 +23,11 @@ public class BooleanProperty extends Property<Boolean> {
 
 	@Override
 	public Optional<Boolean> getValue(String string) {
-		return !"true".equals(string) && !"false".equals(string) ? Optional.empty() : Optional.of(Boolean.valueOf(string));
+		return switch (string) {
+			case "true" -> Optional.of(true);
+			case "false" -> Optional.of(false);
+			default -> Optional.empty();
+		};
 	}
 
 	public String getName(Boolean boolean_) {
@@ -31,23 +36,5 @@ public class BooleanProperty extends Property<Boolean> {
 
 	public int getInternalIndex(Boolean boolean_) {
 		return boolean_ ? 0 : 1;
-	}
-
-	@Override
-	public boolean equals(Object object) {
-		if (this == object) {
-			return true;
-		} else {
-			if (object instanceof BooleanProperty booleanProperty && super.equals(object)) {
-				return this.values.equals(booleanProperty.values);
-			}
-
-			return false;
-		}
-	}
-
-	@Override
-	public int generateHashCode() {
-		return 31 * super.generateHashCode() + this.values.hashCode();
 	}
 }

@@ -247,11 +247,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<MinecartChest> CHEST_MINECART = register(
 		"chest_minecart",
-		EntityType.Builder.<MinecartChest>of(MinecartChest::new, MobCategory.MISC)
-			.noLootTable()
-			.sized(0.98F, 0.7F)
-			.passengerAttachments(0.1875F)
-			.clientTrackingRange(8)
+		EntityType.Builder.of(MinecartChest::new, MobCategory.MISC).noLootTable().sized(0.98F, 0.7F).passengerAttachments(0.1875F).clientTrackingRange(8)
 	);
 	public static final EntityType<Chicken> CHICKEN = register(
 		"chicken",
@@ -266,11 +262,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<MinecartCommandBlock> COMMAND_BLOCK_MINECART = register(
 		"command_block_minecart",
-		EntityType.Builder.<MinecartCommandBlock>of(MinecartCommandBlock::new, MobCategory.MISC)
-			.noLootTable()
-			.sized(0.98F, 0.7F)
-			.passengerAttachments(0.1875F)
-			.clientTrackingRange(8)
+		EntityType.Builder.of(MinecartCommandBlock::new, MobCategory.MISC).noLootTable().sized(0.98F, 0.7F).passengerAttachments(0.1875F).clientTrackingRange(8)
 	);
 	public static final EntityType<Cow> COW = register(
 		"cow", EntityType.Builder.of(Cow::new, MobCategory.CREATURE).sized(0.9F, 1.4F).eyeHeight(1.3F).passengerAttachments(1.36875F).clientTrackingRange(10)
@@ -387,11 +379,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<MinecartFurnace> FURNACE_MINECART = register(
 		"furnace_minecart",
-		EntityType.Builder.<MinecartFurnace>of(MinecartFurnace::new, MobCategory.MISC)
-			.noLootTable()
-			.sized(0.98F, 0.7F)
-			.passengerAttachments(0.1875F)
-			.clientTrackingRange(8)
+		EntityType.Builder.of(MinecartFurnace::new, MobCategory.MISC).noLootTable().sized(0.98F, 0.7F).passengerAttachments(0.1875F).clientTrackingRange(8)
 	);
 	public static final EntityType<Ghast> GHAST = register(
 		"ghast",
@@ -430,11 +418,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<MinecartHopper> HOPPER_MINECART = register(
 		"hopper_minecart",
-		EntityType.Builder.<MinecartHopper>of(MinecartHopper::new, MobCategory.MISC)
-			.noLootTable()
-			.sized(0.98F, 0.7F)
-			.passengerAttachments(0.1875F)
-			.clientTrackingRange(8)
+		EntityType.Builder.of(MinecartHopper::new, MobCategory.MISC).noLootTable().sized(0.98F, 0.7F).passengerAttachments(0.1875F).clientTrackingRange(8)
 	);
 	public static final EntityType<Horse> HORSE = register(
 		"horse",
@@ -530,8 +514,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		"marker", EntityType.Builder.of(Marker::new, MobCategory.MISC).noLootTable().sized(0.0F, 0.0F).clientTrackingRange(0)
 	);
 	public static final EntityType<Minecart> MINECART = register(
-		"minecart",
-		EntityType.Builder.<Minecart>of(Minecart::new, MobCategory.MISC).noLootTable().sized(0.98F, 0.7F).passengerAttachments(0.1875F).clientTrackingRange(8)
+		"minecart", EntityType.Builder.of(Minecart::new, MobCategory.MISC).noLootTable().sized(0.98F, 0.7F).passengerAttachments(0.1875F).clientTrackingRange(8)
 	);
 	public static final EntityType<MushroomCow> MOOSHROOM = register(
 		"mooshroom",
@@ -661,11 +644,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<MinecartSpawner> SPAWNER_MINECART = register(
 		"spawner_minecart",
-		EntityType.Builder.<MinecartSpawner>of(MinecartSpawner::new, MobCategory.MISC)
-			.noLootTable()
-			.sized(0.98F, 0.7F)
-			.passengerAttachments(0.1875F)
-			.clientTrackingRange(8)
+		EntityType.Builder.of(MinecartSpawner::new, MobCategory.MISC).noLootTable().sized(0.98F, 0.7F).passengerAttachments(0.1875F).clientTrackingRange(8)
 	);
 	public static final EntityType<SpectralArrow> SPECTRAL_ARROW = register(
 		"spectral_arrow",
@@ -712,7 +691,7 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<MinecartTNT> TNT_MINECART = register(
 		"tnt_minecart",
-		EntityType.Builder.<MinecartTNT>of(MinecartTNT::new, MobCategory.MISC).noLootTable().sized(0.98F, 0.7F).passengerAttachments(0.1875F).clientTrackingRange(8)
+		EntityType.Builder.of(MinecartTNT::new, MobCategory.MISC).noLootTable().sized(0.98F, 0.7F).passengerAttachments(0.1875F).clientTrackingRange(8)
 	);
 	public static final EntityType<TraderLlama> TRADER_LLAMA = register(
 		"trader_llama",

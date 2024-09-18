@@ -27,10 +27,10 @@ import net.minecraft.network.TickablePacketListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.configuration.ConfigurationProtocols;
 import net.minecraft.network.protocol.cookie.ServerboundCookieResponsePacket;
-import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
 import net.minecraft.network.protocol.login.ClientboundHelloPacket;
 import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
 import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
+import net.minecraft.network.protocol.login.ClientboundLoginFinishedPacket;
 import net.minecraft.network.protocol.login.ServerLoginPacketListener;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryAnswerPacket;
 import net.minecraft.network.protocol.login.ServerboundHelloPacket;
@@ -161,7 +161,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 
 	private void finishLoginAndWaitForClient(GameProfile gameProfile) {
 		this.state = ServerLoginPacketListenerImpl.State.PROTOCOL_SWITCHING;
-		this.connection.send(new ClientboundGameProfilePacket(gameProfile, true));
+		this.connection.send(new ClientboundLoginFinishedPacket(gameProfile));
 	}
 
 	@Override

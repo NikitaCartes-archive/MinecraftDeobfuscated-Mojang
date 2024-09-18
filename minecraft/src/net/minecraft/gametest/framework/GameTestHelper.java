@@ -853,13 +853,13 @@ public class GameTestHelper {
 	}
 
 	public BlockPos absolutePos(BlockPos blockPos) {
-		BlockPos blockPos2 = this.testInfo.getStructureBlockPos();
+		BlockPos blockPos2 = this.testInfo.getTestOrigin();
 		BlockPos blockPos3 = blockPos2.offset(blockPos);
 		return StructureTemplate.transform(blockPos3, Mirror.NONE, this.testInfo.getRotation(), blockPos2);
 	}
 
 	public BlockPos relativePos(BlockPos blockPos) {
-		BlockPos blockPos2 = this.testInfo.getStructureBlockPos();
+		BlockPos blockPos2 = this.testInfo.getTestOrigin();
 		Rotation rotation = this.testInfo.getRotation().getRotated(Rotation.CLOCKWISE_180);
 		BlockPos blockPos3 = StructureTemplate.transform(blockPos, Mirror.NONE, rotation, blockPos2);
 		return blockPos3.subtract(blockPos2);
@@ -878,13 +878,13 @@ public class GameTestHelper {
 	}
 
 	public Vec3 absoluteVec(Vec3 vec3) {
-		Vec3 vec32 = Vec3.atLowerCornerOf(this.testInfo.getStructureBlockPos());
-		return StructureTemplate.transform(vec32.add(vec3), Mirror.NONE, this.testInfo.getRotation(), this.testInfo.getStructureBlockPos());
+		Vec3 vec32 = Vec3.atLowerCornerOf(this.testInfo.getTestOrigin());
+		return StructureTemplate.transform(vec32.add(vec3), Mirror.NONE, this.testInfo.getRotation(), this.testInfo.getTestOrigin());
 	}
 
 	public Vec3 relativeVec(Vec3 vec3) {
-		Vec3 vec32 = Vec3.atLowerCornerOf(this.testInfo.getStructureBlockPos());
-		return StructureTemplate.transform(vec3.subtract(vec32), Mirror.NONE, this.testInfo.getRotation(), this.testInfo.getStructureBlockPos());
+		Vec3 vec32 = Vec3.atLowerCornerOf(this.testInfo.getTestOrigin());
+		return StructureTemplate.transform(vec3.subtract(vec32), Mirror.NONE, this.testInfo.getRotation(), this.testInfo.getTestOrigin());
 	}
 
 	public Rotation getTestRotation() {
@@ -930,7 +930,7 @@ public class GameTestHelper {
 	}
 
 	public void forEveryBlockInStructure(Consumer<BlockPos> consumer) {
-		AABB aABB = this.getRelativeBounds().contract(1.0, -1.0, 1.0);
+		AABB aABB = this.getRelativeBounds().contract(1.0, 1.0, 1.0);
 		BlockPos.MutableBlockPos.betweenClosedStream(aABB).forEach(consumer);
 	}
 

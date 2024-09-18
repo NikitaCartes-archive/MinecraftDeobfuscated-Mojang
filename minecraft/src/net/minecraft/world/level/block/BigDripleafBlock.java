@@ -24,6 +24,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -152,18 +153,25 @@ public class BigDripleafBlock extends HorizontalDirectionalBlock implements Bone
 
 	@Override
 	protected BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+		BlockState blockState,
+		LevelReader levelReader,
+		ScheduledTickAccess scheduledTickAccess,
+		BlockPos blockPos,
+		Direction direction,
+		BlockPos blockPos2,
+		BlockState blockState2,
+		RandomSource randomSource
 	) {
-		if (direction == Direction.DOWN && !blockState.canSurvive(levelAccessor, blockPos)) {
+		if (direction == Direction.DOWN && !blockState.canSurvive(levelReader, blockPos)) {
 			return Blocks.AIR.defaultBlockState();
 		} else {
 			if ((Boolean)blockState.getValue(WATERLOGGED)) {
-				levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+				scheduledTickAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelReader));
 			}
 
 			return direction == Direction.UP && blockState2.is(this)
 				? Blocks.BIG_DRIPLEAF_STEM.withPropertiesOf(blockState)
-				: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+				: super.updateShape(blockState, levelReader, scheduledTickAccess, blockPos, direction, blockPos2, blockState2, randomSource);
 		}
 	}
 

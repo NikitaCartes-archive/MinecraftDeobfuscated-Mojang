@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer;
 
+import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -45,7 +46,7 @@ public class CloudRenderer extends SimplePreparableReloadListener<Optional<Cloud
 	private CloudStatus prevType;
 	@Nullable
 	private CloudRenderer.TextureData texture;
-	private final VertexBuffer vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+	private final VertexBuffer vertexBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
 	private boolean vertexBufferEmpty;
 
 	protected Optional<CloudRenderer.TextureData> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {

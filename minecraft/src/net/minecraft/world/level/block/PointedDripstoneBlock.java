@@ -23,12 +23,12 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.DripstoneThickness;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -45,7 +45,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PointedDripstoneBlock extends Block implements Fallable, SimpleWaterloggedBlock {
 	public static final MapCodec<PointedDripstoneBlock> CODEC = simpleCodec(PointedDripstoneBlock::new);
-	public static final DirectionProperty TIP_DIRECTION = BlockStateProperties.VERTICAL_DIRECTION;
+	public static final EnumProperty<Direction> TIP_DIRECTION = BlockStateProperties.VERTICAL_DIRECTION;
 	public static final EnumProperty<DripstoneThickness> THICKNESS = BlockStateProperties.DRIPSTONE_THICKNESS;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 	private static final int MAX_SEARCH_LENGTH_WHEN_CHECKING_DRIP_TYPE = 11;
@@ -99,29 +99,36 @@ public class PointedDripstoneBlock extends Block implements Fallable, SimpleWate
 
 	@Override
 	protected BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+		BlockState blockState,
+		LevelReader levelReader,
+		ScheduledTickAccess scheduledTickAccess,
+		BlockPos blockPos,
+		Direction direction,
+		BlockPos blockPos2,
+		BlockState blockState2,
+		RandomSource randomSource
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
-			levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+			scheduledTickAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelReader));
 		}
 
 		if (direction != Direction.UP && direction != Direction.DOWN) {
 			return blockState;
 		} else {
 			Direction direction2 = blockState.getValue(TIP_DIRECTION);
-			if (direction2 == Direction.DOWN && levelAccessor.getBlockTicks().hasScheduledTick(blockPos, this)) {
+			if (direction2 == Direction.DOWN && scheduledTickAccess.getBlockTicks().hasScheduledTick(blockPos, this)) {
 				return blockState;
-			} else if (direction == direction2.getOpposite() && !this.canSurvive(blockState, levelAccessor, blockPos)) {
+			} else if (direction == direction2.getOpposite() && !this.canSurvive(blockState, levelReader, blockPos)) {
 				if (direction2 == Direction.DOWN) {
-					levelAccessor.scheduleTick(blockPos, this, 2);
+					scheduledTickAccess.scheduleTick(blockPos, this, 2);
 				} else {
-					levelAccessor.scheduleTick(blockPos, this, 1);
+					scheduledTickAccess.scheduleTick(blockPos, this, 1);
 				}
 
 				return blockState;
 			} else {
 				boolean bl = blockState.getValue(THICKNESS) == DripstoneThickness.TIP_MERGE;
-				DripstoneThickness dripstoneThickness = calculateDripstoneThickness(levelAccessor, blockPos, direction2, bl);
+				DripstoneThickness dripstoneThickness = calculateDripstoneThickness(levelReader, blockPos, direction2, bl);
 				return blockState.setValue(THICKNESS, dripstoneThickness);
 			}
 		}

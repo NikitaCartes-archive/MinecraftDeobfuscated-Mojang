@@ -8,6 +8,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.util.StringUtil;
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.LevelSettings;
 
 @Environment(EnvType.CLIENT)
 public class RealmsWorldOptions extends ValueObject {
@@ -18,6 +21,7 @@ public class RealmsWorldOptions extends ValueObject {
 	public final boolean forceGameMode;
 	public final int difficulty;
 	public final int gameMode;
+	public final boolean hardcore;
 	private final String slotName;
 	public final String version;
 	public final RealmsServer.Compatibility compatibility;
@@ -32,6 +36,7 @@ public class RealmsWorldOptions extends ValueObject {
 	private static final boolean DEFAULT_COMMAND_BLOCKS = false;
 	private static final int DEFAULT_DIFFICULTY = 2;
 	private static final int DEFAULT_GAME_MODE = 0;
+	private static final boolean DEFAULT_HARDCORE_MODE = false;
 	private static final String DEFAULT_SLOT_NAME = "";
 	private static final String DEFAULT_VERSION = "";
 	private static final RealmsServer.Compatibility DEFAULT_COMPATIBILITY = RealmsServer.Compatibility.UNVERIFIABLE;
@@ -39,7 +44,7 @@ public class RealmsWorldOptions extends ValueObject {
 	private static final String DEFAULT_TEMPLATE_IMAGE = null;
 
 	public RealmsWorldOptions(
-		boolean bl, boolean bl2, int i, boolean bl3, int j, int k, boolean bl4, String string, String string2, RealmsServer.Compatibility compatibility
+		boolean bl, boolean bl2, int i, boolean bl3, int j, int k, boolean bl4, boolean bl5, String string, String string2, RealmsServer.Compatibility compatibility
 	) {
 		this.pvp = bl;
 		this.spawnMonsters = bl2;
@@ -47,14 +52,23 @@ public class RealmsWorldOptions extends ValueObject {
 		this.commandBlocks = bl3;
 		this.difficulty = j;
 		this.gameMode = k;
-		this.forceGameMode = bl4;
+		this.hardcore = bl4;
+		this.forceGameMode = bl5;
 		this.slotName = string;
 		this.version = string2;
 		this.compatibility = compatibility;
 	}
 
 	public static RealmsWorldOptions createDefaults() {
-		return new RealmsWorldOptions(true, true, 0, false, 2, 0, false, "", "", DEFAULT_COMPATIBILITY);
+		return new RealmsWorldOptions(true, true, 0, false, 2, 0, false, false, "", "", DEFAULT_COMPATIBILITY);
+	}
+
+	public static RealmsWorldOptions createDefaultsWith(GameType gameType, Difficulty difficulty, boolean bl, String string, String string2) {
+		return new RealmsWorldOptions(true, true, 0, false, difficulty.getId(), gameType.getId(), bl, false, string2, string, DEFAULT_COMPATIBILITY);
+	}
+
+	public static RealmsWorldOptions createFromSettings(LevelSettings levelSettings, String string) {
+		return createDefaultsWith(levelSettings.gameType(), levelSettings.difficulty(), levelSettings.hardcore(), string, levelSettings.levelName());
 	}
 
 	public static RealmsWorldOptions createEmptyDefaults() {
@@ -75,6 +89,7 @@ public class RealmsWorldOptions extends ValueObject {
 			JsonUtils.getBooleanOr("commandBlocks", jsonObject, false),
 			JsonUtils.getIntOr("difficulty", jsonObject, 2),
 			JsonUtils.getIntOr("gameMode", jsonObject, 0),
+			JsonUtils.getBooleanOr("hardcore", jsonObject, false),
 			JsonUtils.getBooleanOr("forceGameMode", jsonObject, false),
 			JsonUtils.getRequiredStringOr("slotName", jsonObject, ""),
 			JsonUtils.getRequiredStringOr("version", jsonObject, ""),
@@ -123,6 +138,10 @@ public class RealmsWorldOptions extends ValueObject {
 			jsonObject.addProperty("gameMode", this.gameMode);
 		}
 
+		if (this.hardcore) {
+			jsonObject.addProperty("hardcore", this.hardcore);
+		}
+
 		if (this.forceGameMode) {
 			jsonObject.addProperty("forceGameMode", this.forceGameMode);
 		}
@@ -150,6 +169,7 @@ public class RealmsWorldOptions extends ValueObject {
 			this.commandBlocks,
 			this.difficulty,
 			this.gameMode,
+			this.hardcore,
 			this.forceGameMode,
 			this.slotName,
 			this.version,

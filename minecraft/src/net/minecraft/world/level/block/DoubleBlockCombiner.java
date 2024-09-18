@@ -8,14 +8,14 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 
 public class DoubleBlockCombiner {
 	public static <S extends BlockEntity> DoubleBlockCombiner.NeighborCombineResult<S> combineWithNeigbour(
 		BlockEntityType<S> blockEntityType,
 		Function<BlockState, DoubleBlockCombiner.BlockType> function,
 		Function<BlockState, Direction> function2,
-		DirectionProperty directionProperty,
+		Property<Direction> property,
 		BlockState blockState,
 		LevelAccessor levelAccessor,
 		BlockPos blockPos,
@@ -37,9 +37,7 @@ public class DoubleBlockCombiner {
 				BlockState blockState2 = levelAccessor.getBlockState(blockPos2);
 				if (blockState2.is(blockState.getBlock())) {
 					DoubleBlockCombiner.BlockType blockType2 = (DoubleBlockCombiner.BlockType)function.apply(blockState2);
-					if (blockType2 != DoubleBlockCombiner.BlockType.SINGLE
-						&& blockType != blockType2
-						&& blockState2.getValue(directionProperty) == blockState.getValue(directionProperty)) {
+					if (blockType2 != DoubleBlockCombiner.BlockType.SINGLE && blockType != blockType2 && blockState2.getValue(property) == blockState.getValue(property)) {
 						if (biPredicate.test(levelAccessor, blockPos2)) {
 							return DoubleBlockCombiner.Combiner::acceptNone;
 						}

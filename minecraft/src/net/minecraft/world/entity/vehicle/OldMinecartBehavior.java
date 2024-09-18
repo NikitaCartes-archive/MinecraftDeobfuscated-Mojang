@@ -396,7 +396,7 @@ public class OldMinecartBehavior extends MinecartBehavior {
 	@Override
 	public boolean pushAndPickupEntities() {
 		AABB aABB = this.minecart.getBoundingBox().inflate(0.2F, 0.0, 0.2F);
-		if (this.minecart.getMinecartType() == AbstractMinecart.Type.RIDEABLE && this.getDeltaMovement().horizontalDistanceSqr() >= 0.01) {
+		if (this.minecart.isRideable() && this.getDeltaMovement().horizontalDistanceSqr() >= 0.01) {
 			List<Entity> list = this.level().getEntities(this.minecart, aABB, EntitySelector.pushableBy(this.minecart));
 			if (!list.isEmpty()) {
 				for (Entity entity : list) {

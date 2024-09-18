@@ -1366,6 +1366,10 @@ public abstract class Player extends LivingEntity {
 		return this.containerMenu != this.inventoryMenu;
 	}
 
+	public boolean canDropItems() {
+		return true;
+	}
+
 	public Either<Player.BedSleepingProblem, Unit> startSleepInBed(BlockPos blockPos) {
 		this.startSleeping(blockPos);
 		this.sleepCounter = 0;

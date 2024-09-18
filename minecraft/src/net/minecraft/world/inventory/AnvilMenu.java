@@ -229,7 +229,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 				itemStack2.remove(DataComponents.CUSTOM_NAME);
 			}
 
-			int t = (int)Mth.clamp(l + (long)i, 0L, 2147483647L);
+			int t = i <= 0 ? 0 : (int)Mth.clamp(l + (long)i, 0L, 2147483647L);
 			this.cost.set(t);
 			if (i <= 0) {
 				itemStack2 = ItemStack.EMPTY;

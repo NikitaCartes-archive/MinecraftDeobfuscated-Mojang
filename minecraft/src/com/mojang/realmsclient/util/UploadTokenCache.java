@@ -2,6 +2,7 @@ package com.mojang.realmsclient.util;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -17,7 +18,7 @@ public class UploadTokenCache {
 		TOKEN_CACHE.remove(l);
 	}
 
-	public static void put(long l, String string) {
+	public static void put(long l, @Nullable String string) {
 		TOKEN_CACHE.put(l, string);
 	}
 }

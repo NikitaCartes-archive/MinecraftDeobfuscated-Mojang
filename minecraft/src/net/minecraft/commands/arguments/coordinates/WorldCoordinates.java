@@ -104,10 +104,6 @@ public class WorldCoordinates implements Coordinates {
 		return new WorldCoordinates(new WorldCoordinate(false, (double)vec2.x), new WorldCoordinate(false, (double)vec2.y), new WorldCoordinate(true, 0.0));
 	}
 
-	public static WorldCoordinates current() {
-		return new WorldCoordinates(new WorldCoordinate(true, 0.0), new WorldCoordinate(true, 0.0), new WorldCoordinate(true, 0.0));
-	}
-
 	public int hashCode() {
 		int i = this.x.hashCode();
 		i = 31 * i + this.y.hashCode();

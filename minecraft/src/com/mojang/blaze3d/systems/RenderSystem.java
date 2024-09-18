@@ -3,6 +3,9 @@ package com.mojang.blaze3d.systems;
 import com.google.common.collect.Queues;
 import com.mojang.blaze3d.DontObfuscate;
 import com.mojang.blaze3d.TracyFrameCapture;
+import com.mojang.blaze3d.buffers.BufferType;
+import com.mojang.blaze3d.buffers.BufferUsage;
+import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.pipeline.RenderCall;
 import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -37,6 +40,7 @@ import org.joml.Matrix4fStack;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallbackI;
+import org.lwjgl.system.MemoryUtil;
 import org.slf4j.Logger;
 
 @Environment(EnvType.CLIENT)
@@ -746,7 +750,8 @@ public class RenderSystem {
 		private final int vertexStride;
 		private final int indexStride;
 		private final RenderSystem.AutoStorageIndexBuffer.IndexGenerator generator;
-		private int name;
+		@Nullable
+		private GpuBuffer buffer;
 		private VertexFormat.IndexType type = VertexFormat.IndexType.SHORT;
 		private int indexCount;
 
@@ -761,11 +766,11 @@ public class RenderSystem {
 		}
 
 		public void bind(int i) {
-			if (this.name == 0) {
-				this.name = GlStateManager._glGenBuffers();
+			if (this.buffer == null) {
+				this.buffer = new GpuBuffer(BufferType.INDICES, BufferUsage.DYNAMIC_WRITE, 0);
 			}
 
-			GlStateManager._glBindBuffer(34963, this.name);
+			this.buffer.bind();
 			this.ensureStorage(i);
 		}
 
@@ -777,11 +782,9 @@ public class RenderSystem {
 				int k = j * this.vertexStride;
 				VertexFormat.IndexType indexType = VertexFormat.IndexType.least(k);
 				int l = Mth.roundToward(i * indexType.bytes, 4);
-				GlStateManager._glBufferData(34963, (long)l, 35048);
-				ByteBuffer byteBuffer = GlStateManager._glMapBuffer(34963, 35001);
-				if (byteBuffer == null) {
-					throw new RuntimeException("Failed to map GL buffer");
-				} else {
+				ByteBuffer byteBuffer = MemoryUtil.memAlloc(l);
+
+				try {
 					this.type = indexType;
 					it.unimi.dsi.fastutil.ints.IntConsumer intConsumer = this.intConsumer(byteBuffer);
 
@@ -789,9 +792,14 @@ public class RenderSystem {
 						this.generator.accept(intConsumer, m * this.vertexStride / this.indexStride);
 					}
 
-					GlStateManager._glUnmapBuffer(34963);
-					this.indexCount = i;
+					byteBuffer.flip();
+					this.buffer.resize(l);
+					this.buffer.write(byteBuffer, 0);
+				} finally {
+					MemoryUtil.memFree(byteBuffer);
 				}
+
+				this.indexCount = i;
 			}
 		}
 

@@ -17,7 +17,6 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
-import net.minecraft.commands.arguments.coordinates.WorldCoordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -46,7 +45,7 @@ public class TeleportCommand {
 									Collections.singleton(commandContext.getSource().getEntityOrException()),
 									commandContext.getSource().getLevel(),
 									Vec3Argument.getCoordinates(commandContext, "location"),
-									WorldCoordinates.current(),
+									null,
 									null
 								)
 						)
@@ -187,31 +186,7 @@ public class TeleportCommand {
 	) throws CommandSyntaxException {
 		Vec3 vec3 = coordinates.getPosition(commandSourceStack);
 		Vec2 vec2 = coordinates2 == null ? null : coordinates2.getRotation(commandSourceStack);
-		Set<Relative> set = EnumSet.noneOf(Relative.class);
-		if (coordinates.isXRelative()) {
-			set.add(Relative.DELTA_X);
-		}
-
-		if (coordinates.isYRelative()) {
-			set.add(Relative.DELTA_Y);
-		}
-
-		if (coordinates.isZRelative()) {
-			set.add(Relative.DELTA_Z);
-		}
-
-		if (coordinates2 == null) {
-			set.add(Relative.X_ROT);
-			set.add(Relative.Y_ROT);
-		} else {
-			if (coordinates2.isXRelative()) {
-				set.add(Relative.X_ROT);
-			}
-
-			if (coordinates2.isYRelative()) {
-				set.add(Relative.Y_ROT);
-			}
-		}
+		Set<Relative> set = getRelatives(coordinates, coordinates2);
 
 		for (Entity entity : collection) {
 			if (coordinates2 == null) {
@@ -244,6 +219,39 @@ public class TeleportCommand {
 		return collection.size();
 	}
 
+	private static Set<Relative> getRelatives(Coordinates coordinates, @Nullable Coordinates coordinates2) {
+		Set<Relative> set = EnumSet.noneOf(Relative.class);
+		if (coordinates.isXRelative()) {
+			set.add(Relative.DELTA_X);
+			set.add(Relative.X);
+		}
+
+		if (coordinates.isYRelative()) {
+			set.add(Relative.DELTA_Y);
+			set.add(Relative.Y);
+		}
+
+		if (coordinates.isZRelative()) {
+			set.add(Relative.DELTA_Z);
+			set.add(Relative.Z);
+		}
+
+		if (coordinates2 == null) {
+			set.add(Relative.X_ROT);
+			set.add(Relative.Y_ROT);
+		} else {
+			if (coordinates2.isXRelative()) {
+				set.add(Relative.X_ROT);
+			}
+
+			if (coordinates2.isYRelative()) {
+				set.add(Relative.Y_ROT);
+			}
+		}
+
+		return set;
+	}
+
 	private static String formatDouble(double d) {
 		return String.format(Locale.ROOT, "%f", d);
 	}
@@ -264,11 +272,14 @@ public class TeleportCommand {
 		if (!Level.isInSpawnableBounds(blockPos)) {
 			throw INVALID_POSITION.create();
 		} else {
-			float i = set.contains(Relative.Y_ROT) ? g - entity.getYRot() : g;
-			float j = set.contains(Relative.X_ROT) ? h - entity.getXRot() : h;
-			float k = Mth.wrapDegrees(i);
-			float l = Mth.wrapDegrees(j);
-			if (entity.teleportTo(serverLevel, d, e, f, set, k, l, true)) {
+			double i = set.contains(Relative.X) ? d - entity.getX() : d;
+			double j = set.contains(Relative.Y) ? e - entity.getY() : e;
+			double k = set.contains(Relative.Z) ? f - entity.getZ() : f;
+			float l = set.contains(Relative.Y_ROT) ? g - entity.getYRot() : g;
+			float m = set.contains(Relative.X_ROT) ? h - entity.getXRot() : h;
+			float n = Mth.wrapDegrees(l);
+			float o = Mth.wrapDegrees(m);
+			if (entity.teleportTo(serverLevel, i, j, k, set, n, o, true)) {
 				if (lookAt != null) {
 					lookAt.perform(commandSourceStack, entity);
 				}

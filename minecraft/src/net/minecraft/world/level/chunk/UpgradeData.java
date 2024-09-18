@@ -338,7 +338,9 @@ public class UpgradeData {
 			public BlockState updateShape(
 				BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 			) {
-				return blockState.updateShape(direction, levelAccessor.getBlockState(blockPos2), levelAccessor, blockPos, blockPos2);
+				return blockState.updateShape(
+					levelAccessor, levelAccessor, blockPos, direction, blockPos2, levelAccessor.getBlockState(blockPos2), levelAccessor.getRandom()
+				);
 			}
 		},
 		CHEST(Blocks.CHEST, Blocks.TRAPPED_CHEST) {
@@ -378,7 +380,9 @@ public class UpgradeData {
 			public BlockState updateShape(
 				BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
 			) {
-				BlockState blockState3 = blockState.updateShape(direction, levelAccessor.getBlockState(blockPos2), levelAccessor, blockPos, blockPos2);
+				BlockState blockState3 = blockState.updateShape(
+					levelAccessor, levelAccessor, blockPos, direction, blockPos2, levelAccessor.getBlockState(blockPos2), levelAccessor.getRandom()
+				);
 				if (blockState != blockState3) {
 					int i = (Integer)blockState3.getValue(BlockStateProperties.DISTANCE);
 					List<ObjectSet<BlockPos>> list = (List<ObjectSet<BlockPos>>)this.queue.get();

@@ -298,6 +298,11 @@ public class GlStateManager {
 		GL15.glBufferData(i, byteBuffer, j);
 	}
 
+	public static void _glBufferSubData(int i, int j, ByteBuffer byteBuffer) {
+		RenderSystem.assertOnRenderThreadOrInit();
+		GL15.glBufferSubData(i, (long)j, byteBuffer);
+	}
+
 	public static void _glBufferData(int i, long l, int j) {
 		RenderSystem.assertOnRenderThreadOrInit();
 		GL15.glBufferData(i, l, j);
@@ -754,9 +759,9 @@ public class GlStateManager {
 		return GL32.glFenceSync(i, j);
 	}
 
-	public static int _glClientWaitSync(long l, int i, int j) {
+	public static int _glClientWaitSync(long l, int i, long m) {
 		RenderSystem.assertOnRenderThreadOrInit();
-		return GL32.glClientWaitSync(l, i, (long)j);
+		return GL32.glClientWaitSync(l, i, m);
 	}
 
 	public static void _glDeleteSync(long l) {

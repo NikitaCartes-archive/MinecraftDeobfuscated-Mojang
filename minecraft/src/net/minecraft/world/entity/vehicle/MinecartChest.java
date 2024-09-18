@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -22,23 +23,19 @@ public class MinecartChest extends AbstractMinecartContainer {
 		super(entityType, level);
 	}
 
-	public MinecartChest(Level level, double d, double e, double f) {
-		super(EntityType.CHEST_MINECART, d, e, f, level);
-	}
-
 	@Override
 	protected Item getDropItem() {
 		return Items.CHEST_MINECART;
 	}
 
 	@Override
-	public int getContainerSize() {
-		return 27;
+	public ItemStack getPickResult() {
+		return new ItemStack(Items.CHEST_MINECART);
 	}
 
 	@Override
-	public AbstractMinecart.Type getMinecartType() {
-		return AbstractMinecart.Type.CHEST;
+	public int getContainerSize() {
+		return 27;
 	}
 
 	@Override

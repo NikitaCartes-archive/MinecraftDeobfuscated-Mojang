@@ -21,6 +21,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
@@ -30,7 +31,6 @@ import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.Block;
@@ -86,29 +86,29 @@ public abstract class AbstractMinecart extends VehicleEntity {
 
 	protected AbstractMinecart(EntityType<?> entityType, Level level, double d, double e, double f) {
 		this(entityType, level);
+		this.setInitialPos(d, e, f);
+	}
+
+	public void setInitialPos(double d, double e, double f) {
 		this.setPos(d, e, f);
 		this.xo = d;
 		this.yo = e;
 		this.zo = f;
 	}
 
-	public static AbstractMinecart createMinecart(
-		Level level, double d, double e, double f, AbstractMinecart.Type type, ItemStack itemStack, @Nullable Player player
+	@Nullable
+	public static <T extends AbstractMinecart> T createMinecart(
+		Level level, double d, double e, double f, EntityType<T> entityType, EntitySpawnReason entitySpawnReason, ItemStack itemStack, @Nullable Player player
 	) {
-		AbstractMinecart abstractMinecart = (AbstractMinecart)(switch (type) {
-			case CHEST -> new MinecartChest(level, d, e, f);
-			case FURNACE -> new MinecartFurnace(level, d, e, f);
-			case TNT -> new MinecartTNT(level, d, e, f);
-			case SPAWNER -> new MinecartSpawner(level, d, e, f);
-			case HOPPER -> new MinecartHopper(level, d, e, f);
-			case COMMAND_BLOCK -> new MinecartCommandBlock(level, d, e, f);
-			default -> new Minecart(level, d, e, f);
-		});
-		EntityType.createDefaultStackConfig(level, itemStack, player).accept(abstractMinecart);
-		if (abstractMinecart.getBehavior() instanceof NewMinecartBehavior newMinecartBehavior) {
-			BlockPos blockPos = abstractMinecart.getCurrentBlockPosOrRailBelow();
-			BlockState blockState = level.getBlockState(blockPos);
-			newMinecartBehavior.adjustToRails(blockPos, blockState, true);
+		T abstractMinecart = (T)entityType.create(level, entitySpawnReason);
+		if (abstractMinecart != null) {
+			abstractMinecart.setInitialPos(d, e, f);
+			EntityType.createDefaultStackConfig(level, itemStack, player).accept(abstractMinecart);
+			if (abstractMinecart.getBehavior() instanceof NewMinecartBehavior newMinecartBehavior) {
+				BlockPos blockPos = abstractMinecart.getCurrentBlockPosOrRailBelow();
+				BlockState blockState = level.getBlockState(blockPos);
+				newMinecartBehavior.adjustToRails(blockPos, blockState, true);
+			}
 		}
 
 		return abstractMinecart;
@@ -489,43 +489,8 @@ public abstract class AbstractMinecart extends VehicleEntity {
 						e *= 0.1F;
 						d *= 0.5;
 						e *= 0.5;
-						if (entity instanceof AbstractMinecart) {
-							double h;
-							double i;
-							if (useExperimentalMovement(this.level())) {
-								h = this.getDeltaMovement().x;
-								i = this.getDeltaMovement().z;
-							} else {
-								h = entity.getX() - this.getX();
-								i = entity.getZ() - this.getZ();
-							}
-
-							Vec3 vec3 = new Vec3(h, 0.0, i).normalize();
-							Vec3 vec32 = new Vec3((double)Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)), 0.0, (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)))
-								.normalize();
-							double j = Math.abs(vec3.dot(vec32));
-							if (j < 0.8F && !useExperimentalMovement(this.level())) {
-								return;
-							}
-
-							Vec3 vec33 = this.getDeltaMovement();
-							Vec3 vec34 = entity.getDeltaMovement();
-							if (((AbstractMinecart)entity).getMinecartType() == AbstractMinecart.Type.FURNACE && this.getMinecartType() != AbstractMinecart.Type.FURNACE) {
-								this.setDeltaMovement(vec33.multiply(0.2, 1.0, 0.2));
-								this.push(vec34.x - d, 0.0, vec34.z - e);
-								entity.setDeltaMovement(vec34.multiply(0.95, 1.0, 0.95));
-							} else if (((AbstractMinecart)entity).getMinecartType() != AbstractMinecart.Type.FURNACE && this.getMinecartType() == AbstractMinecart.Type.FURNACE) {
-								entity.setDeltaMovement(vec34.multiply(0.2, 1.0, 0.2));
-								entity.push(vec33.x + d, 0.0, vec33.z + e);
-								this.setDeltaMovement(vec33.multiply(0.95, 1.0, 0.95));
-							} else {
-								double k = (vec34.x + vec33.x) / 2.0;
-								double l = (vec34.z + vec33.z) / 2.0;
-								this.setDeltaMovement(vec33.multiply(0.2, 1.0, 0.2));
-								this.push(k - d, 0.0, l - e);
-								entity.setDeltaMovement(vec34.multiply(0.2, 1.0, 0.2));
-								entity.push(k + d, 0.0, l + e);
-							}
+						if (entity instanceof AbstractMinecart abstractMinecart) {
+							this.pushOtherMinecart(abstractMinecart, d, e);
 						} else {
 							this.push(-d, 0.0, -e);
 							entity.push(d / 4.0, 0.0, e / 4.0);
@@ -536,7 +501,42 @@ public abstract class AbstractMinecart extends VehicleEntity {
 		}
 	}
 
-	public abstract AbstractMinecart.Type getMinecartType();
+	private void pushOtherMinecart(AbstractMinecart abstractMinecart, double d, double e) {
+		double f;
+		double g;
+		if (useExperimentalMovement(this.level())) {
+			f = this.getDeltaMovement().x;
+			g = this.getDeltaMovement().z;
+		} else {
+			f = abstractMinecart.getX() - this.getX();
+			g = abstractMinecart.getZ() - this.getZ();
+		}
+
+		Vec3 vec3 = new Vec3(f, 0.0, g).normalize();
+		Vec3 vec32 = new Vec3((double)Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)), 0.0, (double)Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)))
+			.normalize();
+		double h = Math.abs(vec3.dot(vec32));
+		if (!(h < 0.8F) || useExperimentalMovement(this.level())) {
+			Vec3 vec33 = this.getDeltaMovement();
+			Vec3 vec34 = abstractMinecart.getDeltaMovement();
+			if (abstractMinecart.isFurnace() && !this.isFurnace()) {
+				this.setDeltaMovement(vec33.multiply(0.2, 1.0, 0.2));
+				this.push(vec34.x - d, 0.0, vec34.z - e);
+				abstractMinecart.setDeltaMovement(vec34.multiply(0.95, 1.0, 0.95));
+			} else if (!abstractMinecart.isFurnace() && this.isFurnace()) {
+				abstractMinecart.setDeltaMovement(vec34.multiply(0.2, 1.0, 0.2));
+				abstractMinecart.push(vec33.x + d, 0.0, vec33.z + e);
+				this.setDeltaMovement(vec33.multiply(0.95, 1.0, 0.95));
+			} else {
+				double i = (vec34.x + vec33.x) / 2.0;
+				double j = (vec34.z + vec33.z) / 2.0;
+				this.setDeltaMovement(vec33.multiply(0.2, 1.0, 0.2));
+				this.push(i - d, 0.0, j - e);
+				abstractMinecart.setDeltaMovement(vec34.multiply(0.2, 1.0, 0.2));
+				abstractMinecart.push(i + d, 0.0, j + e);
+			}
+		}
+	}
 
 	public BlockState getDisplayBlockState() {
 		return !this.hasCustomDisplay() ? this.getDefaultDisplayBlockState() : Block.stateById(this.getEntityData().get(DATA_ID_DISPLAY_BLOCK));
@@ -572,29 +572,18 @@ public abstract class AbstractMinecart extends VehicleEntity {
 		this.getEntityData().set(DATA_ID_CUSTOM_DISPLAY, bl);
 	}
 
-	@Override
-	public ItemStack getPickResult() {
-		return new ItemStack(switch (this.getMinecartType()) {
-			case CHEST -> Items.CHEST_MINECART;
-			case FURNACE -> Items.FURNACE_MINECART;
-			case TNT -> Items.TNT_MINECART;
-			default -> Items.MINECART;
-			case HOPPER -> Items.HOPPER_MINECART;
-			case COMMAND_BLOCK -> Items.COMMAND_BLOCK_MINECART;
-		});
-	}
-
 	public static boolean useExperimentalMovement(Level level) {
 		return level.enabledFeatures().contains(FeatureFlags.MINECART_IMPROVEMENTS);
 	}
 
-	public static enum Type {
-		RIDEABLE,
-		CHEST,
-		FURNACE,
-		TNT,
-		SPAWNER,
-		HOPPER,
-		COMMAND_BLOCK;
+	@Override
+	public abstract ItemStack getPickResult();
+
+	public boolean isRideable() {
+		return false;
+	}
+
+	public boolean isFurnace() {
+		return false;
 	}
 }

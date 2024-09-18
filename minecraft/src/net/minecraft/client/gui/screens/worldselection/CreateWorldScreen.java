@@ -11,6 +11,7 @@ import com.mojang.serialization.Lifecycle;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
@@ -105,6 +106,7 @@ public class CreateWorldScreen extends Screen {
 	private final TabManager tabManager = new TabManager(this::addRenderableWidget, guiEventListener -> this.removeWidget(guiEventListener));
 	private boolean recreated;
 	private final DirectoryValidator packValidator;
+	private final CreateWorldCallback createWorldCallback;
 	@Nullable
 	private final Screen lastScreen;
 	@Nullable
@@ -115,13 +117,21 @@ public class CreateWorldScreen extends Screen {
 	private TabNavigationBar tabNavigationBar;
 
 	public static void openFresh(Minecraft minecraft, @Nullable Screen screen) {
+		openFresh(
+			minecraft,
+			screen,
+			(createWorldScreen, layeredRegistryAccess, primaryLevelData, path) -> createWorldScreen.createNewWorld(layeredRegistryAccess, primaryLevelData)
+		);
+	}
+
+	public static void openFresh(Minecraft minecraft, @Nullable Screen screen, CreateWorldCallback createWorldCallback) {
 		WorldCreationContextMapper worldCreationContextMapper = (reloadableServerResources, layeredRegistryAccess, dataPackReloadCookie) -> new WorldCreationContext(
 				dataPackReloadCookie.worldGenSettings(), layeredRegistryAccess, reloadableServerResources, dataPackReloadCookie.dataConfiguration()
 			);
 		Function<WorldLoader.DataLoadContext, WorldGenSettings> function = dataLoadContext -> new WorldGenSettings(
 				WorldOptions.defaultWithRandomSeed(), WorldPresets.createNormalWorldDimensions(dataLoadContext.datapackWorldgen())
 			);
-		openCreateWorldScreen(minecraft, screen, function, worldCreationContextMapper, WorldPresets.NORMAL);
+		openCreateWorldScreen(minecraft, screen, function, worldCreationContextMapper, WorldPresets.NORMAL, createWorldCallback);
 	}
 
 	public static void testWorld(Minecraft minecraft, @Nullable Screen screen) {
@@ -140,7 +150,14 @@ public class CreateWorldScreen extends Screen {
 		Function<WorldLoader.DataLoadContext, WorldGenSettings> function = dataLoadContext -> new WorldGenSettings(
 				WorldOptions.testWorldWithRandomSeed(), WorldPresets.createFlatWorldDimensions(dataLoadContext.datapackWorldgen())
 			);
-		openCreateWorldScreen(minecraft, screen, function, worldCreationContextMapper, WorldPresets.FLAT);
+		openCreateWorldScreen(
+			minecraft,
+			screen,
+			function,
+			worldCreationContextMapper,
+			WorldPresets.FLAT,
+			(createWorldScreen, layeredRegistryAccess, primaryLevelData, path) -> createWorldScreen.createNewWorld(layeredRegistryAccess, primaryLevelData)
+		);
 	}
 
 	private static void openCreateWorldScreen(
@@ -148,7 +165,8 @@ public class CreateWorldScreen extends Screen {
 		@Nullable Screen screen,
 		Function<WorldLoader.DataLoadContext, WorldGenSettings> function,
 		WorldCreationContextMapper worldCreationContextMapper,
-		ResourceKey<WorldPreset> resourceKey
+		ResourceKey<WorldPreset> resourceKey,
+		CreateWorldCallback createWorldCallback
 	) {
 		queueLoadScreen(minecraft, PREPARING_WORLD_DATA);
 		PackRepository packRepository = new PackRepository(new ServerPacksSource(minecraft.directoryValidator()));
@@ -166,7 +184,9 @@ public class CreateWorldScreen extends Screen {
 			minecraft
 		);
 		minecraft.managedBlock(completableFuture::isDone);
-		minecraft.setScreen(new CreateWorldScreen(minecraft, screen, (WorldCreationContext)completableFuture.join(), Optional.of(resourceKey), OptionalLong.empty()));
+		minecraft.setScreen(
+			new CreateWorldScreen(minecraft, screen, (WorldCreationContext)completableFuture.join(), Optional.of(resourceKey), OptionalLong.empty(), createWorldCallback)
+		);
 	}
 
 	public static CreateWorldScreen createFromExisting(
@@ -177,7 +197,8 @@ public class CreateWorldScreen extends Screen {
 			screen,
 			worldCreationContext,
 			WorldPresets.fromSettings(worldCreationContext.selectedDimensions()),
-			OptionalLong.of(worldCreationContext.options().seed())
+			OptionalLong.of(worldCreationContext.options().seed()),
+			(createWorldScreenx, layeredRegistryAccess, primaryLevelData, pathx) -> createWorldScreenx.createNewWorld(layeredRegistryAccess, primaryLevelData)
 		);
 		createWorldScreen.recreated = true;
 		createWorldScreen.uiState.setName(levelSettings.levelName());
@@ -201,11 +222,13 @@ public class CreateWorldScreen extends Screen {
 		@Nullable Screen screen,
 		WorldCreationContext worldCreationContext,
 		Optional<ResourceKey<WorldPreset>> optional,
-		OptionalLong optionalLong
+		OptionalLong optionalLong,
+		CreateWorldCallback createWorldCallback
 	) {
 		super(Component.translatable("selectWorld.create"));
 		this.lastScreen = screen;
 		this.packValidator = minecraft.directoryValidator();
+		this.createWorldCallback = createWorldCallback;
 		this.uiState = new WorldCreationUiState(minecraft.getLevelSource().getBaseDir(), worldCreationContext, optional, optionalLong);
 	}
 
@@ -261,27 +284,34 @@ public class CreateWorldScreen extends Screen {
 		Lifecycle lifecycle2 = layeredRegistryAccess.compositeAccess().allRegistriesLifecycle();
 		Lifecycle lifecycle3 = lifecycle2.add(lifecycle);
 		boolean bl = !this.recreated && lifecycle2 == Lifecycle.stable();
-		WorldOpenFlows.confirmWorldCreation(
-			this.minecraft, this, lifecycle3, () -> this.createNewWorld(complete.specialWorldProperty(), layeredRegistryAccess, lifecycle3), bl
-		);
+		LevelSettings levelSettings = this.createLevelSettings(complete.specialWorldProperty() == PrimaryLevelData.SpecialWorldProperty.DEBUG);
+		PrimaryLevelData primaryLevelData = new PrimaryLevelData(levelSettings, this.uiState.getSettings().options(), complete.specialWorldProperty(), lifecycle3);
+		WorldOpenFlows.confirmWorldCreation(this.minecraft, this, lifecycle3, () -> this.createWorldAndCleanup(layeredRegistryAccess, primaryLevelData), bl);
 	}
 
-	private void createNewWorld(
-		PrimaryLevelData.SpecialWorldProperty specialWorldProperty, LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, Lifecycle lifecycle
-	) {
+	private void createWorldAndCleanup(LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, PrimaryLevelData primaryLevelData) {
+		boolean bl = this.createWorldCallback.create(this, layeredRegistryAccess, primaryLevelData, this.tempDataPackDir);
+		this.removeTempDataPackDir();
+		if (!bl) {
+			this.popScreen();
+		}
+	}
+
+	private boolean createNewWorld(LayeredRegistryAccess<RegistryLayer> layeredRegistryAccess, WorldData worldData) {
+		String string = this.uiState.getTargetFolder();
+		WorldCreationContext worldCreationContext = this.uiState.getSettings();
 		queueLoadScreen(this.minecraft, PREPARING_WORLD_DATA);
-		Optional<LevelStorageSource.LevelStorageAccess> optional = this.createNewWorldDirectory();
-		if (!optional.isEmpty()) {
-			this.removeTempDataPackDir();
-			boolean bl = specialWorldProperty == PrimaryLevelData.SpecialWorldProperty.DEBUG;
-			WorldCreationContext worldCreationContext = this.uiState.getSettings();
-			LevelSettings levelSettings = this.createLevelSettings(bl);
-			WorldData worldData = new PrimaryLevelData(levelSettings, worldCreationContext.options(), specialWorldProperty, lifecycle);
+		Optional<LevelStorageSource.LevelStorageAccess> optional = createNewWorldDirectory(this.minecraft, string, this.tempDataPackDir);
+		if (optional.isEmpty()) {
+			SystemToast.onPackCopyFailure(this.minecraft, string);
+			return false;
+		} else {
 			this.minecraft
 				.createWorldOpenFlows()
 				.createLevelFromExistingSettings(
 					(LevelStorageSource.LevelStorageAccess)optional.get(), worldCreationContext.dataPackResources(), layeredRegistryAccess, worldData
 				);
+			return true;
 		}
 	}
 
@@ -351,7 +381,7 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	@Nullable
-	private Path getTempDataPackDir() {
+	private Path getOrCreateTempDataPackDir() {
 		if (this.tempDataPackDir == null) {
 			try {
 				this.tempDataPackDir = Files.createTempDirectory("mcworld-");
@@ -488,7 +518,7 @@ public class CreateWorldScreen extends Screen {
 	}
 
 	private void removeTempDataPackDir() {
-		if (this.tempDataPackDir != null) {
+		if (this.tempDataPackDir != null && Files.exists(this.tempDataPackDir, new LinkOption[0])) {
 			try {
 				Stream<Path> stream = Files.walk(this.tempDataPackDir);
 
@@ -518,9 +548,9 @@ public class CreateWorldScreen extends Screen {
 			} catch (IOException var6) {
 				LOGGER.warn("Failed to list temporary dir {}", this.tempDataPackDir);
 			}
-
-			this.tempDataPackDir = null;
 		}
+
+		this.tempDataPackDir = null;
 	}
 
 	private static void copyBetweenDirs(Path path, Path path2, Path path3) {
@@ -532,51 +562,47 @@ public class CreateWorldScreen extends Screen {
 		}
 	}
 
-	private Optional<LevelStorageSource.LevelStorageAccess> createNewWorldDirectory() {
-		String string = this.uiState.getTargetFolder();
-
+	private static Optional<LevelStorageSource.LevelStorageAccess> createNewWorldDirectory(Minecraft minecraft, String string, @Nullable Path path) {
 		try {
-			LevelStorageSource.LevelStorageAccess levelStorageAccess = this.minecraft.getLevelSource().createAccess(string);
-			if (this.tempDataPackDir == null) {
+			LevelStorageSource.LevelStorageAccess levelStorageAccess = minecraft.getLevelSource().createAccess(string);
+			if (path == null) {
 				return Optional.of(levelStorageAccess);
 			}
 
 			try {
-				Stream<Path> stream = Files.walk(this.tempDataPackDir);
+				Stream<Path> stream = Files.walk(path);
 
-				Optional var5;
+				Optional var6;
 				try {
-					Path path = levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR);
-					FileUtil.createDirectoriesSafe(path);
-					stream.filter(pathx -> !pathx.equals(this.tempDataPackDir)).forEach(path2 -> copyBetweenDirs(this.tempDataPackDir, path, path2));
-					var5 = Optional.of(levelStorageAccess);
-				} catch (Throwable var7) {
+					Path path2 = levelStorageAccess.getLevelPath(LevelResource.DATAPACK_DIR);
+					FileUtil.createDirectoriesSafe(path2);
+					stream.filter(path2x -> !path2x.equals(path)).forEach(path3 -> copyBetweenDirs(path, path2, path3));
+					var6 = Optional.of(levelStorageAccess);
+				} catch (Throwable var8) {
 					if (stream != null) {
 						try {
 							stream.close();
-						} catch (Throwable var6) {
-							var7.addSuppressed(var6);
+						} catch (Throwable var7) {
+							var8.addSuppressed(var7);
 						}
 					}
 
-					throw var7;
+					throw var8;
 				}
 
 				if (stream != null) {
 					stream.close();
 				}
 
-				return var5;
-			} catch (UncheckedIOException | IOException var8) {
-				LOGGER.warn("Failed to copy datapacks to world {}", string, var8);
+				return var6;
+			} catch (UncheckedIOException | IOException var9) {
+				LOGGER.warn("Failed to copy datapacks to world {}", string, var9);
 				levelStorageAccess.close();
 			}
-		} catch (UncheckedIOException | IOException var9) {
-			LOGGER.warn("Failed to create access for {}", string, var9);
+		} catch (UncheckedIOException | IOException var10) {
+			LOGGER.warn("Failed to create access for {}", string, var10);
 		}
 
-		SystemToast.onPackCopyFailure(this.minecraft, string);
-		this.popScreen();
 		return Optional.empty();
 	}
 
@@ -629,7 +655,7 @@ public class CreateWorldScreen extends Screen {
 
 	@Nullable
 	private Pair<Path, PackRepository> getDataPackSelectionSettings(WorldDataConfiguration worldDataConfiguration) {
-		Path path = this.getTempDataPackDir();
+		Path path = this.getOrCreateTempDataPackDir();
 		if (path != null) {
 			if (this.tempDataPackRepository == null) {
 				this.tempDataPackRepository = ServerPacksSource.createPackRepository(path, this.packValidator);

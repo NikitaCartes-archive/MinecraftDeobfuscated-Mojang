@@ -7,7 +7,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
@@ -31,7 +32,7 @@ public class CoralFanBlock extends BaseCoralFanBlock {
 
 	@Override
 	protected void onPlace(BlockState blockState, Level level, BlockPos blockPos, BlockState blockState2, boolean bl) {
-		this.tryScheduleDieTick(blockState, level, blockPos);
+		this.tryScheduleDieTick(blockState, level, level, level.random, blockPos);
 	}
 
 	@Override
@@ -43,17 +44,24 @@ public class CoralFanBlock extends BaseCoralFanBlock {
 
 	@Override
 	protected BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+		BlockState blockState,
+		LevelReader levelReader,
+		ScheduledTickAccess scheduledTickAccess,
+		BlockPos blockPos,
+		Direction direction,
+		BlockPos blockPos2,
+		BlockState blockState2,
+		RandomSource randomSource
 	) {
-		if (direction == Direction.DOWN && !blockState.canSurvive(levelAccessor, blockPos)) {
+		if (direction == Direction.DOWN && !blockState.canSurvive(levelReader, blockPos)) {
 			return Blocks.AIR.defaultBlockState();
 		} else {
-			this.tryScheduleDieTick(blockState, levelAccessor, blockPos);
+			this.tryScheduleDieTick(blockState, levelReader, scheduledTickAccess, randomSource, blockPos);
 			if ((Boolean)blockState.getValue(WATERLOGGED)) {
-				levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+				scheduledTickAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelReader));
 			}
 
-			return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+			return super.updateShape(blockState, levelReader, scheduledTickAccess, blockPos, direction, blockPos2, blockState2, randomSource);
 		}
 	}
 }

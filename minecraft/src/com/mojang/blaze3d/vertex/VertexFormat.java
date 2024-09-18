@@ -2,6 +2,7 @@ package com.mojang.blaze3d.vertex;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -132,7 +133,7 @@ public class VertexFormat {
 	public VertexBuffer getImmediateDrawVertexBuffer() {
 		VertexBuffer vertexBuffer = this.immediateDrawVertexBuffer;
 		if (vertexBuffer == null) {
-			this.immediateDrawVertexBuffer = vertexBuffer = new VertexBuffer(VertexBuffer.Usage.DYNAMIC);
+			this.immediateDrawVertexBuffer = vertexBuffer = new VertexBuffer(BufferUsage.DYNAMIC_WRITE);
 		}
 
 		return vertexBuffer;

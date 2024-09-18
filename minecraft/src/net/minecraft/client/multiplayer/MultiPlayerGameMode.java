@@ -450,6 +450,7 @@ public class MultiPlayerGameMode {
 		boolean bl = this.minecraft.screen instanceof AbstractContainerScreen && !(this.minecraft.screen instanceof CreativeModeInventoryScreen);
 		if (this.localPlayerMode.isCreative() && !bl && !itemStack.isEmpty() && this.connection.isFeatureEnabled(itemStack.getItem().requiredFeatures())) {
 			this.connection.send(new ServerboundSetCreativeModeSlotPacket(-1, itemStack));
+			this.minecraft.player.getDropSpamThrottler().increment();
 		}
 	}
 

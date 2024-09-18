@@ -231,7 +231,17 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 			this.parentScreen
 				.saveSlotSettings(
 					new RealmsWorldOptions(
-						this.pvp, bl, this.spawnProtection, this.commandBlocks, i, j, this.forceGameMode, this.worldName, this.options.version, this.options.compatibility
+						this.pvp,
+						bl,
+						this.spawnProtection,
+						this.commandBlocks,
+						i,
+						j,
+						this.options.hardcore,
+						this.forceGameMode,
+						this.worldName,
+						this.options.version,
+						this.options.compatibility
 					)
 				);
 		} else {
@@ -244,6 +254,7 @@ public class RealmsSlotOptionsScreen extends RealmsScreen {
 						this.options.commandBlocks,
 						i,
 						j,
+						this.options.hardcore,
 						this.options.forceGameMode,
 						this.worldName,
 						this.options.version,

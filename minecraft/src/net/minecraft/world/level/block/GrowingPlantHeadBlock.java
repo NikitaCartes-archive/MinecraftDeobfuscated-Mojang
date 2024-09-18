@@ -6,8 +6,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -31,8 +31,8 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 	protected abstract MapCodec<? extends GrowingPlantHeadBlock> codec();
 
 	@Override
-	public BlockState getStateForPlacement(LevelAccessor levelAccessor) {
-		return this.defaultBlockState().setValue(AGE, Integer.valueOf(levelAccessor.getRandom().nextInt(25)));
+	public BlockState getStateForPlacement(RandomSource randomSource) {
+		return this.defaultBlockState().setValue(AGE, Integer.valueOf(randomSource.nextInt(25)));
 	}
 
 	@Override
@@ -68,18 +68,25 @@ public abstract class GrowingPlantHeadBlock extends GrowingPlantBlock implements
 
 	@Override
 	protected BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+		BlockState blockState,
+		LevelReader levelReader,
+		ScheduledTickAccess scheduledTickAccess,
+		BlockPos blockPos,
+		Direction direction,
+		BlockPos blockPos2,
+		BlockState blockState2,
+		RandomSource randomSource
 	) {
-		if (direction == this.growthDirection.getOpposite() && !blockState.canSurvive(levelAccessor, blockPos)) {
-			levelAccessor.scheduleTick(blockPos, this, 1);
+		if (direction == this.growthDirection.getOpposite() && !blockState.canSurvive(levelReader, blockPos)) {
+			scheduledTickAccess.scheduleTick(blockPos, this, 1);
 		}
 
 		if (direction != this.growthDirection || !blockState2.is(this) && !blockState2.is(this.getBodyBlock())) {
 			if (this.scheduleFluidTicks) {
-				levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+				scheduledTickAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelReader));
 			}
 
-			return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+			return super.updateShape(blockState, levelReader, scheduledTickAccess, blockPos, direction, blockPos2, blockState2, randomSource);
 		} else {
 			return this.updateBodyAfterConvertedFromHead(blockState, this.getBodyBlock().defaultBlockState());
 		}

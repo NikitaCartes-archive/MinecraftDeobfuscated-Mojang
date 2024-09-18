@@ -11,15 +11,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -33,7 +34,7 @@ public class AttachedStemBlock extends BushBlock {
 				)
 				.apply(instance, AttachedStemBlock::new)
 	);
-	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 	protected static final float AABB_OFFSET = 2.0F;
 	private static final Map<Direction, VoxelShape> AABBS = Maps.newEnumMap(
 		ImmutableMap.of(
@@ -73,16 +74,23 @@ public class AttachedStemBlock extends BushBlock {
 
 	@Override
 	protected BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+		BlockState blockState,
+		LevelReader levelReader,
+		ScheduledTickAccess scheduledTickAccess,
+		BlockPos blockPos,
+		Direction direction,
+		BlockPos blockPos2,
+		BlockState blockState2,
+		RandomSource randomSource
 	) {
 		if (!blockState2.is(this.fruit) && direction == blockState.getValue(FACING)) {
-			Optional<Block> optional = levelAccessor.registryAccess().lookupOrThrow(Registries.BLOCK).getOptional(this.stem);
+			Optional<Block> optional = levelReader.registryAccess().lookupOrThrow(Registries.BLOCK).getOptional(this.stem);
 			if (optional.isPresent()) {
 				return ((Block)optional.get()).defaultBlockState().trySetValue(StemBlock.AGE, Integer.valueOf(7));
 			}
 		}
 
-		return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+		return super.updateShape(blockState, levelReader, scheduledTickAccess, blockPos, direction, blockPos2, blockState2, randomSource);
 	}
 
 	@Override

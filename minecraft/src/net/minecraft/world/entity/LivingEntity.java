@@ -2966,7 +2966,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	public float getViewYRot(float f) {
-		return f == 1.0F ? this.yHeadRot : Mth.lerp(f, this.yHeadRotO, this.yHeadRot);
+		return f == 1.0F ? this.yHeadRot : Mth.rotLerp(f, this.yHeadRotO, this.yHeadRot);
 	}
 
 	public float getAttackAnim(float f) {

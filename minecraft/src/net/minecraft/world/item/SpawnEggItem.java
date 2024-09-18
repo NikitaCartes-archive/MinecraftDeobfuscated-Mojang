@@ -80,7 +80,7 @@ public class SpawnEggItem extends Item {
 						itemStack,
 						useOnContext.getPlayer(),
 						blockPos2,
-						EntitySpawnReason.SPAWN_EGG,
+						EntitySpawnReason.SPAWN_ITEM_USE,
 						true,
 						!Objects.equals(blockPos, blockPos2) && direction == Direction.UP
 					)
@@ -108,7 +108,7 @@ public class SpawnEggItem extends Item {
 				return InteractionResult.PASS;
 			} else if (level.mayInteract(player, blockPos) && player.mayUseItemAt(blockPos, blockHitResult.getDirection(), itemStack)) {
 				EntityType<?> entityType = this.getType(itemStack);
-				Entity entity = entityType.spawn((ServerLevel)level, itemStack, player, blockPos, EntitySpawnReason.SPAWN_EGG, false, false);
+				Entity entity = entityType.spawn((ServerLevel)level, itemStack, player, blockPos, EntitySpawnReason.SPAWN_ITEM_USE, false, false);
 				if (entity == null) {
 					return InteractionResult.PASS;
 				} else {
@@ -160,7 +160,7 @@ public class SpawnEggItem extends Item {
 			if (mob instanceof AgeableMob) {
 				mob2 = ((AgeableMob)mob).getBreedOffspring(serverLevel, (AgeableMob)mob);
 			} else {
-				mob2 = entityType.create(serverLevel, EntitySpawnReason.SPAWN_EGG);
+				mob2 = entityType.create(serverLevel, EntitySpawnReason.SPAWN_ITEM_USE);
 			}
 
 			if (mob2 == null) {

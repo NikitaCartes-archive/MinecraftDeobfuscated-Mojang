@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer;
 
+import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -32,7 +33,7 @@ public class SkyRenderer implements AutoCloseable {
 	private final VertexBuffer bottomSkyBuffer = this.createBottomSkyBuffer();
 
 	private VertexBuffer createStarBuffer() {
-		VertexBuffer vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+		VertexBuffer vertexBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
 		vertexBuffer.bind();
 		vertexBuffer.upload(this.drawStars(Tesselator.getInstance()));
 		VertexBuffer.unbind();
@@ -40,7 +41,7 @@ public class SkyRenderer implements AutoCloseable {
 	}
 
 	private VertexBuffer createTopSkyBuffer() {
-		VertexBuffer vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+		VertexBuffer vertexBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
 		vertexBuffer.bind();
 		vertexBuffer.upload(this.buildSkyDisc(Tesselator.getInstance(), 16.0F));
 		VertexBuffer.unbind();
@@ -48,7 +49,7 @@ public class SkyRenderer implements AutoCloseable {
 	}
 
 	private VertexBuffer createBottomSkyBuffer() {
-		VertexBuffer vertexBuffer = new VertexBuffer(VertexBuffer.Usage.STATIC);
+		VertexBuffer vertexBuffer = new VertexBuffer(BufferUsage.STATIC_WRITE);
 		vertexBuffer.bind();
 		vertexBuffer.upload(this.buildSkyDisc(Tesselator.getInstance(), -16.0F));
 		VertexBuffer.unbind();

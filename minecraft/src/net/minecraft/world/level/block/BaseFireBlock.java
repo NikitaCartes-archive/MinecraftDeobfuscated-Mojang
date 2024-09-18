@@ -144,7 +144,7 @@ public abstract class BaseFireBlock extends Block {
 			if (inPortalDimension(level)) {
 				Optional<PortalShape> optional = PortalShape.findEmptyPortalShape(level, blockPos, Direction.Axis.X);
 				if (optional.isPresent()) {
-					((PortalShape)optional.get()).createPortalBlocks();
+					((PortalShape)optional.get()).createPortalBlocks(level);
 					return;
 				}
 			}

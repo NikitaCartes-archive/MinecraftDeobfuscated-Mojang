@@ -1,6 +1,8 @@
 package net.minecraft.world.item;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -250,6 +252,51 @@ public class BundleItem extends Item {
 			itemEntity.getItem().set(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
 			ItemUtils.onContainerDestroyed(itemEntity, bundleContents.itemsCopy());
 		}
+	}
+
+	public static List<BundleItem> getAllBundleItemColors() {
+		return Stream.of(
+				Items.BUNDLE,
+				Items.WHITE_BUNDLE,
+				Items.ORANGE_BUNDLE,
+				Items.MAGENTA_BUNDLE,
+				Items.LIGHT_BLUE_BUNDLE,
+				Items.YELLOW_BUNDLE,
+				Items.LIME_BUNDLE,
+				Items.PINK_BUNDLE,
+				Items.GRAY_BUNDLE,
+				Items.LIGHT_GRAY_BUNDLE,
+				Items.CYAN_BUNDLE,
+				Items.BLACK_BUNDLE,
+				Items.BROWN_BUNDLE,
+				Items.GREEN_BUNDLE,
+				Items.RED_BUNDLE,
+				Items.BLUE_BUNDLE,
+				Items.PURPLE_BUNDLE
+			)
+			.map(item -> (BundleItem)item)
+			.toList();
+	}
+
+	public static Item getByColor(DyeColor dyeColor) {
+		return switch (dyeColor) {
+			case WHITE -> Items.WHITE_BUNDLE;
+			case ORANGE -> Items.ORANGE_BUNDLE;
+			case MAGENTA -> Items.MAGENTA_BUNDLE;
+			case LIGHT_BLUE -> Items.LIGHT_BLUE_BUNDLE;
+			case YELLOW -> Items.YELLOW_BUNDLE;
+			case LIME -> Items.LIME_BUNDLE;
+			case PINK -> Items.PINK_BUNDLE;
+			case GRAY -> Items.GRAY_BUNDLE;
+			case LIGHT_GRAY -> Items.LIGHT_GRAY_BUNDLE;
+			case CYAN -> Items.CYAN_BUNDLE;
+			case BLUE -> Items.BLUE_BUNDLE;
+			case BROWN -> Items.BROWN_BUNDLE;
+			case GREEN -> Items.GREEN_BUNDLE;
+			case RED -> Items.RED_BUNDLE;
+			case BLACK -> Items.BLACK_BUNDLE;
+			case PURPLE -> Items.PURPLE_BUNDLE;
+		};
 	}
 
 	private static void playRemoveOneSound(Entity entity) {

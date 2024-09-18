@@ -740,7 +740,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 		}
 
 		if (entitySpawnReason == EntitySpawnReason.COMMAND
-			|| entitySpawnReason == EntitySpawnReason.SPAWN_EGG
+			|| entitySpawnReason == EntitySpawnReason.SPAWN_ITEM_USE
 			|| EntitySpawnReason.isSpawner(entitySpawnReason)
 			|| entitySpawnReason == EntitySpawnReason.DISPENSER) {
 			this.setVillagerData(this.getVillagerData().setType(VillagerType.byBiome(serverLevelAccessor.getBiome(this.blockPosition()))));

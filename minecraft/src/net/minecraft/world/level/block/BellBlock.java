@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -18,8 +19,8 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -30,7 +31,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BellAttachType;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -42,7 +42,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BellBlock extends BaseEntityBlock {
 	public static final MapCodec<BellBlock> CODEC = simpleCodec(BellBlock::new);
-	public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 	public static final EnumProperty<BellAttachType> ATTACHMENT = BlockStateProperties.BELL_ATTACHMENT;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	private static final VoxelShape NORTH_SOUTH_FLOOR_SHAPE = Block.box(0.0, 0.0, 4.0, 16.0, 16.0, 12.0);
@@ -235,26 +235,33 @@ public class BellBlock extends BaseEntityBlock {
 
 	@Override
 	protected BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+		BlockState blockState,
+		LevelReader levelReader,
+		ScheduledTickAccess scheduledTickAccess,
+		BlockPos blockPos,
+		Direction direction,
+		BlockPos blockPos2,
+		BlockState blockState2,
+		RandomSource randomSource
 	) {
 		BellAttachType bellAttachType = blockState.getValue(ATTACHMENT);
 		Direction direction2 = getConnectedDirection(blockState).getOpposite();
-		if (direction2 == direction && !blockState.canSurvive(levelAccessor, blockPos) && bellAttachType != BellAttachType.DOUBLE_WALL) {
+		if (direction2 == direction && !blockState.canSurvive(levelReader, blockPos) && bellAttachType != BellAttachType.DOUBLE_WALL) {
 			return Blocks.AIR.defaultBlockState();
 		} else {
 			if (direction.getAxis() == ((Direction)blockState.getValue(FACING)).getAxis()) {
-				if (bellAttachType == BellAttachType.DOUBLE_WALL && !blockState2.isFaceSturdy(levelAccessor, blockPos2, direction)) {
+				if (bellAttachType == BellAttachType.DOUBLE_WALL && !blockState2.isFaceSturdy(levelReader, blockPos2, direction)) {
 					return blockState.setValue(ATTACHMENT, BellAttachType.SINGLE_WALL).setValue(FACING, direction.getOpposite());
 				}
 
 				if (bellAttachType == BellAttachType.SINGLE_WALL
 					&& direction2.getOpposite() == direction
-					&& blockState2.isFaceSturdy(levelAccessor, blockPos2, blockState.getValue(FACING))) {
+					&& blockState2.isFaceSturdy(levelReader, blockPos2, blockState.getValue(FACING))) {
 					return blockState.setValue(ATTACHMENT, BellAttachType.DOUBLE_WALL);
 				}
 			}
 
-			return super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+			return super.updateShape(blockState, levelReader, scheduledTickAccess, blockPos, direction, blockPos2, blockState2, randomSource);
 		}
 	}
 

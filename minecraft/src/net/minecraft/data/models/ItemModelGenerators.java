@@ -458,6 +458,22 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.OMINOUS_TRIAL_KEY, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.OMINOUS_BOTTLE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BLACK_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.WHITE_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.GRAY_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.LIGHT_GRAY_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.LIGHT_BLUE_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BLUE_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.CYAN_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.YELLOW_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.RED_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.PURPLE_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.MAGENTA_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.PINK_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.GREEN_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.LIME_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.BROWN_BUNDLE, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.ORANGE_BUNDLE, ModelTemplates.FLAT_ITEM);
 	}
 
 	static record TrimModelData(String name, float itemModelIndex, Map<ResourceLocation, String> overrideArmorMaterials) {

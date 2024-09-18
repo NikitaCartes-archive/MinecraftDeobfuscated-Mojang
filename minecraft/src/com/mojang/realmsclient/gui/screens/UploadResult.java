@@ -15,6 +15,15 @@ public class UploadResult {
 		this.errorMessage = string;
 	}
 
+	@Nullable
+	public String getSimplifiedErrorMessage() {
+		if (this.statusCode >= 200 && this.statusCode < 300) {
+			return null;
+		} else {
+			return this.statusCode == 400 && this.errorMessage != null ? this.errorMessage : String.valueOf(this.statusCode);
+		}
+	}
+
 	@Environment(EnvType.CLIENT)
 	public static class Builder {
 		private int statusCode = -1;

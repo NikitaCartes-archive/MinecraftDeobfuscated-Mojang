@@ -23,7 +23,7 @@ public class Foods {
 	public static final FoodProperties ENCHANTED_GOLDEN_APPLE = new FoodProperties.Builder().nutrition(4).saturationModifier(1.2F).alwaysEdible().build();
 	public static final FoodProperties GOLDEN_APPLE = new FoodProperties.Builder().nutrition(4).saturationModifier(1.2F).alwaysEdible().build();
 	public static final FoodProperties GOLDEN_CARROT = new FoodProperties.Builder().nutrition(6).saturationModifier(1.2F).build();
-	public static final FoodProperties HONEY_BOTTLE = new FoodProperties.Builder().nutrition(6).saturationModifier(0.1F).build();
+	public static final FoodProperties HONEY_BOTTLE = new FoodProperties.Builder().nutrition(6).saturationModifier(0.1F).alwaysEdible().build();
 	public static final FoodProperties MELON_SLICE = new FoodProperties.Builder().nutrition(2).saturationModifier(0.3F).build();
 	public static final FoodProperties MUSHROOM_STEW = stew(6).build();
 	public static final FoodProperties MUTTON = new FoodProperties.Builder().nutrition(2).saturationModifier(0.3F).build();

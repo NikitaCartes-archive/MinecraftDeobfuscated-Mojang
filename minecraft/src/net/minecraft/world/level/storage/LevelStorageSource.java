@@ -80,7 +80,7 @@ import org.slf4j.Logger;
 public class LevelStorageSource {
 	static final Logger LOGGER = LogUtils.getLogger();
 	static final DateTimeFormatter FORMATTER = FileNameDateFormatter.create();
-	private static final String TAG_DATA = "Data";
+	public static final String TAG_DATA = "Data";
 	private static final PathMatcher NO_SYMLINKS_ALLOWED = path -> false;
 	public static final String ALLOWED_SYMLINKS_CONFIG_NAME = "allowed_symlinks.txt";
 	private static final int UNCOMPRESSED_NBT_QUOTA = 104857600;

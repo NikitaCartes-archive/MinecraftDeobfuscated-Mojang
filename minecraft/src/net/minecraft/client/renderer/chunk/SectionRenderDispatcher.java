@@ -3,6 +3,7 @@ package net.minecraft.client.renderer.chunk;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Sets;
+import com.mojang.blaze3d.buffers.BufferUsage;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexBuffer;
@@ -259,7 +260,7 @@ public class SectionRenderDispatcher {
 		private final Set<BlockEntity> globalBlockEntities = Sets.<BlockEntity>newHashSet();
 		private final Map<RenderType, VertexBuffer> buffers = (Map<RenderType, VertexBuffer>)RenderType.chunkBufferLayers()
 			.stream()
-			.collect(Collectors.toMap(renderType -> renderType, renderType -> new VertexBuffer(VertexBuffer.Usage.STATIC)));
+			.collect(Collectors.toMap(renderType -> renderType, renderType -> new VertexBuffer(BufferUsage.STATIC_WRITE)));
 		private AABB bb;
 		private boolean dirty = true;
 		long sectionNode = SectionPos.asLong(-1, -1, -1);

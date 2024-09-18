@@ -23,8 +23,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -92,14 +92,21 @@ public class NetherPortalBlock extends Block implements Portal {
 
 	@Override
 	protected BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+		BlockState blockState,
+		LevelReader levelReader,
+		ScheduledTickAccess scheduledTickAccess,
+		BlockPos blockPos,
+		Direction direction,
+		BlockPos blockPos2,
+		BlockState blockState2,
+		RandomSource randomSource
 	) {
 		Direction.Axis axis = direction.getAxis();
 		Direction.Axis axis2 = blockState.getValue(AXIS);
 		boolean bl = axis2 != axis && axis.isHorizontal();
-		return !bl && !blockState2.is(this) && !new PortalShape(levelAccessor, blockPos, axis2).isComplete()
+		return !bl && !blockState2.is(this) && !PortalShape.findAnyShape(levelReader, blockPos, axis2).isComplete()
 			? Blocks.AIR.defaultBlockState()
-			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+			: super.updateShape(blockState, levelReader, scheduledTickAccess, blockPos, direction, blockPos2, blockState2, randomSource);
 	}
 
 	@Override

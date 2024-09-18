@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -18,7 +19,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -51,12 +53,12 @@ public class NoteBlock extends Block {
 		);
 	}
 
-	private BlockState setInstrument(LevelAccessor levelAccessor, BlockPos blockPos, BlockState blockState) {
-		NoteBlockInstrument noteBlockInstrument = levelAccessor.getBlockState(blockPos.above()).instrument();
+	private BlockState setInstrument(LevelReader levelReader, BlockPos blockPos, BlockState blockState) {
+		NoteBlockInstrument noteBlockInstrument = levelReader.getBlockState(blockPos.above()).instrument();
 		if (noteBlockInstrument.worksAboveNoteBlock()) {
 			return blockState.setValue(INSTRUMENT, noteBlockInstrument);
 		} else {
-			NoteBlockInstrument noteBlockInstrument2 = levelAccessor.getBlockState(blockPos.below()).instrument();
+			NoteBlockInstrument noteBlockInstrument2 = levelReader.getBlockState(blockPos.below()).instrument();
 			NoteBlockInstrument noteBlockInstrument3 = noteBlockInstrument2.worksAboveNoteBlock() ? NoteBlockInstrument.HARP : noteBlockInstrument2;
 			return blockState.setValue(INSTRUMENT, noteBlockInstrument3);
 		}
@@ -69,12 +71,19 @@ public class NoteBlock extends Block {
 
 	@Override
 	protected BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+		BlockState blockState,
+		LevelReader levelReader,
+		ScheduledTickAccess scheduledTickAccess,
+		BlockPos blockPos,
+		Direction direction,
+		BlockPos blockPos2,
+		BlockState blockState2,
+		RandomSource randomSource
 	) {
 		boolean bl = direction.getAxis() == Direction.Axis.Y;
 		return bl
-			? this.setInstrument(levelAccessor, blockPos, blockState)
-			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+			? this.setInstrument(levelReader, blockPos, blockState)
+			: super.updateShape(blockState, levelReader, scheduledTickAccess, blockPos, direction, blockPos2, blockState2, randomSource);
 	}
 
 	@Override

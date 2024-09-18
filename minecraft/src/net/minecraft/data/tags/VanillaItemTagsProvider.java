@@ -75,6 +75,7 @@ public class VanillaItemTagsProvider extends ItemTagsProvider {
 		this.copy(BlockTags.DIRT, ItemTags.DIRT);
 		this.copy(BlockTags.TERRACOTTA, ItemTags.TERRACOTTA);
 		this.copy(BlockTags.COMPLETES_FIND_TREE_TUTORIAL, ItemTags.COMPLETES_FIND_TREE_TUTORIAL);
+		this.copy(BlockTags.SHULKER_BOXES, ItemTags.SHULKER_BOXES);
 		this.tag(ItemTags.BANNERS)
 			.add(
 				Items.WHITE_BANNER,

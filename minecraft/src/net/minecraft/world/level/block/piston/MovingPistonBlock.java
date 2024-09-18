@@ -23,7 +23,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.PistonType;
 import net.minecraft.world.level.pathfinder.PathComputationType;
@@ -36,7 +35,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class MovingPistonBlock extends BaseEntityBlock {
 	public static final MapCodec<MovingPistonBlock> CODEC = simpleCodec(MovingPistonBlock::new);
-	public static final DirectionProperty FACING = PistonHeadBlock.FACING;
+	public static final EnumProperty<Direction> FACING = PistonHeadBlock.FACING;
 	public static final EnumProperty<PistonType> TYPE = PistonHeadBlock.TYPE;
 
 	@Override

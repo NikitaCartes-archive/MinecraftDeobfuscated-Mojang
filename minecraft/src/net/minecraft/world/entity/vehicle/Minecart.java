@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -17,10 +18,6 @@ public class Minecart extends AbstractMinecart {
 
 	public Minecart(EntityType<?> entityType, Level level) {
 		super(entityType, level);
-	}
-
-	public Minecart(Level level, double d, double e, double f) {
-		super(EntityType.MINECART, level, d, e, f);
 	}
 
 	@Override
@@ -43,6 +40,11 @@ public class Minecart extends AbstractMinecart {
 	}
 
 	@Override
+	public ItemStack getPickResult() {
+		return new ItemStack(Items.MINECART);
+	}
+
+	@Override
 	public void activateMinecart(int i, int j, int k, boolean bl) {
 		if (bl) {
 			if (this.isVehicle()) {
@@ -59,8 +61,8 @@ public class Minecart extends AbstractMinecart {
 	}
 
 	@Override
-	public AbstractMinecart.Type getMinecartType() {
-		return AbstractMinecart.Type.RIDEABLE;
+	public boolean isRideable() {
+		return true;
 	}
 
 	@Override

@@ -511,20 +511,28 @@ public abstract class AbstractContainerMenu {
 		} else if (clickType == ClickType.THROW && this.getCarried().isEmpty() && i >= 0) {
 			Slot slot3 = this.slots.get(i);
 			int l = j == 0 ? 1 : slot3.getItem().getCount();
-			ItemStack itemStack = slot3.safeTake(l, Integer.MAX_VALUE, player);
-			player.drop(itemStack, true);
-			if (j == 1) {
-				while (!itemStack.isEmpty() && ItemStack.isSameItem(slot3.getItem(), itemStack)) {
-					itemStack = slot3.safeTake(l, Integer.MAX_VALUE, player);
-					player.drop(itemStack, true);
-				}
+			if (!player.canDropItems()) {
+				return;
 			}
 
+			ItemStack itemStack = slot3.safeTake(l, Integer.MAX_VALUE, player);
+			player.drop(itemStack, true);
 			player.handleCreativeModeItemDrop(itemStack);
+			if (j == 1) {
+				while (!itemStack.isEmpty() && ItemStack.isSameItem(slot3.getItem(), itemStack)) {
+					if (!player.canDropItems()) {
+						return;
+					}
+
+					itemStack = slot3.safeTake(l, Integer.MAX_VALUE, player);
+					player.drop(itemStack, true);
+					player.handleCreativeModeItemDrop(itemStack);
+				}
+			}
 		} else if (clickType == ClickType.PICKUP_ALL && i >= 0) {
-			Slot slot3 = this.slots.get(i);
+			Slot slot3x = this.slots.get(i);
 			ItemStack itemStack2 = this.getCarried();
-			if (!itemStack2.isEmpty() && (!slot3.hasItem() || !slot3.mayPickup(player))) {
+			if (!itemStack2.isEmpty() && (!slot3x.hasItem() || !slot3x.mayPickup(player))) {
 				int m = j == 0 ? 0 : this.slots.size() - 1;
 				int r = j == 0 ? 1 : -1;
 

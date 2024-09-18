@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.MinecartChest;
 import net.minecraft.world.level.BlockGetter;
@@ -346,11 +347,13 @@ public class MineshaftPieces {
 			if (boundingBox.isInside(blockPos) && worldGenLevel.getBlockState(blockPos).isAir() && !worldGenLevel.getBlockState(blockPos.below()).isAir()) {
 				BlockState blockState = Blocks.RAIL.defaultBlockState().setValue(RailBlock.SHAPE, randomSource.nextBoolean() ? RailShape.NORTH_SOUTH : RailShape.EAST_WEST);
 				this.placeBlock(worldGenLevel, blockState, i, j, k, boundingBox);
-				MinecartChest minecartChest = new MinecartChest(
-					worldGenLevel.getLevel(), (double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5
-				);
-				minecartChest.setLootTable(resourceKey, randomSource.nextLong());
-				worldGenLevel.addFreshEntity(minecartChest);
+				MinecartChest minecartChest = EntityType.CHEST_MINECART.create(worldGenLevel.getLevel(), EntitySpawnReason.CHUNK_GENERATION);
+				if (minecartChest != null) {
+					minecartChest.setInitialPos((double)blockPos.getX() + 0.5, (double)blockPos.getY() + 0.5, (double)blockPos.getZ() + 0.5);
+					minecartChest.setLootTable(resourceKey, randomSource.nextLong());
+					worldGenLevel.addFreshEntity(minecartChest);
+				}
+
 				return true;
 			} else {
 				return false;

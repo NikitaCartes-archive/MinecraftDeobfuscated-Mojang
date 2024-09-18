@@ -25,20 +25,15 @@ public class MinecartFurnace extends AbstractMinecart {
 	private static final int FUEL_TICKS_PER_ITEM = 3600;
 	private static final int MAX_FUEL_TICKS = 32000;
 	private int fuel;
-	public double xPush;
-	public double zPush;
+	public Vec3 push = Vec3.ZERO;
 
 	public MinecartFurnace(EntityType<? extends MinecartFurnace> entityType, Level level) {
 		super(entityType, level);
 	}
 
-	public MinecartFurnace(Level level, double d, double e, double f) {
-		super(EntityType.FURNACE_MINECART, level, d, e, f);
-	}
-
 	@Override
-	public AbstractMinecart.Type getMinecartType() {
-		return AbstractMinecart.Type.FURNACE;
+	public boolean isFurnace() {
+		return true;
 	}
 
 	@Override
@@ -56,8 +51,7 @@ public class MinecartFurnace extends AbstractMinecart {
 			}
 
 			if (this.fuel <= 0) {
-				this.xPush = 0.0;
-				this.zPush = 0.0;
+				this.push = Vec3.ZERO;
 			}
 
 			this.setHasFuel(this.fuel > 0);
@@ -79,30 +73,16 @@ public class MinecartFurnace extends AbstractMinecart {
 	}
 
 	@Override
-	protected void moveAlongTrack() {
-		double d = 1.0E-4;
-		double e = 0.001;
-		super.moveAlongTrack();
-		Vec3 vec3 = this.getDeltaMovement();
-		double f = vec3.horizontalDistanceSqr();
-		double g = this.xPush * this.xPush + this.zPush * this.zPush;
-		if (g > 1.0E-4 && f > 0.001) {
-			double h = Math.sqrt(f);
-			double i = Math.sqrt(g);
-			this.xPush = vec3.x / h * i;
-			this.zPush = vec3.z / h * i;
-		}
+	public ItemStack getPickResult() {
+		return new ItemStack(Items.FURNACE_MINECART);
 	}
 
 	@Override
 	protected Vec3 applyNaturalSlowdown(Vec3 vec3) {
-		double d = this.xPush * this.xPush + this.zPush * this.zPush;
 		Vec3 vec32;
-		if (d > 1.0E-7) {
-			d = Math.sqrt(d);
-			this.xPush /= d;
-			this.zPush /= d;
-			vec32 = vec3.multiply(0.8, 0.0, 0.8).add(this.xPush, 0.0, this.zPush);
+		if (this.push.lengthSqr() > 1.0E-7) {
+			this.push = this.calculateNewPushAlong(vec3);
+			vec32 = vec3.multiply(0.8, 0.0, 0.8).add(this.push);
 			if (this.isInWater()) {
 				vec32 = vec32.scale(0.1);
 			}
@@ -111,6 +91,14 @@ public class MinecartFurnace extends AbstractMinecart {
 		}
 
 		return super.applyNaturalSlowdown(vec32);
+	}
+
+	private Vec3 calculateNewPushAlong(Vec3 vec3) {
+		double d = 1.0E-4;
+		double e = 0.001;
+		return this.push.horizontalDistanceSqr() > 1.0E-4 && vec3.horizontalDistanceSqr() > 0.001
+			? this.push.projectedOn(vec3).normalize().scale(this.push.length())
+			: this.push;
 	}
 
 	@Override
@@ -122,8 +110,7 @@ public class MinecartFurnace extends AbstractMinecart {
 		}
 
 		if (this.fuel > 0) {
-			this.xPush = this.getX() - player.getX();
-			this.zPush = this.getZ() - player.getZ();
+			this.push = this.position().subtract(player.position()).horizontal();
 		}
 
 		return InteractionResult.SUCCESS;
@@ -132,16 +119,17 @@ public class MinecartFurnace extends AbstractMinecart {
 	@Override
 	protected void addAdditionalSaveData(CompoundTag compoundTag) {
 		super.addAdditionalSaveData(compoundTag);
-		compoundTag.putDouble("PushX", this.xPush);
-		compoundTag.putDouble("PushZ", this.zPush);
+		compoundTag.putDouble("PushX", this.push.x);
+		compoundTag.putDouble("PushZ", this.push.z);
 		compoundTag.putShort("Fuel", (short)this.fuel);
 	}
 
 	@Override
 	protected void readAdditionalSaveData(CompoundTag compoundTag) {
 		super.readAdditionalSaveData(compoundTag);
-		this.xPush = compoundTag.getDouble("PushX");
-		this.zPush = compoundTag.getDouble("PushZ");
+		double d = compoundTag.getDouble("PushX");
+		double e = compoundTag.getDouble("PushZ");
+		this.push = new Vec3(d, 0.0, e);
 		this.fuel = compoundTag.getShort("Fuel");
 	}
 

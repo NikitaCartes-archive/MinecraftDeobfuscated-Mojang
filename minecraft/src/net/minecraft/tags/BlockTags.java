@@ -68,6 +68,7 @@ public final class BlockTags {
 	public static final TagKey<Block> BADLANDS_TERRACOTTA = create("badlands_terracotta");
 	public static final TagKey<Block> CONCRETE_POWDER = create("concrete_powder");
 	public static final TagKey<Block> COMPLETES_FIND_TREE_TUTORIAL = create("completes_find_tree_tutorial");
+	public static final TagKey<Block> SHULKER_BOXES = create("shulker_boxes");
 	public static final TagKey<Block> FLOWER_POTS = create("flower_pots");
 	public static final TagKey<Block> ENDERMAN_HOLDABLE = create("enderman_holdable");
 	public static final TagKey<Block> ICE = create("ice");
@@ -101,7 +102,6 @@ public final class BlockTags {
 	public static final TagKey<Block> WALL_POST_OVERRIDE = create("wall_post_override");
 	public static final TagKey<Block> CLIMBABLE = create("climbable");
 	public static final TagKey<Block> FALL_DAMAGE_RESETTING = create("fall_damage_resetting");
-	public static final TagKey<Block> SHULKER_BOXES = create("shulker_boxes");
 	public static final TagKey<Block> HOGLIN_REPELLENTS = create("hoglin_repellents");
 	public static final TagKey<Block> SOUL_FIRE_BASE_BLOCKS = create("soul_fire_base_blocks");
 	public static final TagKey<Block> STRIDER_WARM_BLOCKS = create("strider_warm_blocks");

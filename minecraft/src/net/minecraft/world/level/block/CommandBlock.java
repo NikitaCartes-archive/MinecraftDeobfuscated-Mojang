@@ -26,7 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import org.slf4j.Logger;
@@ -37,7 +37,7 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 				.apply(instance, CommandBlock::new)
 	);
 	private static final Logger LOGGER = LogUtils.getLogger();
-	public static final DirectionProperty FACING = DirectionalBlock.FACING;
+	public static final EnumProperty<Direction> FACING = DirectionalBlock.FACING;
 	public static final BooleanProperty CONDITIONAL = BlockStateProperties.CONDITIONAL;
 	private final boolean automatic;
 

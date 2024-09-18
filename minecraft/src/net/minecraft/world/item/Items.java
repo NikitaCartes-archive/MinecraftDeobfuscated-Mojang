@@ -19,7 +19,6 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.food.Foods;
@@ -957,19 +956,19 @@ public class Items {
 	public static final Item ACTIVATOR_RAIL = registerBlock(Blocks.ACTIVATOR_RAIL);
 	public static final Item SADDLE = registerItem("saddle", SaddleItem::new, new Item.Properties().stacksTo(1));
 	public static final Item MINECART = registerItem(
-		"minecart", properties -> new MinecartItem(AbstractMinecart.Type.RIDEABLE, properties), new Item.Properties().stacksTo(1)
+		"minecart", properties -> new MinecartItem(EntityType.MINECART, properties), new Item.Properties().stacksTo(1)
 	);
 	public static final Item CHEST_MINECART = registerItem(
-		"chest_minecart", properties -> new MinecartItem(AbstractMinecart.Type.CHEST, properties), new Item.Properties().stacksTo(1)
+		"chest_minecart", properties -> new MinecartItem(EntityType.CHEST_MINECART, properties), new Item.Properties().stacksTo(1)
 	);
 	public static final Item FURNACE_MINECART = registerItem(
-		"furnace_minecart", properties -> new MinecartItem(AbstractMinecart.Type.FURNACE, properties), new Item.Properties().stacksTo(1)
+		"furnace_minecart", properties -> new MinecartItem(EntityType.FURNACE_MINECART, properties), new Item.Properties().stacksTo(1)
 	);
 	public static final Item TNT_MINECART = registerItem(
-		"tnt_minecart", properties -> new MinecartItem(AbstractMinecart.Type.TNT, properties), new Item.Properties().stacksTo(1)
+		"tnt_minecart", properties -> new MinecartItem(EntityType.TNT_MINECART, properties), new Item.Properties().stacksTo(1)
 	);
 	public static final Item HOPPER_MINECART = registerItem(
-		"hopper_minecart", properties -> new MinecartItem(AbstractMinecart.Type.HOPPER, properties), new Item.Properties().stacksTo(1)
+		"hopper_minecart", properties -> new MinecartItem(EntityType.HOPPER_MINECART, properties), new Item.Properties().stacksTo(1)
 	);
 	public static final Item CARROT_ON_A_STICK = registerItem(
 		"carrot_on_a_stick", properties -> new FoodOnAStickItem<>(EntityType.PIG, 7, properties), new Item.Properties().durability(25)
@@ -1326,6 +1325,118 @@ public class Items {
 		"bundle",
 		properties -> new BundleItem(
 				ResourceLocation.withDefaultNamespace("bundle_open_front"), ResourceLocation.withDefaultNamespace("bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item WHITE_BUNDLE = registerItem(
+		"white_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("white_bundle_open_front"), ResourceLocation.withDefaultNamespace("white_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item ORANGE_BUNDLE = registerItem(
+		"orange_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("orange_bundle_open_front"), ResourceLocation.withDefaultNamespace("orange_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item MAGENTA_BUNDLE = registerItem(
+		"magenta_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("magenta_bundle_open_front"), ResourceLocation.withDefaultNamespace("magenta_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item LIGHT_BLUE_BUNDLE = registerItem(
+		"light_blue_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("light_blue_bundle_open_front"), ResourceLocation.withDefaultNamespace("light_blue_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item YELLOW_BUNDLE = registerItem(
+		"yellow_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("yellow_bundle_open_front"), ResourceLocation.withDefaultNamespace("yellow_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item LIME_BUNDLE = registerItem(
+		"lime_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("lime_bundle_open_front"), ResourceLocation.withDefaultNamespace("lime_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item PINK_BUNDLE = registerItem(
+		"pink_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("pink_bundle_open_front"), ResourceLocation.withDefaultNamespace("pink_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item GRAY_BUNDLE = registerItem(
+		"gray_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("gray_bundle_open_front"), ResourceLocation.withDefaultNamespace("gray_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item LIGHT_GRAY_BUNDLE = registerItem(
+		"light_gray_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("light_gray_bundle_open_front"), ResourceLocation.withDefaultNamespace("light_gray_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item CYAN_BUNDLE = registerItem(
+		"cyan_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("cyan_bundle_open_front"), ResourceLocation.withDefaultNamespace("cyan_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item PURPLE_BUNDLE = registerItem(
+		"purple_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("purple_bundle_open_front"), ResourceLocation.withDefaultNamespace("purple_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item BLUE_BUNDLE = registerItem(
+		"blue_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("blue_bundle_open_front"), ResourceLocation.withDefaultNamespace("blue_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item BROWN_BUNDLE = registerItem(
+		"brown_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("brown_bundle_open_front"), ResourceLocation.withDefaultNamespace("brown_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item GREEN_BUNDLE = registerItem(
+		"green_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("green_bundle_open_front"), ResourceLocation.withDefaultNamespace("green_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item RED_BUNDLE = registerItem(
+		"red_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("red_bundle_open_front"), ResourceLocation.withDefaultNamespace("red_bundle_open_back"), properties
+			),
+		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
+	);
+	public static final Item BLACK_BUNDLE = registerItem(
+		"black_bundle",
+		properties -> new BundleItem(
+				ResourceLocation.withDefaultNamespace("black_bundle_open_front"), ResourceLocation.withDefaultNamespace("black_bundle_open_back"), properties
 			),
 		new Item.Properties().stacksTo(1).requiredFeatures(FeatureFlags.BUNDLE).component(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY)
 	);
@@ -1700,7 +1811,7 @@ public class Items {
 	public static final Item NAME_TAG = registerItem("name_tag", NameTagItem::new);
 	public static final Item COMMAND_BLOCK_MINECART = registerItem(
 		"command_block_minecart",
-		properties -> new MinecartItem(AbstractMinecart.Type.COMMAND_BLOCK, properties),
+		properties -> new MinecartItem(EntityType.COMMAND_BLOCK_MINECART, properties),
 		new Item.Properties().stacksTo(1).rarity(Rarity.EPIC)
 	);
 	public static final Item MUTTON = registerItem("mutton", new Item.Properties().food(Foods.MUTTON));

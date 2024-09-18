@@ -11,7 +11,7 @@ public interface ClientLoginPacketListener extends ClientCookiePacketListener {
 
 	void handleHello(ClientboundHelloPacket clientboundHelloPacket);
 
-	void handleGameProfile(ClientboundGameProfilePacket clientboundGameProfilePacket);
+	void handleLoginFinished(ClientboundLoginFinishedPacket clientboundLoginFinishedPacket);
 
 	void handleDisconnect(ClientboundLoginDisconnectPacket clientboundLoginDisconnectPacket);
 

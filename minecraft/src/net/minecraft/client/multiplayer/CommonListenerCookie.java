@@ -24,7 +24,6 @@ public record CommonListenerCookie(
 	@Nullable Screen postDisconnectScreen,
 	Map<ResourceLocation, byte[]> serverCookies,
 	@Nullable ChatComponent.State chatState,
-	@Deprecated(forRemoval = true) boolean strictErrorHandling,
 	Map<String, String> customReportDetails,
 	ServerLinks serverLinks
 ) {

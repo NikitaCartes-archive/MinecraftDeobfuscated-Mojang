@@ -23,6 +23,8 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.navigation.CommonInputs;
+import net.minecraft.client.gui.navigation.ScreenAxis;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.RenderType;
@@ -54,6 +56,7 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 	public static final int IMAGE_WIDTH = 147;
 	public static final int IMAGE_HEIGHT = 166;
 	private static final int OFFSET_X_POSITION = 86;
+	private static final int BORDER_WIDTH = 8;
 	private static final Component ALL_RECIPES_TOOLTIP = Component.translatable("gui.recipebook.toggleRecipes.all");
 	private static final int TICKS_TO_SWAP_SLOT = 30;
 	private int xOffset;
@@ -83,6 +86,8 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 	private boolean ignoreTextInput;
 	private boolean visible;
 	private boolean widthTooNarrow;
+	@Nullable
+	private ScreenRectangle magnifierIconPlacement;
 
 	public RecipeBookComponent(T recipeBookMenu) {
 		this.menu = recipeBookMenu;
@@ -107,8 +112,8 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 	private void initVisuals() {
 		boolean bl = this.isFiltering();
 		this.xOffset = this.widthTooNarrow ? 0 : 86;
-		int i = (this.width - 147) / 2 - this.xOffset;
-		int j = (this.height - 166) / 2;
+		int i = this.getXOrigin();
+		int j = this.getYOrigin();
 		this.stackedContents.clear();
 		this.minecraft.player.getInventory().fillStackedContents(this.stackedContents);
 		this.menu.fillCraftSlotsStackedContents(this.stackedContents);
@@ -119,6 +124,9 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 		this.searchBox.setTextColor(16777215);
 		this.searchBox.setValue(string);
 		this.searchBox.setHint(SEARCH_HINT);
+		this.magnifierIconPlacement = ScreenRectangle.of(
+			ScreenAxis.HORIZONTAL, i + 8, this.searchBox.getY(), this.searchBox.getX() - this.getXOrigin(), this.searchBox.getHeight()
+		);
 		this.recipeBookPage.init(this.minecraft, i, j);
 		this.recipeBookPage.addListener(this);
 		this.filterButton = new StateSwitchingButton(i + 110, j + 12, 26, 16, bl);
@@ -145,6 +153,14 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 		this.selectedTab.setStateTriggered(true);
 		this.updateCollections(false, bl);
 		this.updateTabs(bl);
+	}
+
+	private int getYOrigin() {
+		return (this.height - 166) / 2;
+	}
+
+	private int getXOrigin() {
+		return (this.width - 147) / 2 - this.xOffset;
 	}
 
 	private void updateFilterButtonTooltip() {
@@ -277,8 +293,8 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 
 			guiGraphics.pose().pushPose();
 			guiGraphics.pose().translate(0.0F, 0.0F, 100.0F);
-			int k = (this.width - 147) / 2 - this.xOffset;
-			int l = (this.height - 166) / 2;
+			int k = this.getXOrigin();
+			int l = this.getYOrigin();
 			guiGraphics.blit(RenderType::guiTextured, RECIPE_BOOK_LOCATION, k, l, 1.0F, 1.0F, 147, 166, 256, 256);
 			this.searchBox.render(guiGraphics, i, j, f);
 
@@ -308,7 +324,7 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 	@Override
 	public boolean mouseClicked(double d, double e, int i) {
 		if (this.isVisible() && !this.minecraft.player.isSpectator()) {
-			if (this.recipeBookPage.mouseClicked(d, e, i, (this.width - 147) / 2 - this.xOffset, (this.height - 166) / 2, 147, 166)) {
+			if (this.recipeBookPage.mouseClicked(d, e, i, this.getXOrigin(), this.getYOrigin(), 147, 166)) {
 				RecipeHolder<?> recipeHolder = this.recipeBookPage.getLastClickedRecipe();
 				RecipeCollection recipeCollection = this.recipeBookPage.getLastClickedRecipeCollection();
 				if (recipeHolder != null && recipeCollection != null) {
@@ -324,11 +340,17 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 				}
 
 				return true;
-			} else if (this.searchBox.mouseClicked(d, e, i)) {
-				this.searchBox.setFocused(true);
-				return true;
 			} else {
-				this.searchBox.setFocused(false);
+				if (this.searchBox != null) {
+					boolean bl = this.magnifierIconPlacement != null && this.magnifierIconPlacement.containsPoint(Mth.floor(d), Mth.floor(e));
+					if (bl || this.searchBox.mouseClicked(d, e, i)) {
+						this.searchBox.setFocused(true);
+						return true;
+					}
+
+					this.searchBox.setFocused(false);
+				}
+
 				if (this.filterButton.mouseClicked(d, e, i)) {
 					boolean bl = this.toggleFiltering();
 					this.filterButton.setStateTriggered(bl);

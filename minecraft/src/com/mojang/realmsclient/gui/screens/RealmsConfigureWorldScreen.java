@@ -412,6 +412,13 @@ public class RealmsConfigureWorldScreen extends RealmsScreen {
 		this.minecraft.setScreen(this);
 	}
 
+	public void saveSlotSettingsLocally(RealmsWorldOptions realmsWorldOptions) {
+		RealmsWorldOptions realmsWorldOptions2 = (RealmsWorldOptions)this.serverData.slots.get(this.serverData.activeSlot);
+		realmsWorldOptions.templateId = realmsWorldOptions2.templateId;
+		realmsWorldOptions.templateImage = realmsWorldOptions2.templateImage;
+		this.serverData.slots.put(this.serverData.activeSlot, realmsWorldOptions);
+	}
+
 	public void saveSettings(String string, String string2) {
 		String string3 = StringUtil.isBlank(string2) ? null : string2;
 		RealmsClient realmsClient = RealmsClient.create();

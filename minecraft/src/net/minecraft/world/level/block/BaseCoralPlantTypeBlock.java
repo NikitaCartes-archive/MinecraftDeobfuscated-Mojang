@@ -5,10 +5,11 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
@@ -31,9 +32,11 @@ public abstract class BaseCoralPlantTypeBlock extends Block implements SimpleWat
 	@Override
 	protected abstract MapCodec<? extends BaseCoralPlantTypeBlock> codec();
 
-	protected void tryScheduleDieTick(BlockState blockState, LevelAccessor levelAccessor, BlockPos blockPos) {
-		if (!scanForWater(blockState, levelAccessor, blockPos)) {
-			levelAccessor.scheduleTick(blockPos, this, 60 + levelAccessor.getRandom().nextInt(40));
+	protected void tryScheduleDieTick(
+		BlockState blockState, BlockGetter blockGetter, ScheduledTickAccess scheduledTickAccess, RandomSource randomSource, BlockPos blockPos
+	) {
+		if (!scanForWater(blockState, blockGetter, blockPos)) {
+			scheduledTickAccess.scheduleTick(blockPos, this, 60 + randomSource.nextInt(40));
 		}
 	}
 
@@ -65,15 +68,22 @@ public abstract class BaseCoralPlantTypeBlock extends Block implements SimpleWat
 
 	@Override
 	protected BlockState updateShape(
-		BlockState blockState, Direction direction, BlockState blockState2, LevelAccessor levelAccessor, BlockPos blockPos, BlockPos blockPos2
+		BlockState blockState,
+		LevelReader levelReader,
+		ScheduledTickAccess scheduledTickAccess,
+		BlockPos blockPos,
+		Direction direction,
+		BlockPos blockPos2,
+		BlockState blockState2,
+		RandomSource randomSource
 	) {
 		if ((Boolean)blockState.getValue(WATERLOGGED)) {
-			levelAccessor.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelAccessor));
+			scheduledTickAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelReader));
 		}
 
-		return direction == Direction.DOWN && !this.canSurvive(blockState, levelAccessor, blockPos)
+		return direction == Direction.DOWN && !this.canSurvive(blockState, levelReader, blockPos)
 			? Blocks.AIR.defaultBlockState()
-			: super.updateShape(blockState, direction, blockState2, levelAccessor, blockPos, blockPos2);
+			: super.updateShape(blockState, levelReader, scheduledTickAccess, blockPos, direction, blockPos2, blockState2, randomSource);
 	}
 
 	@Override

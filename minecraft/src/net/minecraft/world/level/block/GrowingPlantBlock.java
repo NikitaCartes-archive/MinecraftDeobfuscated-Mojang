@@ -8,7 +8,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -35,11 +34,11 @@ public abstract class GrowingPlantBlock extends Block {
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
 		BlockState blockState = blockPlaceContext.getLevel().getBlockState(blockPlaceContext.getClickedPos().relative(this.growthDirection));
 		return !blockState.is(this.getHeadBlock()) && !blockState.is(this.getBodyBlock())
-			? this.getStateForPlacement(blockPlaceContext.getLevel())
+			? this.getStateForPlacement(blockPlaceContext.getLevel().random)
 			: this.getBodyBlock().defaultBlockState();
 	}
 
-	public BlockState getStateForPlacement(LevelAccessor levelAccessor) {
+	public BlockState getStateForPlacement(RandomSource randomSource) {
 		return this.defaultBlockState();
 	}
 

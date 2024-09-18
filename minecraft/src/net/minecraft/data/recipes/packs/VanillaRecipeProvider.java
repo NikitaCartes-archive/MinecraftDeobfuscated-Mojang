@@ -18,10 +18,13 @@ import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.data.recipes.SingleItemRecipeBuilder;
 import net.minecraft.data.recipes.SpecialRecipeBuilder;
+import net.minecraft.data.recipes.TransmuteRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.ArmorDyeRecipe;
@@ -38,11 +41,11 @@ import net.minecraft.world.item.crafting.MapExtendingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RepairItemRecipe;
 import net.minecraft.world.item.crafting.ShieldDecorationRecipe;
-import net.minecraft.world.item.crafting.ShulkerBoxColoring;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import net.minecraft.world.item.crafting.TippedArrowRecipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.SuspiciousEffectHolder;
 
 public class VanillaRecipeProvider extends RecipeProvider {
@@ -1428,6 +1431,7 @@ public class VanillaRecipeProvider extends RecipeProvider {
 			.pattern("-")
 			.unlockedBy("has_shulker_shell", this.has(Items.SHULKER_SHELL))
 			.save(this.output);
+		this.shulkerBoxRecipes();
 		this.shaped(RecipeCategory.BUILDING_BLOCKS, Blocks.PURPUR_BLOCK, 4)
 			.define('F', Items.POPPED_CHORUS_FRUIT)
 			.pattern("FF")
@@ -2016,7 +2020,6 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		SpecialRecipeBuilder.special(MapExtendingRecipe::new).save(this.output, "map_extending");
 		SpecialRecipeBuilder.special(RepairItemRecipe::new).save(this.output, "repair_item");
 		SpecialRecipeBuilder.special(ShieldDecorationRecipe::new).save(this.output, "shield_decoration");
-		SpecialRecipeBuilder.special(ShulkerBoxColoring::new).save(this.output, "shulker_box_coloring");
 		SpecialRecipeBuilder.special(TippedArrowRecipe::new).save(this.output, "tipped_arrow");
 		SimpleCookingRecipeBuilder.smelting(Ingredient.of(Items.POTATO), RecipeCategory.FOOD, Items.BAKED_POTATO, 0.35F, 200)
 			.unlockedBy("has_potato", this.has(Items.POTATO))
@@ -2735,6 +2738,19 @@ public class VanillaRecipeProvider extends RecipeProvider {
 				Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE
 			)
 			.map(item -> new VanillaRecipeProvider.TrimTemplate(item, ResourceLocation.withDefaultNamespace(getItemName(item) + "_smithing_trim")));
+	}
+
+	private void shulkerBoxRecipes() {
+		Ingredient ingredient = this.tag(ItemTags.SHULKER_BOXES);
+
+		for (DyeColor dyeColor : DyeColor.values()) {
+			TransmuteRecipeBuilder.transmute(
+					RecipeCategory.DECORATIONS, ingredient, Ingredient.of(DyeItem.byColor(dyeColor)), ShulkerBoxBlock.getBlockByColor(dyeColor).asItem()
+				)
+				.group("shulker_box_dye")
+				.unlockedBy("has_shulker_box", this.has(ItemTags.SHULKER_BOXES))
+				.save(this.output);
+		}
 	}
 
 	public static class Runner extends RecipeProvider.Runner {

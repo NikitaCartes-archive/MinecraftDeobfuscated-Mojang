@@ -1,5 +1,8 @@
 package com.mojang.blaze3d.vertex;
 
+import com.mojang.blaze3d.buffers.BufferType;
+import com.mojang.blaze3d.buffers.BufferUsage;
+import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import java.nio.ByteBuffer;
@@ -12,9 +15,10 @@ import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class VertexBuffer implements AutoCloseable {
-	private final VertexBuffer.Usage usage;
-	private int vertexBufferId;
-	private int indexBufferId;
+	private final BufferUsage usage;
+	private final GpuBuffer vertexBuffer;
+	@Nullable
+	private GpuBuffer indexBuffer = null;
 	private int arrayObjectId;
 	@Nullable
 	private VertexFormat format;
@@ -24,11 +28,10 @@ public class VertexBuffer implements AutoCloseable {
 	private int indexCount;
 	private VertexFormat.Mode mode;
 
-	public VertexBuffer(VertexBuffer.Usage usage) {
-		this.usage = usage;
+	public VertexBuffer(BufferUsage bufferUsage) {
+		this.usage = bufferUsage;
 		RenderSystem.assertOnRenderThread();
-		this.vertexBufferId = GlStateManager._glGenBuffers();
-		this.indexBufferId = GlStateManager._glGenBuffers();
+		this.vertexBuffer = new GpuBuffer(BufferType.VERTICES, bufferUsage, 0);
 		this.arrayObjectId = GlStateManager._glGenVertexArrays();
 	}
 
@@ -75,15 +78,18 @@ public class VertexBuffer implements AutoCloseable {
 	public void uploadIndexBuffer(ByteBufferBuilder.Result result) {
 		ByteBufferBuilder.Result var2 = result;
 
-		label40: {
+		label46: {
 			try {
 				if (this.isInvalid()) {
-					break label40;
+					break label46;
 				}
 
 				RenderSystem.assertOnRenderThread();
-				GlStateManager._glBindBuffer(34963, this.indexBufferId);
-				RenderSystem.glBufferData(34963, result.byteBuffer(), this.usage.id);
+				if (this.indexBuffer != null) {
+					this.indexBuffer.close();
+				}
+
+				this.indexBuffer = new GpuBuffer(BufferType.INDICES, this.usage, result.byteBuffer());
 				this.sequentialIndices = null;
 			} catch (Throwable var6) {
 				if (result != null) {
@@ -116,17 +122,18 @@ public class VertexBuffer implements AutoCloseable {
 				this.format.clearBufferState();
 			}
 
-			GlStateManager._glBindBuffer(34962, this.vertexBufferId);
+			this.vertexBuffer.bind();
 			drawState.format().setupBufferState();
 			bl = true;
 		}
 
 		if (byteBuffer != null) {
 			if (!bl) {
-				GlStateManager._glBindBuffer(34962, this.vertexBufferId);
+				this.vertexBuffer.bind();
 			}
 
-			RenderSystem.glBufferData(34962, byteBuffer, this.usage.id);
+			this.vertexBuffer.resize(byteBuffer.remaining());
+			this.vertexBuffer.write(byteBuffer, 0);
 		}
 
 		return drawState.format();
@@ -135,8 +142,11 @@ public class VertexBuffer implements AutoCloseable {
 	@Nullable
 	private RenderSystem.AutoStorageIndexBuffer uploadIndexBuffer(MeshData.DrawState drawState, @Nullable ByteBuffer byteBuffer) {
 		if (byteBuffer != null) {
-			GlStateManager._glBindBuffer(34963, this.indexBufferId);
-			RenderSystem.glBufferData(34963, byteBuffer, this.usage.id);
+			if (this.indexBuffer != null) {
+				this.indexBuffer.close();
+			}
+
+			this.indexBuffer = new GpuBuffer(BufferType.INDICES, this.usage, byteBuffer);
 			return null;
 		} else {
 			RenderSystem.AutoStorageIndexBuffer autoStorageIndexBuffer = RenderSystem.getSequentialBuffer(drawState.mode());
@@ -178,14 +188,10 @@ public class VertexBuffer implements AutoCloseable {
 	}
 
 	public void close() {
-		if (this.vertexBufferId >= 0) {
-			RenderSystem.glDeleteBuffers(this.vertexBufferId);
-			this.vertexBufferId = -1;
-		}
-
-		if (this.indexBufferId >= 0) {
-			RenderSystem.glDeleteBuffers(this.indexBufferId);
-			this.indexBufferId = -1;
+		this.vertexBuffer.close();
+		if (this.indexBuffer != null) {
+			this.indexBuffer.close();
+			this.indexBuffer = null;
 		}
 
 		if (this.arrayObjectId >= 0) {
@@ -200,17 +206,5 @@ public class VertexBuffer implements AutoCloseable {
 
 	public boolean isInvalid() {
 		return this.arrayObjectId == -1;
-	}
-
-	@Environment(EnvType.CLIENT)
-	public static enum Usage {
-		STATIC(35044),
-		DYNAMIC(35048);
-
-		final int id;
-
-		private Usage(final int j) {
-			this.id = j;
-		}
 	}
 }
