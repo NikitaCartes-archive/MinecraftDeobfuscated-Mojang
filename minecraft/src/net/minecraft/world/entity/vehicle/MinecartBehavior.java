@@ -2,6 +2,7 @@ package net.minecraft.world.entity.vehicle;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.phys.Vec3;
@@ -49,7 +50,7 @@ public abstract class MinecartBehavior {
 		return this.minecart.level();
 	}
 
-	public abstract void moveAlongTrack();
+	public abstract void moveAlongTrack(ServerLevel serverLevel);
 
 	public abstract double stepAlongTrack(BlockPos blockPos, RailShape railShape, double d);
 
@@ -115,7 +116,7 @@ public abstract class MinecartBehavior {
 		return vec3;
 	}
 
-	public abstract double getMaxSpeed();
+	public abstract double getMaxSpeed(ServerLevel serverLevel);
 
 	public abstract double getSlowdownFactor();
 }

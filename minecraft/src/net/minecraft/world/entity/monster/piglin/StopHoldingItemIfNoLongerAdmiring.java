@@ -10,7 +10,7 @@ public class StopHoldingItemIfNoLongerAdmiring {
 		return BehaviorBuilder.create(
 			instance -> instance.group(instance.absent(MemoryModuleType.ADMIRING_ITEM)).apply(instance, memoryAccessor -> (serverLevel, piglin, l) -> {
 						if (!piglin.getOffhandItem().isEmpty() && !piglin.getOffhandItem().is(Items.SHIELD)) {
-							PiglinAi.stopHoldingOffHandItem(piglin, true);
+							PiglinAi.stopHoldingOffHandItem(serverLevel, piglin, true);
 							return true;
 						} else {
 							return false;

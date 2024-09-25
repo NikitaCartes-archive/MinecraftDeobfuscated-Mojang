@@ -1,6 +1,7 @@
 package net.minecraft.world.level;
 
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,6 +23,8 @@ public interface Explosion {
 			case Projectile projectile when projectile.getOwner() instanceof LivingEntity livingEntity2 -> livingEntity2;
 		};
 	}
+
+	ServerLevel level();
 
 	Explosion.BlockInteraction getBlockInteraction();
 

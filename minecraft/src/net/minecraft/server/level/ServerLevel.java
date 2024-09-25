@@ -171,7 +171,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.ticks.LevelTicks;
 import org.slf4j.Logger;
 
-public class ServerLevel extends Level implements WorldGenLevel {
+public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLevel {
 	public static final BlockPos END_SPAWN_POINT = new BlockPos(100, 50, 0);
 	public static final IntProvider RAIN_DELAY = UniformInt.of(12000, 180000);
 	public static final IntProvider RAIN_DURATION = UniformInt.of(12000, 24000);
@@ -430,7 +430,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
 			Profiler.get().push("scheduledFunctions");
 			this.serverLevelData.getScheduledEvents().tick(this.server, l);
 			Profiler.get().pop();
-			if (this.levelData.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
+			if (this.serverLevelData.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
 				this.setDayTime(this.levelData.getDayTime() + 1L);
 			}
 		}
@@ -1725,6 +1725,10 @@ public class ServerLevel extends Level implements WorldGenLevel {
 
 	public RandomSequences getRandomSequences() {
 		return this.randomSequences;
+	}
+
+	public GameRules getGameRules() {
+		return this.serverLevelData.getGameRules();
 	}
 
 	@Override

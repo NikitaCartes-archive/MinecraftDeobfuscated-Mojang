@@ -219,14 +219,11 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
+	public boolean doHurtTarget(ServerLevel serverLevel, Entity entity) {
 		DamageSource damageSource = this.damageSources().sting(this);
-		boolean bl = entity.hurt(damageSource, (float)((int)this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
+		boolean bl = entity.hurtServer(serverLevel, damageSource, (float)((int)this.getAttributeValue(Attributes.ATTACK_DAMAGE)));
 		if (bl) {
-			if (this.level() instanceof ServerLevel serverLevel) {
-				EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
-			}
-
+			EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
 			if (entity instanceof LivingEntity livingEntity) {
 				livingEntity.setStingerCount(livingEntity.getStingerCount() + 1);
 				int i = 0;
@@ -361,7 +358,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		boolean bl = this.hasStung();
 		if (this.isInWaterOrBubble()) {
 			this.underWaterTicks++;
@@ -370,13 +367,13 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		}
 
 		if (this.underWaterTicks > 20) {
-			this.hurt(this.damageSources().drown(), 1.0F);
+			this.hurtServer(serverLevel, this.damageSources().drown(), 1.0F);
 		}
 
 		if (bl) {
 			this.timeSinceSting++;
 			if (this.timeSinceSting % 5 == 0 && this.random.nextInt(Mth.clamp(1200 - this.timeSinceSting, 1, 1200)) == 0) {
-				this.hurt(this.damageSources().generic(), this.getHealth());
+				this.hurtServer(serverLevel, this.damageSources().generic(), this.getHealth());
 			}
 		}
 
@@ -384,9 +381,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 			this.ticksWithoutNectarSinceExitingHive++;
 		}
 
-		if (!this.level().isClientSide) {
-			this.updatePersistentAnger((ServerLevel)this.level(), false);
-		}
+		this.updatePersistentAnger(serverLevel, false);
 	}
 
 	public void resetTicksWithoutNectarSinceExitingHive() {
@@ -630,15 +625,12 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (this.isInvulnerableTo(serverLevel, damageSource)) {
 			return false;
 		} else {
-			if (!this.level().isClientSide) {
-				this.beePollinateGoal.stopPollinating();
-			}
-
-			return super.hurt(damageSource, f);
+			this.beePollinateGoal.stopPollinating();
+			return super.hurtServer(serverLevel, damageSource, f);
 		}
 	}
 

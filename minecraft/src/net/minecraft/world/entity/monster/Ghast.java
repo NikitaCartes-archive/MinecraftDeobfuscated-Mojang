@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -47,7 +48,9 @@ public class Ghast extends FlyingMob implements Enemy {
 		this.goalSelector.addGoal(7, new Ghast.GhastLookGoal(this));
 		this.goalSelector.addGoal(7, new Ghast.GhastShootFireballGoal(this));
 		this.targetSelector
-			.addGoal(1, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, livingEntity -> Math.abs(livingEntity.getY() - this.getY()) <= 4.0));
+			.addGoal(
+				1, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, (livingEntity, serverLevel) -> Math.abs(livingEntity.getY() - this.getY()) <= 4.0)
+			);
 	}
 
 	public boolean isCharging() {
@@ -72,18 +75,18 @@ public class Ghast extends FlyingMob implements Enemy {
 	}
 
 	@Override
-	public boolean isInvulnerableTo(DamageSource damageSource) {
+	public boolean isInvulnerableTo(ServerLevel serverLevel, DamageSource damageSource) {
 		return this.isInvulnerable() && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
-			|| !isReflectedFireball(damageSource) && super.isInvulnerableTo(damageSource);
+			|| !isReflectedFireball(damageSource) && super.isInvulnerableTo(serverLevel, damageSource);
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
 		if (isReflectedFireball(damageSource)) {
-			super.hurt(damageSource, 1000.0F);
+			super.hurtServer(serverLevel, damageSource, 1000.0F);
 			return true;
 		} else {
-			return this.isInvulnerableTo(damageSource) ? false : super.hurt(damageSource, f);
+			return this.isInvulnerableTo(serverLevel, damageSource) ? false : super.hurtServer(serverLevel, damageSource, f);
 		}
 	}
 

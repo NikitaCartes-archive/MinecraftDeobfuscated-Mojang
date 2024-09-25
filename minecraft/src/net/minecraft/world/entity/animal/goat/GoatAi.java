@@ -51,9 +51,9 @@ public class GoatAi {
 	private static final UniformInt TIME_BETWEEN_RAMS_SCREAMER = UniformInt.of(100, 300);
 	private static final TargetingConditions RAM_TARGET_CONDITIONS = TargetingConditions.forCombat()
 		.selector(
-			livingEntity -> !livingEntity.getType().equals(EntityType.GOAT)
-					&& (livingEntity.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) || !livingEntity.getType().equals(EntityType.ARMOR_STAND))
-					&& livingEntity.level().getWorldBorder().isWithinBounds(livingEntity.getBoundingBox())
+			(livingEntity, serverLevel) -> !livingEntity.getType().equals(EntityType.GOAT)
+					&& (!serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) || !livingEntity.getType().equals(EntityType.ARMOR_STAND))
+					&& serverLevel.getWorldBorder().isWithinBounds(livingEntity.getBoundingBox())
 		);
 	private static final float SPEED_MULTIPLIER_WHEN_RAMMING = 3.0F;
 	public static final int RAM_MIN_DISTANCE = 4;

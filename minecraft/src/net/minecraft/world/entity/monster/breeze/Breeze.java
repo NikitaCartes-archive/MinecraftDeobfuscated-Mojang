@@ -230,14 +230,14 @@ public class Breeze extends Monster {
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("breezeBrain");
-		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.getBrain().tick(serverLevel, this);
 		profilerFiller.popPush("breezeActivityUpdate");
 		BreezeAi.updateActivity(this);
 		profilerFiller.pop();
-		super.customServerAiStep();
+		super.customServerAiStep(serverLevel);
 	}
 
 	@Override
@@ -267,8 +267,8 @@ public class Breeze extends Monster {
 	}
 
 	@Override
-	public boolean isInvulnerableTo(DamageSource damageSource) {
-		return damageSource.getEntity() instanceof Breeze || super.isInvulnerableTo(damageSource);
+	public boolean isInvulnerableTo(ServerLevel serverLevel, DamageSource damageSource) {
+		return damageSource.getEntity() instanceof Breeze || super.isInvulnerableTo(serverLevel, damageSource);
 	}
 
 	@Override

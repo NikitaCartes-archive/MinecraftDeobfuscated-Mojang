@@ -192,7 +192,7 @@ public class TrialSpawnerData {
 			if (entity != null) {
 				serverLevel.levelEvent(3012, entity.blockPosition(), TrialSpawner.FlameParticle.NORMAL.encode());
 				if (entity instanceof Mob mob) {
-					mob.dropPreservedEquipment();
+					mob.dropPreservedEquipment(serverLevel);
 				}
 
 				entity.remove(Entity.RemovalReason.DISCARDED);

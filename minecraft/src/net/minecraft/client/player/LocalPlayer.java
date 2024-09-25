@@ -58,7 +58,6 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TickThrottler;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -70,8 +69,8 @@ import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.WritableBookContent;
@@ -161,11 +160,6 @@ public class LocalPlayer extends AbstractClientPlayer {
 		this.ambientSoundHandlers.add(new UnderwaterAmbientSoundHandler(this, minecraft.getSoundManager()));
 		this.ambientSoundHandlers.add(new BubbleColumnAmbientSoundHandler(this));
 		this.ambientSoundHandlers.add(new BiomeAmbientSoundsHandler(this, minecraft.getSoundManager(), clientLevel.getBiomeManager()));
-	}
-
-	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		return false;
 	}
 
 	@Override
@@ -324,13 +318,6 @@ public class LocalPlayer extends AbstractClientPlayer {
 	}
 
 	@Override
-	protected void actuallyHurt(DamageSource damageSource, float f) {
-		if (!this.isInvulnerableTo(damageSource)) {
-			this.setHealth(this.getHealth() - f);
-		}
-	}
-
-	@Override
 	public void closeContainer() {
 		this.connection.send(new ServerboundContainerClosePacket(this.containerMenu.containerId));
 		this.clientSideCloseContainer();
@@ -460,11 +447,6 @@ public class LocalPlayer extends AbstractClientPlayer {
 		this.experienceProgress = f;
 		this.totalExperience = i;
 		this.experienceLevel = j;
-	}
-
-	@Override
-	public void sendSystemMessage(Component component) {
-		this.minecraft.gui.getChat().addMessage(component);
 	}
 
 	@Override
@@ -877,8 +859,8 @@ public class LocalPlayer extends AbstractClientPlayer {
 	public void rideTick() {
 		super.rideTick();
 		this.handsBusy = false;
-		if (this.getControlledVehicle() instanceof Boat boat) {
-			boat.setInput(this.input.keyPresses.left(), this.input.keyPresses.right(), this.input.keyPresses.forward(), this.input.keyPresses.backward());
+		if (this.getControlledVehicle() instanceof AbstractBoat abstractBoat) {
+			abstractBoat.setInput(this.input.keyPresses.left(), this.input.keyPresses.right(), this.input.keyPresses.forward(), this.input.keyPresses.backward());
 			this.handsBusy = this.handsBusy
 				| (this.input.keyPresses.left() || this.input.keyPresses.right() || this.input.keyPresses.forward() || this.input.keyPresses.backward());
 		}

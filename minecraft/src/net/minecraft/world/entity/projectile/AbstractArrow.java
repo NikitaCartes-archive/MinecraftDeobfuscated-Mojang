@@ -148,7 +148,12 @@ public abstract class AbstractArrow extends Projectile {
 
 	@Override
 	public void tick() {
-		boolean bl = this.isNoPhysics();
+		boolean bl = !this.isNoPhysics();
+		if (bl) {
+			this.applyGravity();
+		}
+
+		this.applyInertia();
 		Vec3 vec3 = this.getDeltaMovement();
 		if (this.xRotO == 0.0F && this.yRotO == 0.0F) {
 			double d = vec3.horizontalDistance();
@@ -160,7 +165,7 @@ public abstract class AbstractArrow extends Projectile {
 
 		BlockPos blockPos = this.blockPosition();
 		BlockState blockState = this.level().getBlockState(blockPos);
-		if (!blockState.isAir() && !bl) {
+		if (!blockState.isAir() && bl) {
 			VoxelShape voxelShape = blockState.getCollisionShape(this.level(), blockPos);
 			if (!voxelShape.isEmpty()) {
 				Vec3 vec32 = this.position();
@@ -182,7 +187,7 @@ public abstract class AbstractArrow extends Projectile {
 			this.clearFire();
 		}
 
-		if (this.inGround && !bl) {
+		if (this.inGround && bl) {
 			if (this.lastState != blockState && this.shouldFall()) {
 				this.startFalling();
 			} else if (!this.level().isClientSide) {
@@ -209,7 +214,7 @@ public abstract class AbstractArrow extends Projectile {
 			}
 
 			float f;
-			if (bl) {
+			if (!bl) {
 				f = (float)(Mth.atan2(-vec3.x, -vec3.z) * 180.0F / (float)Math.PI);
 			} else {
 				f = (float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI);
@@ -218,23 +223,16 @@ public abstract class AbstractArrow extends Projectile {
 			float g = (float)(Mth.atan2(vec3.y, vec3.horizontalDistance()) * 180.0F / (float)Math.PI);
 			this.setXRot(lerpRotation(this.getXRot(), g));
 			this.setYRot(lerpRotation(this.getYRot(), f));
-			if (!bl) {
+			if (bl) {
 				BlockHitResult blockHitResult = this.level()
 					.clipIncludingBorder(new ClipContext(vec33, vec33.add(vec3), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
 				this.stepMoveAndHit(blockHitResult);
 			} else {
 				this.setPos(vec33.add(vec3));
 				this.applyEffectsFromBlocks();
-				if (this.portalProcess != null && this.portalProcess.isInsidePortalThisTick()) {
-					this.handlePortal();
-				}
 			}
 
 			super.tick();
-			this.applyInertia();
-			if (!bl) {
-				this.applyGravity();
-			}
 		}
 	}
 
@@ -375,7 +373,7 @@ public abstract class AbstractArrow extends Projectile {
 			entity.igniteForSeconds(5.0F);
 		}
 
-		if (entity.hurt(damageSource, (float)i)) {
+		if (entity.hurtOrSimulate(damageSource, (float)i)) {
 			if (bl) {
 				return;
 			}
@@ -416,9 +414,9 @@ public abstract class AbstractArrow extends Projectile {
 			entity.setRemainingFireTicks(j);
 			this.deflect(ProjectileDeflection.REVERSE, entity, this.getOwner(), false);
 			this.setDeltaMovement(this.getDeltaMovement().scale(0.2));
-			if (!this.level().isClientSide && this.getDeltaMovement().lengthSqr() < 1.0E-7) {
+			if (this.level() instanceof ServerLevel serverLevel3 && this.getDeltaMovement().lengthSqr() < 1.0E-7) {
 				if (this.pickup == AbstractArrow.Pickup.ALLOWED) {
-					this.spawnAtLocation(this.getPickupItem(), 0.1F);
+					this.spawnAtLocation(serverLevel3, this.getPickupItem(), 0.1F);
 				}
 
 				this.discard();

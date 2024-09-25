@@ -6,6 +6,7 @@ import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.TimeUtil;
@@ -163,7 +164,7 @@ public class HoglinAi {
 		hoglin.getBrain().setMemoryWithExpiry(MemoryModuleType.AVOID_TARGET, livingEntity, (long)RETREAT_DURATION.sample(hoglin.level().random));
 	}
 
-	private static Optional<? extends LivingEntity> findNearestValidAttackTarget(Hoglin hoglin) {
+	private static Optional<? extends LivingEntity> findNearestValidAttackTarget(ServerLevel serverLevel, Hoglin hoglin) {
 		return !isPacified(hoglin) && !isBreeding(hoglin) ? hoglin.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER) : Optional.empty();
 	}
 
@@ -186,22 +187,22 @@ public class HoglinAi {
 		}
 	}
 
-	protected static void wasHurtBy(Hoglin hoglin, LivingEntity livingEntity) {
+	protected static void wasHurtBy(ServerLevel serverLevel, Hoglin hoglin, LivingEntity livingEntity) {
 		Brain<Hoglin> brain = hoglin.getBrain();
 		brain.eraseMemory(MemoryModuleType.PACIFIED);
 		brain.eraseMemory(MemoryModuleType.BREED_TARGET);
 		if (hoglin.isBaby()) {
 			retreatFromNearestTarget(hoglin, livingEntity);
 		} else {
-			maybeRetaliate(hoglin, livingEntity);
+			maybeRetaliate(serverLevel, hoglin, livingEntity);
 		}
 	}
 
-	private static void maybeRetaliate(Hoglin hoglin, LivingEntity livingEntity) {
+	private static void maybeRetaliate(ServerLevel serverLevel, Hoglin hoglin, LivingEntity livingEntity) {
 		if (!hoglin.getBrain().isActive(Activity.AVOID) || livingEntity.getType() != EntityType.PIGLIN) {
 			if (livingEntity.getType() != EntityType.HOGLIN) {
 				if (!BehaviorUtils.isOtherTargetMuchFurtherAwayThanCurrentAttackTarget(hoglin, livingEntity, 4.0)) {
-					if (Sensor.isEntityAttackable(hoglin, livingEntity)) {
+					if (Sensor.isEntityAttackable(serverLevel, hoglin, livingEntity)) {
 						setAttackTarget(hoglin, livingEntity);
 						broadcastAttackTarget(hoglin, livingEntity);
 					}

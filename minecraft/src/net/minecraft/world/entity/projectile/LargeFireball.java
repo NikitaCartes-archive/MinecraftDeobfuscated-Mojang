@@ -28,8 +28,8 @@ public class LargeFireball extends Fireball {
 	@Override
 	protected void onHit(HitResult hitResult) {
 		super.onHit(hitResult);
-		if (!this.level().isClientSide) {
-			boolean bl = this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+		if (this.level() instanceof ServerLevel serverLevel) {
+			boolean bl = serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
 			this.level().explode(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionPower, bl, Level.ExplosionInteraction.MOB);
 			this.discard();
 		}
@@ -42,7 +42,7 @@ public class LargeFireball extends Fireball {
 			Entity var6 = entityHitResult.getEntity();
 			Entity entity2 = this.getOwner();
 			DamageSource damageSource = this.damageSources().fireball(this, entity2);
-			var6.hurt(damageSource, 6.0F);
+			var6.hurtServer(serverLevel, damageSource, 6.0F);
 			EnchantmentHelper.doPostAttackEffects(serverLevel, var6, damageSource);
 		}
 	}

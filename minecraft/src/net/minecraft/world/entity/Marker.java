@@ -5,6 +5,8 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.PushReaction;
 
@@ -63,5 +65,10 @@ public class Marker extends Entity {
 	@Override
 	public boolean isIgnoringBlockTriggers() {
 		return true;
+	}
+
+	@Override
+	public final boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		return false;
 	}
 }

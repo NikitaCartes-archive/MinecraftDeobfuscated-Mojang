@@ -32,7 +32,9 @@ import org.slf4j.Logger;
 public class RealmsCreateWorldFlow {
 	private static final Logger LOGGER = LogUtils.getLogger();
 
-	public static void createWorld(Minecraft minecraft, Screen screen, Screen screen2, RealmsServer realmsServer, @Nullable RealmCreationTask realmCreationTask) {
+	public static void createWorld(
+		Minecraft minecraft, Screen screen, Screen screen2, int i, RealmsServer realmsServer, @Nullable RealmCreationTask realmCreationTask
+	) {
 		CreateWorldScreen.openFresh(
 			minecraft,
 			screen,
@@ -40,7 +42,7 @@ public class RealmsCreateWorldFlow {
 				Path path2;
 				try {
 					path2 = createTemporaryWorldFolder(layeredRegistryAccess, primaryLevelData, path);
-				} catch (IOException var12) {
+				} catch (IOException var13) {
 					LOGGER.warn("Failed to create temporary world folder.");
 					minecraft.setScreen(new RealmsGenericErrorScreen(Component.translatable("mco.create.world.failed"), screen2));
 					return true;
@@ -50,7 +52,7 @@ public class RealmsCreateWorldFlow {
 					primaryLevelData.getLevelSettings(), SharedConstants.getCurrentVersion().getName()
 				);
 				RealmsWorldUpload realmsWorldUpload = new RealmsWorldUpload(
-					path2, realmsWorldOptions, minecraft.getUser(), realmsServer.id, realmsServer.activeSlot, RealmsWorldUploadStatusTracker.noOp()
+					path2, realmsWorldOptions, minecraft.getUser(), realmsServer.id, i, RealmsWorldUploadStatusTracker.noOp()
 				);
 				minecraft.forceSetScreen(
 					new AlertScreen(realmsWorldUpload::cancel, Component.translatable("mco.create.world.reset.title"), Component.empty(), CommonComponents.GUI_CANCEL, false)
@@ -78,11 +80,11 @@ public class RealmsCreateWorldFlow {
 						}
 					} else {
 						if (screen instanceof RealmsConfigureWorldScreen realmsConfigureWorldScreen) {
-							realmsConfigureWorldScreen.saveSlotSettingsLocally(realmsWorldOptions);
+							realmsConfigureWorldScreen.fetchServerData(realmsServer.id);
 						}
 
 						if (realmCreationTask != null) {
-							RealmsMainScreen.play(realmsServer, screen);
+							RealmsMainScreen.play(realmsServer, screen, true);
 						} else {
 							minecraft.forceSetScreen(screen);
 						}

@@ -20,12 +20,14 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Brightness;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -121,6 +123,11 @@ public abstract class Display extends Entity {
 		if (RENDER_STATE_IDS.contains(entityDataAccessor.id())) {
 			this.updateRenderState = true;
 		}
+	}
+
+	@Override
+	public final boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		return false;
 	}
 
 	private static Transformation createTransformation(SynchedEntityData synchedEntityData) {
@@ -901,15 +908,15 @@ public abstract class Display extends Entity {
 
 				try {
 					Component component = Component.Serializer.fromJson(string, this.registryAccess());
-					if (component != null) {
-						CommandSourceStack commandSourceStack = this.createCommandSourceStack().withPermission(2);
+					if (component != null && this.level() instanceof ServerLevel serverLevel) {
+						CommandSourceStack commandSourceStack = this.createCommandSourceStackForNameResolution(serverLevel).withPermission(2);
 						Component component2 = ComponentUtils.updateForEntity(commandSourceStack, component, this, 0);
 						this.setText(component2);
 					} else {
 						this.setText(Component.empty());
 					}
-				} catch (Exception var8) {
-					Display.LOGGER.warn("Failed to parse display entity text {}", string, var8);
+				} catch (Exception var9) {
+					Display.LOGGER.warn("Failed to parse display entity text {}", string, var9);
 				}
 			}
 		}

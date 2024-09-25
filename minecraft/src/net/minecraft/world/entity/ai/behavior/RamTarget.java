@@ -77,7 +77,7 @@ public class RamTarget extends Behavior<Goat> {
 		if (!list.isEmpty()) {
 			LivingEntity livingEntity = (LivingEntity)list.get(0);
 			DamageSource damageSource = serverLevel.damageSources().noAggroMobAttack(goat);
-			if (livingEntity.hurt(damageSource, (float)goat.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
+			if (livingEntity.hurtServer(serverLevel, damageSource, (float)goat.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
 				EnchantmentHelper.doPostAttackEffects(serverLevel, livingEntity, damageSource);
 			}
 

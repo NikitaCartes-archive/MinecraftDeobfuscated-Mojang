@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
@@ -24,6 +25,9 @@ import net.minecraft.world.phys.Vec3;
 
 public class OldMinecartBehavior extends MinecartBehavior {
 	private static final double MINECART_RIDABLE_THRESHOLD = 0.01;
+	private static final double MAX_SPEED_IN_WATER = 0.2;
+	private static final double MAX_SPEED_ON_LAND = 0.4;
+	private static final double ABSOLUTE_MAX_SPEED = 0.4;
 	private int lerpSteps;
 	private double lerpX;
 	private double lerpY;
@@ -80,28 +84,19 @@ public class OldMinecartBehavior extends MinecartBehavior {
 
 	@Override
 	public void tick() {
-		if (this.level().isClientSide) {
-			if (this.lerpSteps > 0) {
-				this.minecart.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
-				this.lerpSteps--;
-			} else {
-				this.minecart.reapplyPosition();
-				this.setXRot(this.getXRot() % 360.0F);
-				this.setYRot(this.getYRot() % 360.0F);
-			}
-		} else {
+		if (this.level() instanceof ServerLevel serverLevel) {
 			this.minecart.applyGravity();
-			BlockPos blockPos = this.minecart.getCurrentBlockPosOrRailBelow();
-			BlockState blockState = this.level().getBlockState(blockPos);
+			BlockPos var11 = this.minecart.getCurrentBlockPosOrRailBelow();
+			BlockState blockState = this.level().getBlockState(var11);
 			boolean bl = BaseRailBlock.isRail(blockState);
 			this.minecart.setOnRails(bl);
 			if (bl) {
-				this.moveAlongTrack();
+				this.moveAlongTrack(serverLevel);
 				if (blockState.is(Blocks.ACTIVATOR_RAIL)) {
-					this.minecart.activateMinecart(blockPos.getX(), blockPos.getY(), blockPos.getZ(), (Boolean)blockState.getValue(PoweredRailBlock.POWERED));
+					this.minecart.activateMinecart(var11.getX(), var11.getY(), var11.getZ(), (Boolean)blockState.getValue(PoweredRailBlock.POWERED));
 				}
 			} else {
-				this.minecart.comeOffTrack();
+				this.minecart.comeOffTrack(serverLevel);
 			}
 
 			this.minecart.applyEffectsFromBlocks();
@@ -124,11 +119,20 @@ public class OldMinecartBehavior extends MinecartBehavior {
 			this.setXRot(this.getXRot() % 360.0F);
 			this.setYRot(this.getYRot() % 360.0F);
 			this.pushAndPickupEntities();
+		} else {
+			if (this.lerpSteps > 0) {
+				this.minecart.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
+				this.lerpSteps--;
+			} else {
+				this.minecart.reapplyPosition();
+				this.setXRot(this.getXRot() % 360.0F);
+				this.setYRot(this.getYRot() % 360.0F);
+			}
 		}
 	}
 
 	@Override
-	public void moveAlongTrack() {
+	public void moveAlongTrack(ServerLevel serverLevel) {
 		BlockPos blockPos = this.minecart.getCurrentBlockPosOrRailBelow();
 		BlockState blockState = this.level().getBlockState(blockPos);
 		this.minecart.resetFallDistance();
@@ -232,7 +236,7 @@ public class OldMinecartBehavior extends MinecartBehavior {
 		f = o + i * r;
 		this.setPos(d, e, f);
 		double s = this.minecart.isVehicle() ? 0.75 : 1.0;
-		double t = this.minecart.getMaxSpeed();
+		double t = this.minecart.getMaxSpeed(serverLevel);
 		vec32 = this.getDeltaMovement();
 		this.minecart.move(MoverType.SELF, new Vec3(Mth.clamp(s * vec32.x, -t, t), 0.0, Mth.clamp(s * vec32.z, -t, t)));
 		if (vec3i.getY() != 0
@@ -429,13 +433,12 @@ public class OldMinecartBehavior extends MinecartBehavior {
 
 	@Override
 	public Vec3 getKnownMovement(Vec3 vec3) {
-		double d = this.minecart.getMaxSpeed();
-		return new Vec3(Mth.clamp(vec3.x, -d, d), vec3.y, Mth.clamp(vec3.z, -d, d));
+		return new Vec3(Mth.clamp(vec3.x, -0.4, 0.4), vec3.y, Mth.clamp(vec3.z, -0.4, 0.4));
 	}
 
 	@Override
-	public double getMaxSpeed() {
-		return (this.minecart.isInWater() ? 4.0 : 8.0) / 20.0;
+	public double getMaxSpeed(ServerLevel serverLevel) {
+		return this.minecart.isInWater() ? 0.2 : 0.4;
 	}
 
 	@Override

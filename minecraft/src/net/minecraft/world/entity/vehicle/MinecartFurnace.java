@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -63,8 +64,8 @@ public class MinecartFurnace extends AbstractMinecart {
 	}
 
 	@Override
-	protected double getMaxSpeed() {
-		return this.isInWater() ? super.getMaxSpeed() * 0.75 : super.getMaxSpeed() * 0.5;
+	protected double getMaxSpeed(ServerLevel serverLevel) {
+		return this.isInWater() ? super.getMaxSpeed(serverLevel) * 0.75 : super.getMaxSpeed(serverLevel) * 0.5;
 	}
 
 	@Override

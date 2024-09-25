@@ -1,5 +1,6 @@
 package net.minecraft.world.effect;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 
 class PoisonMobEffect extends MobEffect {
@@ -8,9 +9,9 @@ class PoisonMobEffect extends MobEffect {
 	}
 
 	@Override
-	public boolean applyEffectTick(LivingEntity livingEntity, int i) {
+	public boolean applyEffectTick(ServerLevel serverLevel, LivingEntity livingEntity, int i) {
 		if (livingEntity.getHealth() > 1.0F) {
-			livingEntity.hurt(livingEntity.damageSources().magic(), 1.0F);
+			livingEntity.hurtServer(serverLevel, livingEntity.damageSources().magic(), 1.0F);
 		}
 
 		return true;

@@ -190,7 +190,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
 		if (damageSource.getEntity() instanceof Player player) {
 			Optional<UUID> optional = this.getBrain().getMemory(MemoryModuleType.LIKED_PLAYER);
 			if (optional.isPresent() && player.getUUID().equals(optional.get())) {
@@ -198,7 +198,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 			}
 		}
 
-		return super.hurt(damageSource, f);
+		return super.hurtServer(serverLevel, damageSource, f);
 	}
 
 	@Override
@@ -230,15 +230,15 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("allayBrain");
-		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.getBrain().tick(serverLevel, this);
 		profilerFiller.pop();
 		profilerFiller.push("allayActivityUpdate");
 		AllayAi.updateActivity(this);
 		profilerFiller.pop();
-		super.customServerAiStep();
+		super.customServerAiStep(serverLevel);
 	}
 
 	@Override
@@ -365,10 +365,10 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	}
 
 	@Override
-	public boolean wantsToPickUp(ItemStack itemStack) {
+	public boolean wantsToPickUp(ServerLevel serverLevel, ItemStack itemStack) {
 		ItemStack itemStack2 = this.getItemInHand(InteractionHand.MAIN_HAND);
 		return !itemStack2.isEmpty()
-			&& this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
+			&& serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
 			&& this.inventory.canAddItem(itemStack)
 			&& this.allayConsidersItemEqual(itemStack2, itemStack);
 	}
@@ -384,8 +384,8 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	}
 
 	@Override
-	protected void pickUpItem(ItemEntity itemEntity) {
-		InventoryCarrier.pickUpItem(this, this, itemEntity);
+	protected void pickUpItem(ServerLevel serverLevel, ItemEntity itemEntity) {
+		InventoryCarrier.pickUpItem(serverLevel, this, this, itemEntity);
 	}
 
 	@Override
@@ -442,12 +442,12 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	}
 
 	@Override
-	protected void dropEquipment() {
-		super.dropEquipment();
-		this.inventory.removeAllItems().forEach(this::spawnAtLocation);
+	protected void dropEquipment(ServerLevel serverLevel) {
+		super.dropEquipment(serverLevel);
+		this.inventory.removeAllItems().forEach(itemStackx -> this.spawnAtLocation(serverLevel, itemStackx));
 		ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
 		if (!itemStack.isEmpty() && !EnchantmentHelper.has(itemStack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
-			this.spawnAtLocation(itemStack);
+			this.spawnAtLocation(serverLevel, itemStack);
 			this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 		}
 	}

@@ -55,7 +55,8 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 		this.goalSelector.addGoal(2, new WaterAvoidingRandomStrollGoal(this, 1.0, 1.0000001E-5F));
 		this.goalSelector.addGoal(3, new LookAtPlayerGoal(this, Player.class, 6.0F));
 		this.goalSelector.addGoal(4, new RandomLookAroundGoal(this));
-		this.targetSelector.addGoal(1, new NearestAttackableTargetGoal(this, Mob.class, 10, true, false, livingEntity -> livingEntity instanceof Enemy));
+		this.targetSelector
+			.addGoal(1, new NearestAttackableTargetGoal(this, Mob.class, 10, true, false, (livingEntity, serverLevel) -> livingEntity instanceof Enemy));
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {
@@ -90,12 +91,12 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 	@Override
 	public void aiStep() {
 		super.aiStep();
-		if (!this.level().isClientSide) {
+		if (this.level() instanceof ServerLevel serverLevel) {
 			if (this.level().getBiome(this.blockPosition()).is(BiomeTags.SNOW_GOLEM_MELTS)) {
-				this.hurt(this.damageSources().onFire(), 1.0F);
+				this.hurtServer(serverLevel, this.damageSources().onFire(), 1.0F);
 			}
 
-			if (!this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+			if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 				return;
 			}
 
@@ -134,9 +135,9 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 	protected InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.is(Items.SHEARS) && this.readyForShearing()) {
-			this.shear(SoundSource.PLAYERS, itemStack);
-			this.gameEvent(GameEvent.SHEAR, player);
-			if (!this.level().isClientSide) {
+			if (this.level() instanceof ServerLevel serverLevel) {
+				this.shear(serverLevel, SoundSource.PLAYERS, itemStack);
+				this.gameEvent(GameEvent.SHEAR, player);
 				itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 			}
 
@@ -147,12 +148,15 @@ public class SnowGolem extends AbstractGolem implements Shearable, RangedAttackM
 	}
 
 	@Override
-	public void shear(SoundSource soundSource, ItemStack itemStack) {
-		this.level().playSound(null, this, SoundEvents.SNOW_GOLEM_SHEAR, soundSource, 1.0F, 1.0F);
-		if (!this.level().isClientSide()) {
-			this.setPumpkin(false);
-			this.dropFromShearingLootTable(BuiltInLootTables.SHEAR_SNOW_GOLEM, itemStack, itemStackx -> this.spawnAtLocation(itemStackx, this.getEyeHeight()));
-		}
+	public void shear(ServerLevel serverLevel, SoundSource soundSource, ItemStack itemStack) {
+		serverLevel.playSound(null, this, SoundEvents.SNOW_GOLEM_SHEAR, soundSource, 1.0F, 1.0F);
+		this.setPumpkin(false);
+		this.dropFromShearingLootTable(
+			serverLevel,
+			BuiltInLootTables.SHEAR_SNOW_GOLEM,
+			itemStack,
+			(serverLevelx, itemStackx) -> this.spawnAtLocation(serverLevelx, itemStackx, this.getEyeHeight())
+		);
 	}
 
 	@Override

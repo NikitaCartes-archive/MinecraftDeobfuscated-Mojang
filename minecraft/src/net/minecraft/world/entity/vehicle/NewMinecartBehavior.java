@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -45,20 +46,20 @@ public class NewMinecartBehavior extends MinecartBehavior {
 
 	@Override
 	public void tick() {
-		if (this.level().isClientSide) {
-			this.lerpClientPositionAndRotation();
-			boolean bl = BaseRailBlock.isRail(this.level().getBlockState(this.minecart.getCurrentBlockPosOrRailBelow()));
-			this.minecart.setOnRails(bl);
-		} else {
-			BlockPos blockPos = this.minecart.getCurrentBlockPosOrRailBelow();
-			BlockState blockState = this.level().getBlockState(blockPos);
+		if (this.level() instanceof ServerLevel serverLevel) {
+			BlockPos var5 = this.minecart.getCurrentBlockPosOrRailBelow();
+			BlockState blockState = this.level().getBlockState(var5);
 			if (this.minecart.isFirstTick()) {
 				this.minecart.setOnRails(BaseRailBlock.isRail(blockState));
-				this.adjustToRails(blockPos, blockState, true);
+				this.adjustToRails(var5, blockState, true);
 			}
 
 			this.minecart.applyGravity();
-			this.minecart.moveAlongTrack();
+			this.minecart.moveAlongTrack(serverLevel);
+		} else {
+			this.lerpClientPositionAndRotation();
+			boolean bl = BaseRailBlock.isRail(this.level().getBlockState(this.minecart.getCurrentBlockPosOrRailBelow()));
+			this.minecart.setOnRails(bl);
 		}
 	}
 
@@ -219,7 +220,7 @@ public class NewMinecartBehavior extends MinecartBehavior {
 	}
 
 	@Override
-	public void moveAlongTrack() {
+	public void moveAlongTrack(ServerLevel serverLevel) {
 		for (NewMinecartBehavior.TrackIteration trackIteration = new NewMinecartBehavior.TrackIteration();
 			trackIteration.shouldIterate() && this.minecart.isAlive();
 			trackIteration.firstIteration = false
@@ -241,7 +242,7 @@ public class NewMinecartBehavior extends MinecartBehavior {
 				}
 
 				RailShape railShape = blockState.getValue(((BaseRailBlock)blockState.getBlock()).getShapeProperty());
-				Vec3 vec32 = this.calculateTrackSpeed(vec3.horizontal(), trackIteration, blockPos, blockState, railShape);
+				Vec3 vec32 = this.calculateTrackSpeed(serverLevel, vec3.horizontal(), trackIteration, blockPos, blockState, railShape);
 				if (trackIteration.firstIteration) {
 					trackIteration.movementLeft = vec32.horizontalDistance();
 				} else {
@@ -251,7 +252,7 @@ public class NewMinecartBehavior extends MinecartBehavior {
 				this.setDeltaMovement(vec32);
 				trackIteration.movementLeft = this.minecart.makeStepAlongTrack(blockPos, railShape, trackIteration.movementLeft);
 			} else {
-				this.minecart.comeOffTrack();
+				this.minecart.comeOffTrack(serverLevel);
 				trackIteration.movementLeft = 0.0;
 			}
 
@@ -274,7 +275,9 @@ public class NewMinecartBehavior extends MinecartBehavior {
 				}
 
 				this.lerpSteps
-					.add(new NewMinecartBehavior.MinecartStep(vec33, this.getDeltaMovement(), this.getYRot(), this.getXRot(), (float)Math.min(d, this.getMaxSpeed())));
+					.add(
+						new NewMinecartBehavior.MinecartStep(vec33, this.getDeltaMovement(), this.getYRot(), this.getXRot(), (float)Math.min(d, this.getMaxSpeed(serverLevel)))
+					);
 			} else if (vec3.horizontalDistanceSqr() > 0.0) {
 				this.lerpSteps.add(new NewMinecartBehavior.MinecartStep(vec33, this.getDeltaMovement(), this.getYRot(), this.getXRot(), 1.0F));
 			}
@@ -285,7 +288,9 @@ public class NewMinecartBehavior extends MinecartBehavior {
 		}
 	}
 
-	private Vec3 calculateTrackSpeed(Vec3 vec3, NewMinecartBehavior.TrackIteration trackIteration, BlockPos blockPos, BlockState blockState, RailShape railShape) {
+	private Vec3 calculateTrackSpeed(
+		ServerLevel serverLevel, Vec3 vec3, NewMinecartBehavior.TrackIteration trackIteration, BlockPos blockPos, BlockState blockState, RailShape railShape
+	) {
 		Vec3 vec32 = vec3;
 		if (!trackIteration.hasGainedSlopeSpeed) {
 			Vec3 vec33 = this.calculateSlopeSpeed(vec3, railShape);
@@ -314,7 +319,7 @@ public class NewMinecartBehavior extends MinecartBehavior {
 		if (trackIteration.firstIteration) {
 			vec32 = this.minecart.applyNaturalSlowdown(vec32);
 			if (vec32.lengthSqr() > 0.0) {
-				double d = Math.min(vec32.length(), this.minecart.getMaxSpeed());
+				double d = Math.min(vec32.length(), this.minecart.getMaxSpeed(serverLevel));
 				vec32 = vec32.normalize().scale(d);
 			}
 		}
@@ -459,8 +464,8 @@ public class NewMinecartBehavior extends MinecartBehavior {
 	}
 
 	@Override
-	public double getMaxSpeed() {
-		return (double)this.level().getGameRules().getInt(GameRules.RULE_MINECART_MAX_SPEED) * (this.minecart.isInWater() ? 0.5 : 1.0) / 20.0;
+	public double getMaxSpeed(ServerLevel serverLevel) {
+		return (double)serverLevel.getGameRules().getInt(GameRules.RULE_MINECART_MAX_SPEED) * (this.minecart.isInWater() ? 0.5 : 1.0) / 20.0;
 	}
 
 	private boolean isDecending(Vec3 vec3, RailShape railShape) {

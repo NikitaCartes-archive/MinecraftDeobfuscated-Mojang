@@ -158,7 +158,7 @@ public class RealmsResetWorldScreen extends RealmsScreen {
 				this.minecraft.font,
 				GENERATE_NEW_WORLD,
 				NEW_WORLD_LOCATION,
-				button -> RealmsCreateWorldFlow.createWorld(this.minecraft, this.lastScreen, this, this.serverData, this.realmCreationTask)
+				button -> RealmsCreateWorldFlow.createWorld(this.minecraft, this.lastScreen, this, this.slot, this.serverData, this.realmCreationTask)
 			)
 		);
 		rowHelper.addChild(

@@ -3,7 +3,6 @@ package net.minecraft.world.entity.boss.wither;
 import com.google.common.collect.ImmutableList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ColorParticleOption;
@@ -74,7 +73,8 @@ public class WitherBoss extends Monster implements RangedAttackMob {
 			this.getDisplayName(), BossEvent.BossBarColor.PURPLE, BossEvent.BossBarOverlay.PROGRESS
 		)
 		.setDarkenScreen(true);
-	private static final Predicate<LivingEntity> LIVING_ENTITY_SELECTOR = livingEntity -> !livingEntity.getType().is(EntityTypeTags.WITHER_FRIENDS)
+	private static final TargetingConditions.Selector LIVING_ENTITY_SELECTOR = (livingEntity, serverLevel) -> !livingEntity.getType()
+				.is(EntityTypeTags.WITHER_FRIENDS)
 			&& livingEntity.attackable();
 	private static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forCombat().range(20.0).selector(LIVING_ENTITY_SELECTOR);
 
@@ -257,14 +257,14 @@ public class WitherBoss extends Monster implements RangedAttackMob {
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		if (this.getInvulnerableTicks() > 0) {
 			int i = this.getInvulnerableTicks() - 1;
 			this.bossEvent.setProgress(1.0F - (float)i / 220.0F);
 			if (i <= 0) {
-				this.level().explode(this, this.getX(), this.getEyeY(), this.getZ(), 7.0F, false, Level.ExplosionInteraction.MOB);
+				serverLevel.explode(this, this.getX(), this.getEyeY(), this.getZ(), 7.0F, false, Level.ExplosionInteraction.MOB);
 				if (!this.isSilent()) {
-					this.level().globalLevelEvent(1023, this.blockPosition(), 0);
+					serverLevel.globalLevelEvent(1023, this.blockPosition(), 0);
 				}
 			}
 
@@ -273,12 +273,12 @@ public class WitherBoss extends Monster implements RangedAttackMob {
 				this.heal(10.0F);
 			}
 		} else {
-			super.customServerAiStep();
+			super.customServerAiStep(serverLevel);
 
 			for (int ix = 1; ix < 3; ix++) {
 				if (this.tickCount >= this.nextHeadUpdate[ix - 1]) {
 					this.nextHeadUpdate[ix - 1] = this.tickCount + 10 + this.random.nextInt(10);
-					if ((this.level().getDifficulty() == Difficulty.NORMAL || this.level().getDifficulty() == Difficulty.HARD) && this.idleHeadUpdates[ix - 1]++ > 15) {
+					if ((serverLevel.getDifficulty() == Difficulty.NORMAL || serverLevel.getDifficulty() == Difficulty.HARD) && this.idleHeadUpdates[ix - 1]++ > 15) {
 						float f = 10.0F;
 						float g = 5.0F;
 						double d = Mth.nextDouble(this.random, this.getX() - 10.0, this.getX() + 10.0);
@@ -290,7 +290,7 @@ public class WitherBoss extends Monster implements RangedAttackMob {
 
 					int j = this.getAlternativeTarget(ix);
 					if (j > 0) {
-						LivingEntity livingEntity = (LivingEntity)this.level().getEntity(j);
+						LivingEntity livingEntity = (LivingEntity)serverLevel.getEntity(j);
 						if (livingEntity != null && this.canAttack(livingEntity) && !(this.distanceToSqr(livingEntity) > 900.0) && this.hasLineOfSight(livingEntity)) {
 							this.performRangedAttack(ix + 1, livingEntity);
 							this.nextHeadUpdate[ix - 1] = this.tickCount + 40 + this.random.nextInt(20);
@@ -299,7 +299,7 @@ public class WitherBoss extends Monster implements RangedAttackMob {
 							this.setAlternativeTarget(ix, 0);
 						}
 					} else {
-						List<LivingEntity> list = this.level().getNearbyEntities(LivingEntity.class, TARGETING_CONDITIONS, this, this.getBoundingBox().inflate(20.0, 8.0, 20.0));
+						List<LivingEntity> list = serverLevel.getNearbyEntities(LivingEntity.class, TARGETING_CONDITIONS, this, this.getBoundingBox().inflate(20.0, 8.0, 20.0));
 						if (!list.isEmpty()) {
 							LivingEntity livingEntity2 = (LivingEntity)list.get(this.random.nextInt(list.size()));
 							this.setAlternativeTarget(ix, livingEntity2.getId());
@@ -316,7 +316,7 @@ public class WitherBoss extends Monster implements RangedAttackMob {
 
 			if (this.destroyBlocksTick > 0) {
 				this.destroyBlocksTick--;
-				if (this.destroyBlocksTick == 0 && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+				if (this.destroyBlocksTick == 0 && serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 					boolean bl = false;
 					int j = Mth.floor(this.getBbWidth() / 2.0F + 1.0F);
 					int k = Mth.floor(this.getBbHeight());
@@ -324,14 +324,14 @@ public class WitherBoss extends Monster implements RangedAttackMob {
 					for (BlockPos blockPos : BlockPos.betweenClosed(
 						this.getBlockX() - j, this.getBlockY(), this.getBlockZ() - j, this.getBlockX() + j, this.getBlockY() + k, this.getBlockZ() + j
 					)) {
-						BlockState blockState = this.level().getBlockState(blockPos);
+						BlockState blockState = serverLevel.getBlockState(blockPos);
 						if (canDestroy(blockState)) {
-							bl = this.level().destroyBlock(blockPos, true, this) || bl;
+							bl = serverLevel.destroyBlock(blockPos, true, this) || bl;
 						}
 					}
 
 					if (bl) {
-						this.level().levelEvent(null, 1022, this.blockPosition(), 0);
+						serverLevel.levelEvent(null, 1022, this.blockPosition(), 0);
 					}
 				}
 			}
@@ -442,8 +442,8 @@ public class WitherBoss extends Monster implements RangedAttackMob {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (this.isInvulnerableTo(serverLevel, damageSource)) {
 			return false;
 		} else if (damageSource.is(DamageTypeTags.WITHER_IMMUNE_TO) || damageSource.getEntity() instanceof WitherBoss) {
 			return false;
@@ -469,7 +469,7 @@ public class WitherBoss extends Monster implements RangedAttackMob {
 					this.idleHeadUpdates[i] = this.idleHeadUpdates[i] + 3;
 				}
 
-				return super.hurt(damageSource, f);
+				return super.hurtServer(serverLevel, damageSource, f);
 			}
 		}
 	}
@@ -477,7 +477,7 @@ public class WitherBoss extends Monster implements RangedAttackMob {
 	@Override
 	protected void dropCustomDeathLoot(ServerLevel serverLevel, DamageSource damageSource, boolean bl) {
 		super.dropCustomDeathLoot(serverLevel, damageSource, bl);
-		ItemEntity itemEntity = this.spawnAtLocation(Items.NETHER_STAR);
+		ItemEntity itemEntity = this.spawnAtLocation(serverLevel, Items.NETHER_STAR);
 		if (itemEntity != null) {
 			itemEntity.setExtendedLifetime();
 		}

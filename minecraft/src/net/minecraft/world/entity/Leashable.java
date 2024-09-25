@@ -95,7 +95,7 @@ public interface Leashable {
 			}
 
 			if (entity.tickCount > 100) {
-				entity.spawnAtLocation(Items.LEAD);
+				entity.spawnAtLocation(serverLevel, Items.LEAD);
 				entity.setLeashData(null);
 			}
 		}
@@ -109,17 +109,19 @@ public interface Leashable {
 		Leashable.LeashData leashData = entity.getLeashData();
 		if (leashData != null && leashData.leashHolder != null) {
 			entity.setLeashData(null);
-			if (!entity.level().isClientSide && bl2) {
-				entity.spawnAtLocation(Items.LEAD);
-			}
+			if (entity.level() instanceof ServerLevel serverLevel) {
+				if (bl2) {
+					entity.spawnAtLocation(serverLevel, Items.LEAD);
+				}
 
-			if (bl && entity.level() instanceof ServerLevel serverLevel) {
-				serverLevel.getChunkSource().broadcast(entity, new ClientboundSetEntityLinkPacket(entity, null));
+				if (bl) {
+					serverLevel.getChunkSource().broadcast(entity, new ClientboundSetEntityLinkPacket(entity, null));
+				}
 			}
 		}
 	}
 
-	static <E extends Entity & Leashable> void tickLeash(E entity) {
+	static <E extends Entity & Leashable> void tickLeash(ServerLevel serverLevel, E entity) {
 		Leashable.LeashData leashData = entity.getLeashData();
 		if (leashData != null && leashData.delayedLeashInfo != null) {
 			restoreLeashFromSave(entity, leashData);
@@ -127,7 +129,7 @@ public interface Leashable {
 
 		if (leashData != null && leashData.leashHolder != null) {
 			if (!entity.isAlive() || !leashData.leashHolder.isAlive()) {
-				dropLeash(entity, true, entity.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS));
+				dropLeash(entity, true, serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS));
 			}
 
 			Entity entity2 = entity.getLeashHolder();

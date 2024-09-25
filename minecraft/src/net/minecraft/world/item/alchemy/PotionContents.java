@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -155,11 +156,11 @@ public record PotionContents(Optional<Holder<Potion>> potion, Optional<Integer> 
 	}
 
 	public void applyToLivingEntity(LivingEntity livingEntity) {
-		if (!livingEntity.level().isClientSide) {
+		if (livingEntity.level() instanceof ServerLevel serverLevel) {
 			Player player2 = livingEntity instanceof Player player ? player : null;
 			this.forEachEffect(mobEffectInstance -> {
 				if (mobEffectInstance.getEffect().value().isInstantenous()) {
-					mobEffectInstance.getEffect().value().applyInstantenousEffect(player2, player2, livingEntity, mobEffectInstance.getAmplifier(), 1.0);
+					mobEffectInstance.getEffect().value().applyInstantenousEffect(serverLevel, player2, player2, livingEntity, mobEffectInstance.getAmplifier(), 1.0);
 				} else {
 					livingEntity.addEffect(mobEffectInstance);
 				}

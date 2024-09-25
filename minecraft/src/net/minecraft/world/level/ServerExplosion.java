@@ -189,7 +189,7 @@ public class ServerExplosion implements Explosion {
 						float p = this.damageCalculator.getKnockbackMultiplier(entity);
 						float q = !bl && p == 0.0F ? 0.0F : getSeenPercent(this.center, entity);
 						if (bl) {
-							entity.hurt(this.damageSource, this.damageCalculator.getEntityDamageAmount(this, entity, q));
+							entity.hurtServer(this.level, this.damageSource, this.damageCalculator.getEntityDamageAmount(this, entity, q));
 						}
 
 						double r = (1.0 - d) * (double)q * (double)p;
@@ -273,6 +273,11 @@ public class ServerExplosion implements Explosion {
 
 	public Map<Player, Vec3> getHitPlayers() {
 		return this.hitPlayers;
+	}
+
+	@Override
+	public ServerLevel level() {
+		return this.level;
 	}
 
 	@Nullable

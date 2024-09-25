@@ -176,12 +176,12 @@ public class Creeper extends Monster {
 		Entity entity = damageSource.getEntity();
 		if (entity != this && entity instanceof Creeper creeper && creeper.canDropMobsSkull()) {
 			creeper.increaseDroppedSkulls();
-			this.spawnAtLocation(Items.CREEPER_HEAD);
+			this.spawnAtLocation(serverLevel, Items.CREEPER_HEAD);
 		}
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
+	public boolean doHurtTarget(ServerLevel serverLevel, Entity entity) {
 		return true;
 	}
 
@@ -229,12 +229,12 @@ public class Creeper extends Monster {
 	}
 
 	private void explodeCreeper() {
-		if (!this.level().isClientSide) {
+		if (this.level() instanceof ServerLevel serverLevel) {
 			float f = this.isPowered() ? 2.0F : 1.0F;
 			this.dead = true;
-			this.level().explode(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * f, Level.ExplosionInteraction.MOB);
+			serverLevel.explode(this, this.getX(), this.getY(), this.getZ(), (float)this.explosionRadius * f, Level.ExplosionInteraction.MOB);
 			this.spawnLingeringCloud();
-			this.triggerOnDeathMobEffects(Entity.RemovalReason.KILLED);
+			this.triggerOnDeathMobEffects(serverLevel, Entity.RemovalReason.KILLED);
 			this.discard();
 		}
 	}

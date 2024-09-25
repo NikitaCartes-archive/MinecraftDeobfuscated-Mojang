@@ -379,21 +379,19 @@ public class ArmorStand extends LivingEntity {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
 		if (this.isRemoved()) {
 			return false;
-		} else if (!(this.level() instanceof ServerLevel serverLevel)) {
-			return false;
-		} else if (!this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && damageSource.getEntity() instanceof Mob) {
+		} else if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && damageSource.getEntity() instanceof Mob) {
 			return false;
 		} else if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
-			this.kill();
+			this.kill(serverLevel);
 			return false;
-		} else if (this.isInvulnerableTo(damageSource) || this.invisible || this.isMarker()) {
+		} else if (this.isInvulnerableTo(serverLevel, damageSource) || this.invisible || this.isMarker()) {
 			return false;
 		} else if (damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
 			this.brokenByAnything(serverLevel, damageSource);
-			this.kill();
+			this.kill(serverLevel);
 			return false;
 		} else if (damageSource.is(DamageTypeTags.IGNITES_ARMOR_STANDS)) {
 			if (this.isOnFire()) {
@@ -419,7 +417,7 @@ public class ArmorStand extends LivingEntity {
 				if (damageSource.isCreativePlayer()) {
 					this.playBrokenSound();
 					this.showBreakingParticles();
-					this.kill();
+					this.kill(serverLevel);
 					return true;
 				} else {
 					long l = serverLevel.getGameTime();
@@ -430,7 +428,7 @@ public class ArmorStand extends LivingEntity {
 					} else {
 						this.brokenByPlayer(serverLevel, damageSource);
 						this.showBreakingParticles();
-						this.kill();
+						this.kill(serverLevel);
 					}
 
 					return true;
@@ -484,7 +482,7 @@ public class ArmorStand extends LivingEntity {
 		g -= f;
 		if (g <= 0.5F) {
 			this.brokenByAnything(serverLevel, damageSource);
-			this.kill();
+			this.kill(serverLevel);
 		} else {
 			this.setHealth(g);
 			this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
@@ -600,7 +598,7 @@ public class ArmorStand extends LivingEntity {
 	}
 
 	@Override
-	public void kill() {
+	public void kill(ServerLevel serverLevel) {
 		this.remove(Entity.RemovalReason.KILLED);
 		this.gameEvent(GameEvent.ENTITY_DIE);
 	}

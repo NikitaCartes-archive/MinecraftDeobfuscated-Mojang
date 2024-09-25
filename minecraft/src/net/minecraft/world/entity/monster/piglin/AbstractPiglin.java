@@ -75,8 +75,8 @@ public abstract class AbstractPiglin extends Monster {
 	}
 
 	@Override
-	protected void customServerAiStep() {
-		super.customServerAiStep();
+	protected void customServerAiStep(ServerLevel serverLevel) {
+		super.customServerAiStep(serverLevel);
 		if (this.isConverting()) {
 			this.timeInOverworld++;
 		} else {
@@ -85,7 +85,7 @@ public abstract class AbstractPiglin extends Monster {
 
 		if (this.timeInOverworld > 300) {
 			this.playConvertedSound();
-			this.finishConversion((ServerLevel)this.level());
+			this.finishConversion(serverLevel);
 		}
 	}
 

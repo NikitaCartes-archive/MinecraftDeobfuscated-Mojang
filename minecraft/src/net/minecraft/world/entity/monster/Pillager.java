@@ -195,10 +195,10 @@ public class Pillager extends AbstractIllager implements CrossbowAttackMob, Inve
 	}
 
 	@Override
-	protected void pickUpItem(ItemEntity itemEntity) {
+	protected void pickUpItem(ServerLevel serverLevel, ItemEntity itemEntity) {
 		ItemStack itemStack = itemEntity.getItem();
 		if (itemStack.getItem() instanceof BannerItem) {
-			super.pickUpItem(itemEntity);
+			super.pickUpItem(serverLevel, itemEntity);
 		} else if (this.wantsItem(itemStack)) {
 			this.onItemPickup(itemEntity);
 			ItemStack itemStack2 = this.inventory.addItem(itemStack);

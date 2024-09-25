@@ -1,7 +1,6 @@
 package net.minecraft.world.level;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.collect.ImmutableList.Builder;
 import java.util.List;
 import java.util.UUID;
@@ -9,8 +8,6 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.phys.AABB;
@@ -114,73 +111,6 @@ public interface EntityGetter {
 		}
 
 		return false;
-	}
-
-	@Nullable
-	default Player getNearestPlayer(TargetingConditions targetingConditions, LivingEntity livingEntity) {
-		return this.getNearestEntity(this.players(), targetingConditions, livingEntity, livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
-	}
-
-	@Nullable
-	default Player getNearestPlayer(TargetingConditions targetingConditions, LivingEntity livingEntity, double d, double e, double f) {
-		return this.getNearestEntity(this.players(), targetingConditions, livingEntity, d, e, f);
-	}
-
-	@Nullable
-	default Player getNearestPlayer(TargetingConditions targetingConditions, double d, double e, double f) {
-		return this.getNearestEntity(this.players(), targetingConditions, null, d, e, f);
-	}
-
-	@Nullable
-	default <T extends LivingEntity> T getNearestEntity(
-		Class<? extends T> class_, TargetingConditions targetingConditions, @Nullable LivingEntity livingEntity, double d, double e, double f, AABB aABB
-	) {
-		return this.getNearestEntity(this.getEntitiesOfClass(class_, aABB, livingEntityx -> true), targetingConditions, livingEntity, d, e, f);
-	}
-
-	@Nullable
-	default <T extends LivingEntity> T getNearestEntity(
-		List<? extends T> list, TargetingConditions targetingConditions, @Nullable LivingEntity livingEntity, double d, double e, double f
-	) {
-		double g = -1.0;
-		T livingEntity2 = null;
-
-		for (T livingEntity3 : list) {
-			if (targetingConditions.test(livingEntity, livingEntity3)) {
-				double h = livingEntity3.distanceToSqr(d, e, f);
-				if (g == -1.0 || h < g) {
-					g = h;
-					livingEntity2 = livingEntity3;
-				}
-			}
-		}
-
-		return livingEntity2;
-	}
-
-	default List<Player> getNearbyPlayers(TargetingConditions targetingConditions, LivingEntity livingEntity, AABB aABB) {
-		List<Player> list = Lists.<Player>newArrayList();
-
-		for (Player player : this.players()) {
-			if (aABB.contains(player.getX(), player.getY(), player.getZ()) && targetingConditions.test(livingEntity, player)) {
-				list.add(player);
-			}
-		}
-
-		return list;
-	}
-
-	default <T extends LivingEntity> List<T> getNearbyEntities(Class<T> class_, TargetingConditions targetingConditions, LivingEntity livingEntity, AABB aABB) {
-		List<T> list = this.getEntitiesOfClass(class_, aABB, livingEntityx -> true);
-		List<T> list2 = Lists.<T>newArrayList();
-
-		for (T livingEntity2 : list) {
-			if (targetingConditions.test(livingEntity, livingEntity2)) {
-				list2.add(livingEntity2);
-			}
-		}
-
-		return list2;
 	}
 
 	@Nullable

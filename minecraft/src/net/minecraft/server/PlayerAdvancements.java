@@ -205,7 +205,7 @@ public class PlayerAdvancements {
 			if (!bl2 && advancementProgress.isDone()) {
 				advancementHolder.value().rewards().grant(this.player);
 				advancementHolder.value().display().ifPresent(displayInfo -> {
-					if (displayInfo.shouldAnnounceChat() && this.player.level().getGameRules().getBoolean(GameRules.RULE_ANNOUNCE_ADVANCEMENTS)) {
+					if (displayInfo.shouldAnnounceChat() && this.player.serverLevel().getGameRules().getBoolean(GameRules.RULE_ANNOUNCE_ADVANCEMENTS)) {
 						this.playerList.broadcastSystemMessage(displayInfo.getType().createAnnouncement(advancementHolder, this.player), false);
 					}
 				});

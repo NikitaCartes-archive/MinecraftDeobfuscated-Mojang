@@ -24,8 +24,7 @@ public class OfferFlowerGoal extends Goal {
 		} else if (this.golem.getRandom().nextInt(8000) != 0) {
 			return false;
 		} else {
-			this.villager = this.golem
-				.level()
+			this.villager = getServerLevel(this.golem)
 				.getNearestEntity(
 					Villager.class,
 					OFFER_TARGER_CONTEXT,

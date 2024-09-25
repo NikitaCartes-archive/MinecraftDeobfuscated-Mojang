@@ -304,7 +304,7 @@ public class PolarBear extends Animal implements NeutralMob {
 		protected void checkAndPerformAttack(LivingEntity livingEntity) {
 			if (this.canPerformAttack(livingEntity)) {
 				this.resetAttackCooldown();
-				this.mob.doHurtTarget(livingEntity);
+				this.mob.doHurtTarget(getServerLevel(this.mob), livingEntity);
 				PolarBear.this.setStanding(false);
 			} else if (this.mob.distanceToSqr(livingEntity) < (double)((livingEntity.getBbWidth() + 3.0F) * (livingEntity.getBbWidth() + 3.0F))) {
 				if (this.isTimeToAttack()) {

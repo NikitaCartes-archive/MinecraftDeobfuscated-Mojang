@@ -1,5 +1,6 @@
 package net.minecraft.world.effect;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 
 class RegenerationMobEffect extends MobEffect {
@@ -8,7 +9,7 @@ class RegenerationMobEffect extends MobEffect {
 	}
 
 	@Override
-	public boolean applyEffectTick(LivingEntity livingEntity, int i) {
+	public boolean applyEffectTick(ServerLevel serverLevel, LivingEntity livingEntity, int i) {
 		if (livingEntity.getHealth() < livingEntity.getMaxHealth()) {
 			livingEntity.heal(1.0F);
 		}

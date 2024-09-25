@@ -1,21 +1,17 @@
 package net.minecraft.world.food;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 
 public class FoodData {
 	private int foodLevel = 20;
-	private float saturationLevel;
+	private float saturationLevel = 5.0F;
 	private float exhaustionLevel;
 	private int tickTimer;
-	private int lastFoodLevel = 20;
-
-	public FoodData() {
-		this.saturationLevel = 5.0F;
-	}
 
 	private void add(int i, float f) {
 		this.foodLevel = Mth.clamp(i + this.foodLevel, 0, 20);
@@ -30,9 +26,9 @@ public class FoodData {
 		this.add(foodProperties.nutrition(), foodProperties.saturation());
 	}
 
-	public void tick(Player player) {
-		Difficulty difficulty = player.level().getDifficulty();
-		this.lastFoodLevel = this.foodLevel;
+	public void tick(ServerPlayer serverPlayer) {
+		ServerLevel serverLevel = serverPlayer.serverLevel();
+		Difficulty difficulty = serverLevel.getDifficulty();
 		if (this.exhaustionLevel > 4.0F) {
 			this.exhaustionLevel -= 4.0F;
 			if (this.saturationLevel > 0.0F) {
@@ -42,27 +38,27 @@ public class FoodData {
 			}
 		}
 
-		boolean bl = player.level().getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
-		if (bl && this.saturationLevel > 0.0F && player.isHurt() && this.foodLevel >= 20) {
+		boolean bl = serverLevel.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
+		if (bl && this.saturationLevel > 0.0F && serverPlayer.isHurt() && this.foodLevel >= 20) {
 			this.tickTimer++;
 			if (this.tickTimer >= 10) {
 				float f = Math.min(this.saturationLevel, 6.0F);
-				player.heal(f / 6.0F);
+				serverPlayer.heal(f / 6.0F);
 				this.addExhaustion(f);
 				this.tickTimer = 0;
 			}
-		} else if (bl && this.foodLevel >= 18 && player.isHurt()) {
+		} else if (bl && this.foodLevel >= 18 && serverPlayer.isHurt()) {
 			this.tickTimer++;
 			if (this.tickTimer >= 80) {
-				player.heal(1.0F);
+				serverPlayer.heal(1.0F);
 				this.addExhaustion(6.0F);
 				this.tickTimer = 0;
 			}
 		} else if (this.foodLevel <= 0) {
 			this.tickTimer++;
 			if (this.tickTimer >= 80) {
-				if (player.getHealth() > 10.0F || difficulty == Difficulty.HARD || player.getHealth() > 1.0F && difficulty == Difficulty.NORMAL) {
-					player.hurt(player.damageSources().starve(), 1.0F);
+				if (serverPlayer.getHealth() > 10.0F || difficulty == Difficulty.HARD || serverPlayer.getHealth() > 1.0F && difficulty == Difficulty.NORMAL) {
+					serverPlayer.hurtServer(serverLevel, serverPlayer.damageSources().starve(), 1.0F);
 				}
 
 				this.tickTimer = 0;
@@ -92,20 +88,12 @@ public class FoodData {
 		return this.foodLevel;
 	}
 
-	public int getLastFoodLevel() {
-		return this.lastFoodLevel;
-	}
-
 	public boolean needsFood() {
 		return this.foodLevel < 20;
 	}
 
 	public void addExhaustion(float f) {
 		this.exhaustionLevel = Math.min(this.exhaustionLevel + f, 40.0F);
-	}
-
-	public float getExhaustionLevel() {
-		return this.exhaustionLevel;
 	}
 
 	public float getSaturationLevel() {
@@ -118,9 +106,5 @@ public class FoodData {
 
 	public void setSaturation(float f) {
 		this.saturationLevel = f;
-	}
-
-	public void setExhaustion(float f) {
-		this.exhaustionLevel = f;
 	}
 }

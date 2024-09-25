@@ -23,7 +23,7 @@ public class ResetUniversalAngerTargetGoal<T extends Mob & NeutralMob> extends G
 
 	@Override
 	public boolean canUse() {
-		return this.mob.level().getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER) && this.wasHurtByPlayer();
+		return getServerLevel(this.mob).getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER) && this.wasHurtByPlayer();
 	}
 
 	private boolean wasHurtByPlayer() {

@@ -279,8 +279,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.ProfileKeyPair;
 import net.minecraft.world.entity.player.ProfilePublicKey;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.NewMinecartBehavior;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -416,7 +416,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		boolean bl = commonPlayerSpawnInfo.isDebug();
 		boolean bl2 = commonPlayerSpawnInfo.isFlat();
 		int i = commonPlayerSpawnInfo.seaLevel();
-		ClientLevel.ClientLevelData clientLevelData = new ClientLevel.ClientLevelData(this.enabledFeatures, Difficulty.NORMAL, clientboundLoginPacket.hardcore(), bl2);
+		ClientLevel.ClientLevelData clientLevelData = new ClientLevel.ClientLevelData(Difficulty.NORMAL, clientboundLoginPacket.hardcore(), bl2);
 		this.levelData = clientLevelData;
 		this.level = new ClientLevel(
 			this,
@@ -961,9 +961,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleSetTime(ClientboundSetTimePacket clientboundSetTimePacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundSetTimePacket, this, this.minecraft);
-		this.minecraft.level.setGameTime(clientboundSetTimePacket.getGameTime());
-		this.minecraft.level.setDayTime(clientboundSetTimePacket.getDayTime());
-		this.telemetryManager.setTime(clientboundSetTimePacket.getGameTime());
+		this.level.setTimeFromServer(clientboundSetTimePacket.gameTime(), clientboundSetTimePacket.dayTime(), clientboundSetTimePacket.tickDayTime());
+		this.telemetryManager.setTime(clientboundSetTimePacket.gameTime());
 	}
 
 	@Override
@@ -987,7 +986,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 				if (entity2 != null) {
 					entity2.startRiding(entity, true);
 					if (entity2 == this.minecraft.player && !bl) {
-						if (entity instanceof Boat) {
+						if (entity instanceof AbstractBoat) {
 							this.minecraft.player.yRotO = entity.getYRot();
 							this.minecraft.player.setYRot(entity.getYRot());
 							this.minecraft.player.setYHeadRot(entity.getYRot());
@@ -1091,9 +1090,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 			boolean bl2 = commonPlayerSpawnInfo.isDebug();
 			boolean bl3 = commonPlayerSpawnInfo.isFlat();
 			int i = commonPlayerSpawnInfo.seaLevel();
-			ClientLevel.ClientLevelData clientLevelData = new ClientLevel.ClientLevelData(
-				this.enabledFeatures, this.levelData.getDifficulty(), this.levelData.isHardcore(), bl3
-			);
+			ClientLevel.ClientLevelData clientLevelData = new ClientLevel.ClientLevelData(this.levelData.getDifficulty(), this.levelData.isHardcore(), bl3);
 			this.levelData = clientLevelData;
 			this.level = new ClientLevel(
 				this,

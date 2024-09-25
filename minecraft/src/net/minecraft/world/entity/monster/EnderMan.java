@@ -3,7 +3,6 @@ package net.minecraft.world.entity.monster;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -257,16 +256,16 @@ public class EnderMan extends Monster implements NeutralMob {
 	}
 
 	@Override
-	protected void customServerAiStep() {
-		if (this.level().isDay() && this.tickCount >= this.targetChangeTime + 600) {
+	protected void customServerAiStep(ServerLevel serverLevel) {
+		if (serverLevel.isDay() && this.tickCount >= this.targetChangeTime + 600) {
 			float f = this.getLightLevelDependentMagicValue();
-			if (f > 0.5F && this.level().canSeeSky(this.blockPosition()) && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F) {
+			if (f > 0.5F && serverLevel.canSeeSky(this.blockPosition()) && this.random.nextFloat() * 30.0F < (f - 0.4F) * 2.0F) {
 				this.setTarget(null);
 				this.teleport();
 			}
 		}
 
-		super.customServerAiStep();
+		super.customServerAiStep(serverLevel);
 	}
 
 	protected boolean teleport() {
@@ -351,7 +350,7 @@ public class EnderMan extends Monster implements NeutralMob {
 				.withOptionalParameter(LootContextParams.THIS_ENTITY, this);
 
 			for (ItemStack itemStack2 : blockState.getDrops(builder)) {
-				this.spawnAtLocation(itemStack2);
+				this.spawnAtLocation(serverLevel, itemStack2);
 			}
 		}
 	}
@@ -366,20 +365,20 @@ public class EnderMan extends Monster implements NeutralMob {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (this.isInvulnerableTo(serverLevel, damageSource)) {
 			return false;
 		} else {
 			boolean bl = damageSource.getDirectEntity() instanceof ThrownPotion;
 			if (!damageSource.is(DamageTypeTags.IS_PROJECTILE) && !bl) {
-				boolean bl2 = super.hurt(damageSource, f);
-				if (!this.level().isClientSide() && !(damageSource.getEntity() instanceof LivingEntity) && this.random.nextInt(10) != 0) {
+				boolean bl2 = super.hurtServer(serverLevel, damageSource, f);
+				if (!(damageSource.getEntity() instanceof LivingEntity) && this.random.nextInt(10) != 0) {
 					this.teleport();
 				}
 
 				return bl2;
 			} else {
-				boolean bl2 = bl && this.hurtWithCleanWater(damageSource, (ThrownPotion)damageSource.getDirectEntity(), f);
+				boolean bl2 = bl && this.hurtWithCleanWater(serverLevel, damageSource, (ThrownPotion)damageSource.getDirectEntity(), f);
 
 				for (int i = 0; i < 64; i++) {
 					if (this.teleport()) {
@@ -392,10 +391,10 @@ public class EnderMan extends Monster implements NeutralMob {
 		}
 	}
 
-	private boolean hurtWithCleanWater(DamageSource damageSource, ThrownPotion thrownPotion, float f) {
+	private boolean hurtWithCleanWater(ServerLevel serverLevel, DamageSource damageSource, ThrownPotion thrownPotion, float f) {
 		ItemStack itemStack = thrownPotion.getItem();
 		PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
-		return potionContents.is(Potions.WATER) ? super.hurt(damageSource, f) : false;
+		return potionContents.is(Potions.WATER) ? super.hurtServer(serverLevel, damageSource, f) : false;
 	}
 
 	public boolean isCreepy() {
@@ -459,7 +458,7 @@ public class EnderMan extends Monster implements NeutralMob {
 			if (this.enderman.getCarriedBlock() == null) {
 				return false;
 			} else {
-				return !this.enderman.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
+				return !getServerLevel(this.enderman).getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
 					? false
 					: this.enderman.getRandom().nextInt(reducedTickDelay(2000)) == 0;
 			}
@@ -505,19 +504,19 @@ public class EnderMan extends Monster implements NeutralMob {
 		private int teleportTime;
 		private final TargetingConditions startAggroTargetConditions;
 		private final TargetingConditions continueAggroTargetConditions = TargetingConditions.forCombat().ignoreLineOfSight();
-		private final Predicate<LivingEntity> isAngerInducing;
+		private final TargetingConditions.Selector isAngerInducing;
 
-		public EndermanLookForPlayerGoal(EnderMan enderMan, @Nullable Predicate<LivingEntity> predicate) {
-			super(enderMan, Player.class, 10, false, false, predicate);
+		public EndermanLookForPlayerGoal(EnderMan enderMan, @Nullable TargetingConditions.Selector selector) {
+			super(enderMan, Player.class, 10, false, false, selector);
 			this.enderman = enderMan;
-			this.isAngerInducing = livingEntity -> (enderMan.isLookingAtMe((Player)livingEntity) || enderMan.isAngryAt(livingEntity))
+			this.isAngerInducing = (livingEntity, serverLevel) -> (enderMan.isLookingAtMe((Player)livingEntity) || enderMan.isAngryAt(livingEntity, serverLevel))
 					&& !enderMan.hasIndirectPassenger(livingEntity);
 			this.startAggroTargetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(this.isAngerInducing);
 		}
 
 		@Override
 		public boolean canUse() {
-			this.pendingTarget = this.enderman.level().getNearestPlayer(this.startAggroTargetConditions.range(this.getFollowDistance()), this.enderman);
+			this.pendingTarget = getServerLevel(this.enderman).getNearestPlayer(this.startAggroTargetConditions.range(this.getFollowDistance()), this.enderman);
 			return this.pendingTarget != null;
 		}
 
@@ -537,7 +536,7 @@ public class EnderMan extends Monster implements NeutralMob {
 		@Override
 		public boolean canContinueToUse() {
 			if (this.pendingTarget != null) {
-				if (!this.isAngerInducing.test(this.pendingTarget)) {
+				if (!this.isAngerInducing.test(this.pendingTarget, getServerLevel(this.enderman))) {
 					return false;
 				} else {
 					this.enderman.lookAt(this.pendingTarget, 10.0F, 10.0F);
@@ -549,7 +548,7 @@ public class EnderMan extends Monster implements NeutralMob {
 						return false;
 					}
 
-					if (this.continueAggroTargetConditions.test(this.enderman, this.target)) {
+					if (this.continueAggroTargetConditions.test(getServerLevel(this.enderman), this.enderman, this.target)) {
 						return true;
 					}
 				}
@@ -602,7 +601,9 @@ public class EnderMan extends Monster implements NeutralMob {
 			if (this.enderman.getCarriedBlock() != null) {
 				return false;
 			} else {
-				return !this.enderman.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) ? false : this.enderman.getRandom().nextInt(reducedTickDelay(20)) == 0;
+				return !getServerLevel(this.enderman).getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)
+					? false
+					: this.enderman.getRandom().nextInt(reducedTickDelay(20)) == 0;
 			}
 		}
 

@@ -23,7 +23,6 @@ import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
 import net.minecraft.client.gui.components.SubtitleOverlay;
 import net.minecraft.client.gui.components.spectator.SpectatorGui;
-import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -422,11 +421,7 @@ public class Gui {
 
 	private void renderEffects(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		Collection<MobEffectInstance> collection = this.minecraft.player.getActiveEffects();
-		if (!collection.isEmpty()) {
-			if (this.minecraft.screen instanceof EffectRenderingInventoryScreen effectRenderingInventoryScreen && effectRenderingInventoryScreen.canSeeEffects()) {
-				return;
-			}
-
+		if (!collection.isEmpty() && (this.minecraft.screen == null || !this.minecraft.screen.showsActiveEffects())) {
 			int i = 0;
 			int j = 0;
 			MobEffectTextureManager mobEffectTextureManager = this.minecraft.getMobEffectTextures();

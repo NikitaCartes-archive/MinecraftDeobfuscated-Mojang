@@ -1,6 +1,5 @@
 package net.minecraft.world.entity.animal;
 
-import com.google.common.collect.Lists;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -142,11 +141,11 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 	@Override
 	protected void registerGoals() {
 		this.landTargetGoal = new NearestAttackableTargetGoal(
-			this, Animal.class, 10, false, false, livingEntity -> livingEntity instanceof Chicken || livingEntity instanceof Rabbit
+			this, Animal.class, 10, false, false, (livingEntity, serverLevel) -> livingEntity instanceof Chicken || livingEntity instanceof Rabbit
 		);
 		this.turtleEggTargetGoal = new NearestAttackableTargetGoal(this, Turtle.class, 10, false, false, Turtle.BABY_ON_LAND_SELECTOR);
 		this.fishTargetGoal = new NearestAttackableTargetGoal(
-			this, AbstractFish.class, 20, false, false, livingEntity -> livingEntity instanceof AbstractSchoolingFish
+			this, AbstractFish.class, 20, false, false, (livingEntity, serverLevel) -> livingEntity instanceof AbstractSchoolingFish
 		);
 		this.goalSelector.addGoal(0, new Fox.FoxFloatGoal());
 		this.goalSelector.addGoal(0, new ClimbOnTopOfPowderSnowGoal(this, this.level()));
@@ -179,7 +178,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 			.addGoal(
 				3,
 				new Fox.DefendTrustedTargetGoal(
-					LivingEntity.class, false, false, livingEntity -> TRUSTED_TARGET_SELECTOR.test(livingEntity) && !this.trusts(livingEntity.getUUID())
+					LivingEntity.class, false, false, (livingEntity, serverLevel) -> TRUSTED_TARGET_SELECTOR.test(livingEntity) && !this.trusts(livingEntity.getUUID())
 				)
 			);
 	}
@@ -366,10 +365,15 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 	}
 
 	List<UUID> getTrustedUUIDs() {
-		List<UUID> list = Lists.<UUID>newArrayList();
-		list.add((UUID)this.entityData.get(DATA_TRUSTED_ID_0).orElse(null));
-		list.add((UUID)this.entityData.get(DATA_TRUSTED_ID_1).orElse(null));
-		return list;
+		Optional<UUID> optional = this.entityData.get(DATA_TRUSTED_ID_0);
+		Optional<UUID> optional2 = this.entityData.get(DATA_TRUSTED_ID_1);
+		if (optional.isPresent() && optional2.isPresent()) {
+			return List.of((UUID)optional.get(), (UUID)optional2.get());
+		} else if (optional.isPresent()) {
+			return List.of((UUID)optional.get());
+		} else {
+			return optional2.isPresent() ? List.of((UUID)optional2.get()) : List.of();
+		}
 	}
 
 	void addTrustedUUID(@Nullable UUID uUID) {
@@ -387,9 +391,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 		ListTag listTag = new ListTag();
 
 		for (UUID uUID : list) {
-			if (uUID != null) {
-				listTag.add(NbtUtils.createUUID(uUID));
-			}
+			listTag.add(NbtUtils.createUUID(uUID));
 		}
 
 		compoundTag.put("Trusted", listTag);
@@ -488,7 +490,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 	}
 
 	@Override
-	protected void pickUpItem(ItemEntity itemEntity) {
+	protected void pickUpItem(ServerLevel serverLevel, ItemEntity itemEntity) {
 		ItemStack itemStack = itemEntity.getItem();
 		if (this.canHoldItem(itemStack)) {
 			int i = itemStack.getCount();
@@ -668,7 +670,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 	protected void dropAllDeathLoot(ServerLevel serverLevel, DamageSource damageSource) {
 		ItemStack itemStack = this.getItemBySlot(EquipmentSlot.MAINHAND);
 		if (!itemStack.isEmpty()) {
-			this.spawnAtLocation(itemStack);
+			this.spawnAtLocation(serverLevel, itemStack);
 			this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 		}
 
@@ -707,8 +709,8 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 		private LivingEntity trustedLastHurt;
 		private int timestamp;
 
-		public DefendTrustedTargetGoal(final Class<LivingEntity> class_, final boolean bl, final boolean bl2, @Nullable final Predicate<LivingEntity> predicate) {
-			super(Fox.this, class_, 10, bl, bl2, predicate);
+		public DefendTrustedTargetGoal(final Class<LivingEntity> class_, final boolean bl, final boolean bl2, @Nullable final TargetingConditions.Selector selector) {
+			super(Fox.this, class_, 10, bl, bl2, selector);
 		}
 
 		@Override
@@ -716,8 +718,10 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 			if (this.randomInterval > 0 && this.mob.getRandom().nextInt(this.randomInterval) != 0) {
 				return false;
 			} else {
+				ServerLevel serverLevel = getServerLevel(Fox.this.level());
+
 				for (UUID uUID : Fox.this.getTrustedUUIDs()) {
-					if (uUID != null && Fox.this.level() instanceof ServerLevel && ((ServerLevel)Fox.this.level()).getEntity(uUID) instanceof LivingEntity livingEntity) {
+					if (serverLevel.getEntity(uUID) instanceof LivingEntity livingEntity) {
 						this.trustedLastHurt = livingEntity;
 						this.trustedLastHurtBy = livingEntity.getLastHurtByMob();
 						int i = livingEntity.getLastHurtByMobTimestamp();
@@ -777,8 +781,9 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 		}
 	}
 
-	public class FoxAlertableEntitiesSelector implements Predicate<LivingEntity> {
-		public boolean test(LivingEntity livingEntity) {
+	public class FoxAlertableEntitiesSelector implements TargetingConditions.Selector {
+		@Override
+		public boolean test(LivingEntity livingEntity, ServerLevel serverLevel) {
 			if (livingEntity instanceof Fox) {
 				return false;
 			} else if (livingEntity instanceof Chicken || livingEntity instanceof Rabbit || livingEntity instanceof Monster) {
@@ -805,7 +810,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 		}
 
 		protected boolean alertable() {
-			return !Fox.this.level()
+			return !getServerLevel(Fox.this.level())
 				.getNearbyEntities(LivingEntity.class, this.alertableTargeting, Fox.this, Fox.this.getBoundingBox().inflate(12.0, 6.0, 12.0))
 				.isEmpty();
 		}
@@ -825,7 +830,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 
 		@Override
 		protected void breed() {
-			ServerLevel serverLevel = (ServerLevel)this.level;
+			ServerLevel serverLevel = this.level;
 			Fox fox = (Fox)this.animal.getBreedOffspring(serverLevel, this.partner);
 			if (fox != null) {
 				ServerPlayer serverPlayer = this.animal.getLoveCause();
@@ -854,7 +859,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 				fox.moveTo(this.animal.getX(), this.animal.getY(), this.animal.getZ(), 0.0F, 0.0F);
 				serverLevel.addFreshEntityWithPassengers(fox);
 				this.level.broadcastEntityEvent(this.animal, (byte)18);
-				if (this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+				if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
 					this.level
 						.addFreshEntity(new ExperienceOrb(this.level, this.animal.getX(), this.animal.getY(), this.animal.getZ(), this.animal.getRandom().nextInt(7) + 1));
 				}
@@ -902,7 +907,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 		}
 
 		protected void onReachedTarget() {
-			if (Fox.this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+			if (getServerLevel(Fox.this.level()).getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 				BlockState blockState = Fox.this.level().getBlockState(this.blockPos);
 				if (blockState.is(Blocks.SWEET_BERRY_BUSH)) {
 					this.pickSweetBerries(blockState);
@@ -1039,7 +1044,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 		protected void checkAndPerformAttack(LivingEntity livingEntity) {
 			if (this.canPerformAttack(livingEntity)) {
 				this.resetAttackCooldown();
-				this.mob.doHurtTarget(livingEntity);
+				this.mob.doHurtTarget(getServerLevel(this.mob), livingEntity);
 				Fox.this.playSound(SoundEvents.FOX_BITE, 1.0F, 1.0F);
 			}
 		}
@@ -1165,7 +1170,7 @@ public class Fox extends Animal implements VariantHolder<Fox.Variant> {
 			}
 
 			if (livingEntity != null && Fox.this.distanceTo(livingEntity) <= 2.0F) {
-				Fox.this.doHurtTarget(livingEntity);
+				Fox.this.doHurtTarget(getServerLevel(Fox.this.level()), livingEntity);
 			} else if (Fox.this.getXRot() > 0.0F
 				&& Fox.this.onGround()
 				&& (float)Fox.this.getDeltaMovement().y != 0.0F

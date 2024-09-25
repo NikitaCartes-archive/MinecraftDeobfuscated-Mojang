@@ -62,8 +62,8 @@ public class ThrownTrident extends AbstractArrow {
 		int i = this.entityData.get(ID_LOYALTY);
 		if (i > 0 && (this.dealtDamage || this.isNoPhysics()) && entity != null) {
 			if (!this.isAcceptibleReturnOwner()) {
-				if (!this.level().isClientSide && this.pickup == AbstractArrow.Pickup.ALLOWED) {
-					this.spawnAtLocation(this.getPickupItem(), 0.1F);
+				if (this.level() instanceof ServerLevel serverLevel && this.pickup == AbstractArrow.Pickup.ALLOWED) {
+					this.spawnAtLocation(serverLevel, this.getPickupItem(), 0.1F);
 				}
 
 				this.discard();
@@ -110,13 +110,13 @@ public class ThrownTrident extends AbstractArrow {
 		}
 
 		this.dealtDamage = true;
-		if (entity.hurt(damageSource, f)) {
+		if (entity.hurtOrSimulate(damageSource, f)) {
 			if (entity.getType() == EntityType.ENDERMAN) {
 				return;
 			}
 
 			if (this.level() instanceof ServerLevel serverLevel) {
-				EnchantmentHelper.doPostAttackEffectsWithItemSourceOnBreak(serverLevel, entity, damageSource, this.getWeaponItem(), item -> this.kill());
+				EnchantmentHelper.doPostAttackEffectsWithItemSourceOnBreak(serverLevel, entity, damageSource, this.getWeaponItem(), item -> this.kill(serverLevel));
 			}
 
 			if (entity instanceof LivingEntity livingEntity) {
@@ -141,7 +141,7 @@ public class ThrownTrident extends AbstractArrow {
 			null,
 			vec3,
 			serverLevel.getBlockState(blockHitResult.getBlockPos()),
-			item -> this.kill()
+			item -> this.kill(serverLevel)
 		);
 	}
 

@@ -299,10 +299,10 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("axolotlBrain");
-		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.getBrain().tick(serverLevel, this);
 		profilerFiller.pop();
 		profilerFiller.push("axolotlActivityUpdate");
 		AxolotlAi.updateActivity(this);
@@ -332,10 +332,9 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
 		float g = this.getHealth();
-		if (!this.level().isClientSide
-			&& !this.isNoAi()
+		if (!this.isNoAi()
 			&& this.level().random.nextInt(3) == 0
 			&& ((float)this.level().random.nextInt(3) < f || g / this.getMaxHealth() < 0.5F)
 			&& f < g
@@ -345,7 +344,7 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
 			this.brain.setMemory(MemoryModuleType.PLAY_DEAD_TICKS, 200);
 		}
 
-		return super.hurt(damageSource, f);
+		return super.hurtServer(serverLevel, damageSource, f);
 	}
 
 	@Override
@@ -404,15 +403,14 @@ public class Axolotl extends Animal implements VariantHolder<Axolotl.Variant>, B
 		return !this.isPlayingDead() && super.canBeSeenAsEnemy();
 	}
 
-	public static void onStopAttacking(Axolotl axolotl, LivingEntity livingEntity) {
-		Level level = axolotl.level();
+	public static void onStopAttacking(ServerLevel serverLevel, Axolotl axolotl, LivingEntity livingEntity) {
 		if (livingEntity.isDeadOrDying()) {
 			DamageSource damageSource = livingEntity.getLastDamageSource();
 			if (damageSource != null) {
 				Entity entity = damageSource.getEntity();
 				if (entity != null && entity.getType() == EntityType.PLAYER) {
 					Player player = (Player)entity;
-					List<Player> list = level.getEntitiesOfClass(Player.class, axolotl.getBoundingBox().inflate(20.0));
+					List<Player> list = serverLevel.getEntitiesOfClass(Player.class, axolotl.getBoundingBox().inflate(20.0));
 					if (list.contains(player)) {
 						axolotl.applySupportingEffects(player);
 					}

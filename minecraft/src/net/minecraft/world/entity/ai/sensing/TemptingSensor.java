@@ -30,7 +30,7 @@ public class TemptingSensor extends Sensor<PathfinderMob> {
 		List<Player> list = (List<Player>)serverLevel.players()
 			.stream()
 			.filter(EntitySelector.NO_SPECTATORS)
-			.filter(serverPlayer -> targetingConditions.test(pathfinderMob, serverPlayer))
+			.filter(serverPlayer -> targetingConditions.test(serverLevel, pathfinderMob, serverPlayer))
 			.filter(this::playerHoldingTemptation)
 			.filter(serverPlayer -> !pathfinderMob.hasPassenger(serverPlayer))
 			.sorted(Comparator.comparingDouble(pathfinderMob::distanceToSqr))

@@ -98,6 +98,15 @@ public interface ByteBufCodecs {
 			VarInt.write(byteBuf, integer);
 		}
 	};
+	StreamCodec<ByteBuf, Long> LONG = new StreamCodec<ByteBuf, Long>() {
+		public Long decode(ByteBuf byteBuf) {
+			return byteBuf.readLong();
+		}
+
+		public void encode(ByteBuf byteBuf, Long long_) {
+			byteBuf.writeLong(long_);
+		}
+	};
 	StreamCodec<ByteBuf, Long> VAR_LONG = new StreamCodec<ByteBuf, Long>() {
 		public Long decode(ByteBuf byteBuf) {
 			return VarLong.read(byteBuf);

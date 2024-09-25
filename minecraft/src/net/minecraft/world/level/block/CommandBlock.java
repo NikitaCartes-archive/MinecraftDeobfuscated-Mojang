@@ -113,14 +113,14 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 		}
 	}
 
-	private void execute(BlockState blockState, Level level, BlockPos blockPos, BaseCommandBlock baseCommandBlock, boolean bl) {
+	private void execute(BlockState blockState, ServerLevel serverLevel, BlockPos blockPos, BaseCommandBlock baseCommandBlock, boolean bl) {
 		if (bl) {
-			baseCommandBlock.performCommand(level);
+			baseCommandBlock.performCommand(serverLevel);
 		} else {
 			baseCommandBlock.setSuccessCount(0);
 		}
 
-		executeChain(level, blockPos, blockState.getValue(FACING));
+		executeChain(serverLevel, blockPos, blockState.getValue(FACING));
 	}
 
 	@Override
@@ -149,9 +149,9 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 	public void setPlacedBy(Level level, BlockPos blockPos, BlockState blockState, LivingEntity livingEntity, ItemStack itemStack) {
 		if (level.getBlockEntity(blockPos) instanceof CommandBlockEntity commandBlockEntity) {
 			BaseCommandBlock baseCommandBlock = commandBlockEntity.getCommandBlock();
-			if (!level.isClientSide) {
+			if (level instanceof ServerLevel serverLevel) {
 				if (!itemStack.has(DataComponents.BLOCK_ENTITY_DATA)) {
-					baseCommandBlock.setTrackOutput(level.getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK));
+					baseCommandBlock.setTrackOutput(serverLevel.getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK));
 					commandBlockEntity.setAutomatic(this.automatic);
 				}
 
@@ -186,17 +186,17 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 		return this.defaultBlockState().setValue(FACING, blockPlaceContext.getNearestLookingDirection().getOpposite());
 	}
 
-	private static void executeChain(Level level, BlockPos blockPos, Direction direction) {
+	private static void executeChain(ServerLevel serverLevel, BlockPos blockPos, Direction direction) {
 		BlockPos.MutableBlockPos mutableBlockPos = blockPos.mutable();
-		GameRules gameRules = level.getGameRules();
+		GameRules gameRules = serverLevel.getGameRules();
 		int i = gameRules.getInt(GameRules.RULE_MAX_COMMAND_CHAIN_LENGTH);
 
 		while (i-- > 0) {
 			mutableBlockPos.move(direction);
-			BlockState blockState = level.getBlockState(mutableBlockPos);
+			BlockState blockState = serverLevel.getBlockState(mutableBlockPos);
 			Block block = blockState.getBlock();
 			if (!blockState.is(Blocks.CHAIN_COMMAND_BLOCK)
-				|| !(level.getBlockEntity(mutableBlockPos) instanceof CommandBlockEntity commandBlockEntity)
+				|| !(serverLevel.getBlockEntity(mutableBlockPos) instanceof CommandBlockEntity commandBlockEntity)
 				|| commandBlockEntity.getMode() != CommandBlockEntity.Mode.SEQUENCE) {
 				break;
 			}
@@ -204,11 +204,11 @@ public class CommandBlock extends BaseEntityBlock implements GameMasterBlock {
 			if (commandBlockEntity.isPowered() || commandBlockEntity.isAutomatic()) {
 				BaseCommandBlock baseCommandBlock = commandBlockEntity.getCommandBlock();
 				if (commandBlockEntity.markConditionMet()) {
-					if (!baseCommandBlock.performCommand(level)) {
+					if (!baseCommandBlock.performCommand(serverLevel)) {
 						break;
 					}
 
-					level.updateNeighbourForOutputSignal(mutableBlockPos, block);
+					serverLevel.updateNeighbourForOutputSignal(mutableBlockPos, block);
 				} else if (commandBlockEntity.isConditional()) {
 					baseCommandBlock.setSuccessCount(0);
 				}

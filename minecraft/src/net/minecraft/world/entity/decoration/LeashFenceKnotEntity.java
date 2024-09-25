@@ -9,6 +9,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionHand;
@@ -55,7 +56,7 @@ public class LeashFenceKnotEntity extends BlockAttachedEntity {
 	}
 
 	@Override
-	public void dropItem(@Nullable Entity entity) {
+	public void dropItem(ServerLevel serverLevel, @Nullable Entity entity) {
 		this.playSound(SoundEvents.LEASH_KNOT_BREAK, 1.0F, 1.0F);
 	}
 

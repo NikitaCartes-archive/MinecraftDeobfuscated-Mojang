@@ -69,7 +69,6 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.ExplosionDamageCalculator;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -135,6 +134,7 @@ public class ClientLevel extends Level {
 	private int serverSimulationDistance;
 	private final BlockStatePredictionHandler blockStatePredictionHandler = new BlockStatePredictionHandler();
 	private final int seaLevel;
+	private boolean tickDayTime;
 	private static final Set<Item> MARKER_PARTICLE_ITEMS = Set.of(Items.BARRIER, Items.LIGHT);
 
 	public void handleBlockChangedAck(int i) {
@@ -242,25 +242,16 @@ public class ClientLevel extends Level {
 	}
 
 	private void tickTime() {
-		this.setGameTime(this.levelData.getGameTime() + 1L);
-		if (this.levelData.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) {
-			this.setDayTime(this.levelData.getDayTime() + 1L);
+		this.clientLevelData.setGameTime(this.clientLevelData.getGameTime() + 1L);
+		if (this.tickDayTime) {
+			this.clientLevelData.setDayTime(this.clientLevelData.getDayTime() + 1L);
 		}
 	}
 
-	public void setGameTime(long l) {
+	public void setTimeFromServer(long l, long m, boolean bl) {
 		this.clientLevelData.setGameTime(l);
-	}
-
-	public void setDayTime(long l) {
-		if (l < 0L) {
-			l = -l;
-			this.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(false, null);
-		} else {
-			this.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true, null);
-		}
-
-		this.clientLevelData.setDayTime(l);
+		this.clientLevelData.setDayTime(m);
+		this.tickDayTime = bl;
 	}
 
 	public Iterable<Entity> entitiesForRendering() {
@@ -892,7 +883,6 @@ public class ClientLevel extends Level {
 	@Environment(EnvType.CLIENT)
 	public static class ClientLevelData implements WritableLevelData {
 		private final boolean hardcore;
-		private final GameRules gameRules;
 		private final boolean isFlat;
 		private BlockPos spawnPos;
 		private float spawnAngle;
@@ -902,11 +892,10 @@ public class ClientLevel extends Level {
 		private Difficulty difficulty;
 		private boolean difficultyLocked;
 
-		public ClientLevelData(FeatureFlagSet featureFlagSet, Difficulty difficulty, boolean bl, boolean bl2) {
+		public ClientLevelData(Difficulty difficulty, boolean bl, boolean bl2) {
 			this.difficulty = difficulty;
 			this.hardcore = bl;
 			this.isFlat = bl2;
-			this.gameRules = new GameRules(featureFlagSet);
 		}
 
 		@Override
@@ -961,11 +950,6 @@ public class ClientLevel extends Level {
 		@Override
 		public boolean isHardcore() {
 			return this.hardcore;
-		}
-
-		@Override
-		public GameRules getGameRules() {
-			return this.gameRules;
 		}
 
 		@Override

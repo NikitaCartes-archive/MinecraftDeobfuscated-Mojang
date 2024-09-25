@@ -2,7 +2,7 @@ package net.minecraft.world.entity.ai.sensing;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -61,32 +61,32 @@ public abstract class Sensor<E extends LivingEntity> {
 
 	public abstract Set<MemoryModuleType<?>> requires();
 
-	public static boolean isEntityTargetable(LivingEntity livingEntity, LivingEntity livingEntity2) {
+	public static boolean isEntityTargetable(ServerLevel serverLevel, LivingEntity livingEntity, LivingEntity livingEntity2) {
 		return livingEntity.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, livingEntity2)
-			? TARGET_CONDITIONS_IGNORE_INVISIBILITY_TESTING.test(livingEntity, livingEntity2)
-			: TARGET_CONDITIONS.test(livingEntity, livingEntity2);
+			? TARGET_CONDITIONS_IGNORE_INVISIBILITY_TESTING.test(serverLevel, livingEntity, livingEntity2)
+			: TARGET_CONDITIONS.test(serverLevel, livingEntity, livingEntity2);
 	}
 
-	public static boolean isEntityAttackable(LivingEntity livingEntity, LivingEntity livingEntity2) {
+	public static boolean isEntityAttackable(ServerLevel serverLevel, LivingEntity livingEntity, LivingEntity livingEntity2) {
 		return livingEntity.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, livingEntity2)
-			? ATTACK_TARGET_CONDITIONS_IGNORE_INVISIBILITY_TESTING.test(livingEntity, livingEntity2)
-			: ATTACK_TARGET_CONDITIONS.test(livingEntity, livingEntity2);
+			? ATTACK_TARGET_CONDITIONS_IGNORE_INVISIBILITY_TESTING.test(serverLevel, livingEntity, livingEntity2)
+			: ATTACK_TARGET_CONDITIONS.test(serverLevel, livingEntity, livingEntity2);
 	}
 
-	public static Predicate<LivingEntity> wasEntityAttackableLastNTicks(LivingEntity livingEntity, int i) {
-		return rememberPositives(i, livingEntity2 -> isEntityAttackable(livingEntity, livingEntity2));
+	public static BiPredicate<ServerLevel, LivingEntity> wasEntityAttackableLastNTicks(LivingEntity livingEntity, int i) {
+		return rememberPositives(i, (serverLevel, livingEntity2) -> isEntityAttackable(serverLevel, livingEntity, livingEntity2));
 	}
 
-	public static boolean isEntityAttackableIgnoringLineOfSight(LivingEntity livingEntity, LivingEntity livingEntity2) {
+	public static boolean isEntityAttackableIgnoringLineOfSight(ServerLevel serverLevel, LivingEntity livingEntity, LivingEntity livingEntity2) {
 		return livingEntity.getBrain().isMemoryValue(MemoryModuleType.ATTACK_TARGET, livingEntity2)
-			? ATTACK_TARGET_CONDITIONS_IGNORE_INVISIBILITY_AND_LINE_OF_SIGHT.test(livingEntity, livingEntity2)
-			: ATTACK_TARGET_CONDITIONS_IGNORE_LINE_OF_SIGHT.test(livingEntity, livingEntity2);
+			? ATTACK_TARGET_CONDITIONS_IGNORE_INVISIBILITY_AND_LINE_OF_SIGHT.test(serverLevel, livingEntity, livingEntity2)
+			: ATTACK_TARGET_CONDITIONS_IGNORE_LINE_OF_SIGHT.test(serverLevel, livingEntity, livingEntity2);
 	}
 
-	static <T> Predicate<T> rememberPositives(int i, Predicate<T> predicate) {
+	static <T, U> BiPredicate<T, U> rememberPositives(int i, BiPredicate<T, U> biPredicate) {
 		AtomicInteger atomicInteger = new AtomicInteger(0);
-		return object -> {
-			if (predicate.test(object)) {
+		return (object, object2) -> {
+			if (biPredicate.test(object, object2)) {
 				atomicInteger.set(i);
 				return true;
 			} else {

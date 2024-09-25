@@ -155,8 +155,8 @@ public class Warden extends Monster implements VibrationSystem {
 	}
 
 	@Override
-	public boolean isInvulnerableTo(DamageSource damageSource) {
-		return this.isDiggingOrEmerging() && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) ? true : super.isInvulnerableTo(damageSource);
+	public boolean isInvulnerableTo(ServerLevel serverLevel, DamageSource damageSource) {
+		return this.isDiggingOrEmerging() && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) ? true : super.isInvulnerableTo(serverLevel, damageSource);
 	}
 
 	boolean isDiggingOrEmerging() {
@@ -220,11 +220,11 @@ public class Warden extends Monster implements VibrationSystem {
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
-		this.level().broadcastEntityEvent(this, (byte)4);
+	public boolean doHurtTarget(ServerLevel serverLevel, Entity entity) {
+		serverLevel.broadcastEntityEvent(this, (byte)4);
 		this.playSound(SoundEvents.WARDEN_ATTACK_IMPACT, 10.0F, this.getVoicePitch());
 		SonicBoom.setCooldown(this, 40);
-		return super.doHurtTarget(entity);
+		return super.doHurtTarget(serverLevel, entity);
 	}
 
 	@Override
@@ -280,13 +280,12 @@ public class Warden extends Monster implements VibrationSystem {
 	}
 
 	@Override
-	protected void customServerAiStep() {
-		ServerLevel serverLevel = (ServerLevel)this.level();
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("wardenBrain");
 		this.getBrain().tick(serverLevel, this);
 		profilerFiller.pop();
-		super.customServerAiStep();
+		super.customServerAiStep(serverLevel);
 		if ((this.tickCount + this.getId()) % 120 == 0) {
 			applyDarknessAround(serverLevel, this.position(), this, 20);
 		}
@@ -515,9 +514,9 @@ public class Warden extends Monster implements VibrationSystem {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		boolean bl = super.hurt(damageSource, f);
-		if (!this.level().isClientSide && !this.isNoAi() && !this.isDiggingOrEmerging()) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		boolean bl = super.hurtServer(serverLevel, damageSource, f);
+		if (!this.isNoAi() && !this.isDiggingOrEmerging()) {
 			Entity entity = damageSource.getEntity();
 			this.increaseAngerAt(entity, AngerLevel.ANGRY.getMinimumAnger() + 20, false);
 			if (this.brain.getMemory(MemoryModuleType.ATTACK_TARGET).isEmpty()

@@ -9,6 +9,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -67,6 +68,7 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 	@Override
 	public void tick() {
 		Entity entity = this.getOwner();
+		this.applyInertia();
 		if (this.level().isClientSide || (entity == null || !entity.isRemoved()) && this.level().hasChunkAt(this.blockPosition())) {
 			HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity, this.getClipType());
 			Vec3 vec3;
@@ -88,7 +90,6 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 				this.hitTargetOrDeflectSelf(hitResult);
 			}
 
-			this.applyInertia();
 			this.createParticleTrail();
 		} else {
 			this.discard();
@@ -122,8 +123,8 @@ public abstract class AbstractHurtingProjectile extends Projectile {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		return !this.isInvulnerableTo(damageSource);
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		return false;
 	}
 
 	@Override

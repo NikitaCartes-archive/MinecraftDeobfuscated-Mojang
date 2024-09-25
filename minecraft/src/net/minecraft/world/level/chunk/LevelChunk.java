@@ -532,7 +532,7 @@ public class LevelChunk extends ChunkAccess {
 		return this.blockEntities;
 	}
 
-	public void postProcessGeneration() {
+	public void postProcessGeneration(ServerLevel serverLevel) {
 		ChunkPos chunkPos = this.getPos();
 
 		for (int i = 0; i < this.postProcessing.length; i++) {
@@ -542,13 +542,13 @@ public class LevelChunk extends ChunkAccess {
 					BlockState blockState = this.getBlockState(blockPos);
 					FluidState fluidState = blockState.getFluidState();
 					if (!fluidState.isEmpty()) {
-						fluidState.tick(this.level, blockPos, blockState);
+						fluidState.tick(serverLevel, blockPos, blockState);
 					}
 
 					if (!(blockState.getBlock() instanceof LiquidBlock)) {
-						BlockState blockState2 = Block.updateFromNeighbourShapes(blockState, this.level, blockPos);
+						BlockState blockState2 = Block.updateFromNeighbourShapes(blockState, serverLevel, blockPos);
 						if (blockState2 != blockState) {
-							this.level.setBlock(blockPos, blockState2, 20);
+							serverLevel.setBlock(blockPos, blockState2, 20);
 						}
 					}
 				}

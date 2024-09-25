@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -72,22 +73,22 @@ public abstract class LavaFluid extends FlowingFluid {
 	}
 
 	@Override
-	public void randomTick(Level level, BlockPos blockPos, FluidState fluidState, RandomSource randomSource) {
-		if (level.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
+	public void randomTick(ServerLevel serverLevel, BlockPos blockPos, FluidState fluidState, RandomSource randomSource) {
+		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
 			int i = randomSource.nextInt(3);
 			if (i > 0) {
 				BlockPos blockPos2 = blockPos;
 
 				for (int j = 0; j < i; j++) {
 					blockPos2 = blockPos2.offset(randomSource.nextInt(3) - 1, 1, randomSource.nextInt(3) - 1);
-					if (!level.isLoaded(blockPos2)) {
+					if (!serverLevel.isLoaded(blockPos2)) {
 						return;
 					}
 
-					BlockState blockState = level.getBlockState(blockPos2);
+					BlockState blockState = serverLevel.getBlockState(blockPos2);
 					if (blockState.isAir()) {
-						if (this.hasFlammableNeighbours(level, blockPos2)) {
-							level.setBlockAndUpdate(blockPos2, BaseFireBlock.getState(level, blockPos2));
+						if (this.hasFlammableNeighbours(serverLevel, blockPos2)) {
+							serverLevel.setBlockAndUpdate(blockPos2, BaseFireBlock.getState(serverLevel, blockPos2));
 							return;
 						}
 					} else if (blockState.blocksMotion()) {
@@ -97,12 +98,12 @@ public abstract class LavaFluid extends FlowingFluid {
 			} else {
 				for (int k = 0; k < 3; k++) {
 					BlockPos blockPos3 = blockPos.offset(randomSource.nextInt(3) - 1, 0, randomSource.nextInt(3) - 1);
-					if (!level.isLoaded(blockPos3)) {
+					if (!serverLevel.isLoaded(blockPos3)) {
 						return;
 					}
 
-					if (level.isEmptyBlock(blockPos3.above()) && this.isFlammable(level, blockPos3)) {
-						level.setBlockAndUpdate(blockPos3.above(), BaseFireBlock.getState(level, blockPos3));
+					if (serverLevel.isEmptyBlock(blockPos3.above()) && this.isFlammable(serverLevel, blockPos3)) {
+						serverLevel.setBlockAndUpdate(blockPos3.above(), BaseFireBlock.getState(serverLevel, blockPos3));
 					}
 				}
 			}
@@ -184,8 +185,8 @@ public abstract class LavaFluid extends FlowingFluid {
 	}
 
 	@Override
-	protected boolean canConvertToSource(Level level) {
-		return level.getGameRules().getBoolean(GameRules.RULE_LAVA_SOURCE_CONVERSION);
+	protected boolean canConvertToSource(ServerLevel serverLevel) {
+		return serverLevel.getGameRules().getBoolean(GameRules.RULE_LAVA_SOURCE_CONVERSION);
 	}
 
 	@Override

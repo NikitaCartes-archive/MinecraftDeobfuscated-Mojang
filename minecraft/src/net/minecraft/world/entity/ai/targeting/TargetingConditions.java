@@ -1,7 +1,7 @@
 package net.minecraft.world.entity.ai.targeting;
 
-import java.util.function.Predicate;
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -14,7 +14,7 @@ public class TargetingConditions {
 	private boolean checkLineOfSight = true;
 	private boolean testInvisible = true;
 	@Nullable
-	private Predicate<LivingEntity> selector;
+	private TargetingConditions.Selector selector;
 
 	private TargetingConditions(boolean bl) {
 		this.isCombat = bl;
@@ -52,21 +52,21 @@ public class TargetingConditions {
 		return this;
 	}
 
-	public TargetingConditions selector(@Nullable Predicate<LivingEntity> predicate) {
-		this.selector = predicate;
+	public TargetingConditions selector(@Nullable TargetingConditions.Selector selector) {
+		this.selector = selector;
 		return this;
 	}
 
-	public boolean test(@Nullable LivingEntity livingEntity, LivingEntity livingEntity2) {
+	public boolean test(ServerLevel serverLevel, @Nullable LivingEntity livingEntity, LivingEntity livingEntity2) {
 		if (livingEntity == livingEntity2) {
 			return false;
 		} else if (!livingEntity2.canBeSeenByAnyone()) {
 			return false;
-		} else if (this.selector != null && !this.selector.test(livingEntity2)) {
+		} else if (this.selector != null && !this.selector.test(livingEntity2, serverLevel)) {
 			return false;
 		} else {
 			if (livingEntity == null) {
-				if (this.isCombat && (!livingEntity2.canBeSeenAsEnemy() || livingEntity2.level().getDifficulty() == Difficulty.PEACEFUL)) {
+				if (this.isCombat && (!livingEntity2.canBeSeenAsEnemy() || serverLevel.getDifficulty() == Difficulty.PEACEFUL)) {
 					return false;
 				}
 			} else {
@@ -91,5 +91,10 @@ public class TargetingConditions {
 
 			return true;
 		}
+	}
+
+	@FunctionalInterface
+	public interface Selector {
+		boolean test(LivingEntity livingEntity, ServerLevel serverLevel);
 	}
 }

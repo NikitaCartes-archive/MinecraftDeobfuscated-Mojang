@@ -1,12 +1,12 @@
 package net.minecraft.world.entity.animal;
 
 import java.util.List;
-import java.util.function.Predicate;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -30,14 +30,14 @@ public class Pufferfish extends AbstractFish {
 	private static final EntityDataAccessor<Integer> PUFF_STATE = SynchedEntityData.defineId(Pufferfish.class, EntityDataSerializers.INT);
 	int inflateCounter;
 	int deflateTimer;
-	private static final Predicate<LivingEntity> SCARY_MOB = livingEntity -> {
+	private static final TargetingConditions.Selector SCARY_MOB = (livingEntity, serverLevel) -> {
 		if (livingEntity instanceof Player player && player.isCreative()) {
 			return false;
 		}
 
 		return !livingEntity.getType().is(EntityTypeTags.NOT_SCARY_FOR_PUFFERFISH);
 	};
-	static final TargetingConditions targetingConditions = TargetingConditions.forNonCombat().ignoreInvisibilityTesting().ignoreLineOfSight().selector(SCARY_MOB);
+	static final TargetingConditions TARGETING_CONDITIONS = TargetingConditions.forNonCombat().ignoreInvisibilityTesting().ignoreLineOfSight().selector(SCARY_MOB);
 	public static final int STATE_SMALL = 0;
 	public static final int STATE_MID = 1;
 	public static final int STATE_FULL = 2;
@@ -125,18 +125,18 @@ public class Pufferfish extends AbstractFish {
 	@Override
 	public void aiStep() {
 		super.aiStep();
-		if (this.isAlive() && this.getPuffState() > 0) {
-			for (Mob mob : this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(0.3), mobx -> targetingConditions.test(this, mobx))) {
+		if (this.level() instanceof ServerLevel serverLevel && this.isAlive() && this.getPuffState() > 0) {
+			for (Mob mob : this.level().getEntitiesOfClass(Mob.class, this.getBoundingBox().inflate(0.3), mobx -> TARGETING_CONDITIONS.test(serverLevel, this, mobx))) {
 				if (mob.isAlive()) {
-					this.touch(mob);
+					this.touch(serverLevel, mob);
 				}
 			}
 		}
 	}
 
-	private void touch(Mob mob) {
+	private void touch(ServerLevel serverLevel, Mob mob) {
 		int i = this.getPuffState();
-		if (mob.hurt(this.damageSources().mobAttack(this), (float)(1 + i))) {
+		if (mob.hurtServer(serverLevel, this.damageSources().mobAttack(this), (float)(1 + i))) {
 			mob.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * i, 0), this);
 			this.playSound(SoundEvents.PUFFER_FISH_STING, 1.0F, 1.0F);
 		}
@@ -145,9 +145,11 @@ public class Pufferfish extends AbstractFish {
 	@Override
 	public void playerTouch(Player player) {
 		int i = this.getPuffState();
-		if (player instanceof ServerPlayer && i > 0 && player.hurt(this.damageSources().mobAttack(this), (float)(1 + i))) {
+		if (player instanceof ServerPlayer serverPlayer
+			&& i > 0
+			&& player.hurtServer(serverPlayer.serverLevel(), this.damageSources().mobAttack(this), (float)(1 + i))) {
 			if (!this.isSilent()) {
-				((ServerPlayer)player).connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.PUFFER_FISH_STING, 0.0F));
+				serverPlayer.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.PUFFER_FISH_STING, 0.0F));
 			}
 
 			player.addEffect(new MobEffectInstance(MobEffects.POISON, 60 * i, 0), this);
@@ -202,7 +204,9 @@ public class Pufferfish extends AbstractFish {
 			List<LivingEntity> list = this.fish
 				.level()
 				.getEntitiesOfClass(
-					LivingEntity.class, this.fish.getBoundingBox().inflate(2.0), livingEntity -> Pufferfish.targetingConditions.test(this.fish, livingEntity)
+					LivingEntity.class,
+					this.fish.getBoundingBox().inflate(2.0),
+					livingEntity -> Pufferfish.TARGETING_CONDITIONS.test(getServerLevel(this.fish), this.fish, livingEntity)
 				);
 			return !list.isEmpty();
 		}

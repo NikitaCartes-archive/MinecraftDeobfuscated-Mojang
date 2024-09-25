@@ -5,6 +5,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -115,7 +116,7 @@ public class Blaze extends Monster {
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		this.nextHeightOffsetChangeTick--;
 		if (this.nextHeightOffsetChangeTick <= 0) {
 			this.nextHeightOffsetChangeTick = 100;
@@ -129,7 +130,7 @@ public class Blaze extends Monster {
 			this.hasImpulse = true;
 		}
 
-		super.customServerAiStep();
+		super.customServerAiStep(serverLevel);
 	}
 
 	@Override
@@ -205,7 +206,7 @@ public class Blaze extends Monster {
 
 					if (this.attackTime <= 0) {
 						this.attackTime = 20;
-						this.blaze.doHurtTarget(livingEntity);
+						this.blaze.doHurtTarget(getServerLevel(this.blaze), livingEntity);
 					}
 
 					this.blaze.getMoveControl().setWantedPosition(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ(), 1.0);

@@ -55,6 +55,7 @@ import net.minecraft.util.datafix.fixes.BlockNameFlatteningFix;
 import net.minecraft.util.datafix.fixes.BlockPosFormatAndRenamesFix;
 import net.minecraft.util.datafix.fixes.BlockRenameFix;
 import net.minecraft.util.datafix.fixes.BlockStateStructureTemplateFix;
+import net.minecraft.util.datafix.fixes.BoatSplitFix;
 import net.minecraft.util.datafix.fixes.CarvingStepRemoveFix;
 import net.minecraft.util.datafix.fixes.CatTypeFix;
 import net.minecraft.util.datafix.fixes.CauldronRenameFix;
@@ -74,6 +75,7 @@ import net.minecraft.util.datafix.fixes.ChunkStatusFix2;
 import net.minecraft.util.datafix.fixes.ChunkStructuresTemplateRenameFix;
 import net.minecraft.util.datafix.fixes.ChunkToProtochunkFix;
 import net.minecraft.util.datafix.fixes.ColorlessShulkerEntityFix;
+import net.minecraft.util.datafix.fixes.ContainerBlockEntityLockPredicateFix;
 import net.minecraft.util.datafix.fixes.CriteriaRenameFix;
 import net.minecraft.util.datafix.fixes.DecoratedPotFieldRenameFix;
 import net.minecraft.util.datafix.fixes.DropInvalidSignDataFix;
@@ -156,6 +158,7 @@ import net.minecraft.util.datafix.fixes.LevelDataGeneratorOptionsFix;
 import net.minecraft.util.datafix.fixes.LevelFlatGeneratorInfoFix;
 import net.minecraft.util.datafix.fixes.LevelLegacyWorldGenSettingsFix;
 import net.minecraft.util.datafix.fixes.LevelUUIDFix;
+import net.minecraft.util.datafix.fixes.LockComponentPredicateFix;
 import net.minecraft.util.datafix.fixes.LodestoneCompassComponentFix;
 import net.minecraft.util.datafix.fixes.MapBannerBlockPosFormatFix;
 import net.minecraft.util.datafix.fixes.MapIdFix;
@@ -310,6 +313,7 @@ import net.minecraft.util.datafix.schemas.V3818_5;
 import net.minecraft.util.datafix.schemas.V3825;
 import net.minecraft.util.datafix.schemas.V3938;
 import net.minecraft.util.datafix.schemas.V4059;
+import net.minecraft.util.datafix.schemas.V4067;
 import net.minecraft.util.datafix.schemas.V501;
 import net.minecraft.util.datafix.schemas.V700;
 import net.minecraft.util.datafix.schemas.V701;
@@ -1343,6 +1347,12 @@ public class DataFixers {
 		dataFixerBuilder.addFixer(new TrialSpawnerConfigInRegistryFix(schema231));
 		Schema schema232 = dataFixerBuilder.addSchema(4064, SAME_NAMESPACED);
 		dataFixerBuilder.addFixer(new FireResistantToDamageResistantComponentFix(schema232));
+		Schema schema233 = dataFixerBuilder.addSchema(4067, V4067::new);
+		dataFixerBuilder.addFixer(new BoatSplitFix(schema233));
+		dataFixerBuilder.addFixer(new FeatureFlagRemoveFix(schema233, "Remove Bundle experimental feature flag", Set.of("minecraft:bundle")));
+		Schema schema234 = dataFixerBuilder.addSchema(4068, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new LockComponentPredicateFix(schema234));
+		dataFixerBuilder.addFixer(new ContainerBlockEntityLockPredicateFix(schema234));
 	}
 
 	private static UnaryOperator<String> createRenamerNoNamespace(Map<String, String> map) {

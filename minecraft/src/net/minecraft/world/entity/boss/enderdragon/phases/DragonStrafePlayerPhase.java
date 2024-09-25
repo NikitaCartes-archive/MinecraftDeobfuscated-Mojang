@@ -3,6 +3,7 @@ package net.minecraft.world.entity.boss.enderdragon.phases;
 import com.mojang.logging.LogUtils;
 import javax.annotation.Nullable;
 import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
@@ -29,7 +30,7 @@ public class DragonStrafePlayerPhase extends AbstractDragonPhaseInstance {
 	}
 
 	@Override
-	public void doServerTick() {
+	public void doServerTick(ServerLevel serverLevel) {
 		if (this.attackTarget == null) {
 			LOGGER.warn("Skipping player strafe phase because no player was found");
 			this.dragon.getPhaseManager().setPhase(EnderDragonPhase.HOLDING_PATTERN);
@@ -72,12 +73,12 @@ public class DragonStrafePlayerPhase extends AbstractDragonPhaseInstance {
 						double q = this.attackTarget.getZ() - n;
 						Vec3 vec34 = new Vec3(o, p, q);
 						if (!this.dragon.isSilent()) {
-							this.dragon.level().levelEvent(null, 1017, this.dragon.blockPosition(), 0);
+							serverLevel.levelEvent(null, 1017, this.dragon.blockPosition(), 0);
 						}
 
-						DragonFireball dragonFireball = new DragonFireball(this.dragon.level(), this.dragon, vec34.normalize());
+						DragonFireball dragonFireball = new DragonFireball(serverLevel, this.dragon, vec34.normalize());
 						dragonFireball.moveTo(l, m, n, 0.0F, 0.0F);
-						this.dragon.level().addFreshEntity(dragonFireball);
+						serverLevel.addFreshEntity(dragonFireball);
 						this.fireballCharge = 0;
 						if (this.currentPath != null) {
 							while (!this.currentPath.isDone()) {

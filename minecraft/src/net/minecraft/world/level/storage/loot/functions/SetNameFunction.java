@@ -64,7 +64,7 @@ public class SetNameFunction extends LootItemConditionalFunction {
 		if (entityTarget != null) {
 			Entity entity = lootContext.getParamOrNull(entityTarget.getParam());
 			if (entity != null) {
-				CommandSourceStack commandSourceStack = entity.createCommandSourceStack().withPermission(2);
+				CommandSourceStack commandSourceStack = entity.createCommandSourceStackForNameResolution(lootContext.getLevel()).withPermission(2);
 				return component -> {
 					try {
 						return ComponentUtils.updateForEntity(commandSourceStack, component, entity, 0);

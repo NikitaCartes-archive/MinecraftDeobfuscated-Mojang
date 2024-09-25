@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
@@ -151,7 +152,7 @@ public class LightningBolt extends Entity {
 	}
 
 	private void spawnFire(int i) {
-		if (!this.visualOnly && !this.level().isClientSide && this.level().getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
+		if (!this.visualOnly && this.level() instanceof ServerLevel serverLevel && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOFIRETICK)) {
 			BlockPos blockPos = this.blockPosition();
 			BlockState blockState = BaseFireBlock.getState(this.level(), blockPos);
 			if (this.level().getBlockState(blockPos).isAir() && blockState.canSurvive(this.level(), blockPos)) {
@@ -244,5 +245,10 @@ public class LightningBolt extends Entity {
 
 	public Stream<Entity> getHitEntities() {
 		return this.hitEntities.stream().filter(Entity::isAlive);
+	}
+
+	@Override
+	public final boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		return false;
 	}
 }

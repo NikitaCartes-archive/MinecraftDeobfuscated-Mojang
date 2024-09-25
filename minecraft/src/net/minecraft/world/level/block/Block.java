@@ -323,10 +323,11 @@ public class Block extends BlockBehaviour implements ItemLike {
 	}
 
 	private static void popResource(Level level, Supplier<ItemEntity> supplier, ItemStack itemStack) {
-		if (!level.isClientSide && !itemStack.isEmpty() && level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
+		if (level instanceof ServerLevel serverLevel && !itemStack.isEmpty() && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)) {
 			ItemEntity itemEntity = (ItemEntity)supplier.get();
 			itemEntity.setDefaultPickUpDelay();
 			level.addFreshEntity(itemEntity);
+			return;
 		}
 	}
 
@@ -398,8 +399,8 @@ public class Block extends BlockBehaviour implements ItemLike {
 
 	public BlockState playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
 		this.spawnDestroyParticles(level, player, blockPos, blockState);
-		if (blockState.is(BlockTags.GUARDED_BY_PIGLINS)) {
-			PiglinAi.angerNearbyPiglins(player, false);
+		if (blockState.is(BlockTags.GUARDED_BY_PIGLINS) && level instanceof ServerLevel serverLevel) {
+			PiglinAi.angerNearbyPiglins(serverLevel, player, false);
 		}
 
 		level.gameEvent(GameEvent.BLOCK_DESTROY, blockPos, GameEvent.Context.of(player, blockState));

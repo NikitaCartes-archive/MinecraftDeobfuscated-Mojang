@@ -5,7 +5,6 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.LevelHeightAccessor;
 
 public interface LevelData {
@@ -24,8 +23,6 @@ public interface LevelData {
 	void setRaining(boolean bl);
 
 	boolean isHardcore();
-
-	GameRules getGameRules();
 
 	Difficulty getDifficulty();
 

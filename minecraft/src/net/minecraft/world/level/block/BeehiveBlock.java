@@ -274,9 +274,9 @@ public class BeehiveBlock extends BaseEntityBlock {
 
 	@Override
 	public BlockState playerWillDestroy(Level level, BlockPos blockPos, BlockState blockState, Player player) {
-		if (!level.isClientSide
+		if (level instanceof ServerLevel serverLevel
 			&& player.isCreative()
-			&& level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)
+			&& serverLevel.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS)
 			&& level.getBlockEntity(blockPos) instanceof BeehiveBlockEntity beehiveBlockEntity) {
 			int i = (Integer)blockState.getValue(HONEY_LEVEL);
 			boolean bl = !beehiveBlockEntity.isEmpty();

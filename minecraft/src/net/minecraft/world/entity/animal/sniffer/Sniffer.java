@@ -262,14 +262,15 @@ public class Sniffer extends Animal {
 	}
 
 	private void dropSeed() {
-		if (!this.level().isClientSide() && this.entityData.get(DATA_DROP_SEED_AT_TICK) == this.tickCount) {
+		if (this.level() instanceof ServerLevel serverLevel && this.entityData.get(DATA_DROP_SEED_AT_TICK) == this.tickCount) {
 			BlockPos blockPos = this.getHeadBlock();
-			this.dropFromGiftLootTable(BuiltInLootTables.SNIFFER_DIGGING, itemStack -> {
+			this.dropFromGiftLootTable(serverLevel, BuiltInLootTables.SNIFFER_DIGGING, (serverLevelx, itemStack) -> {
 				ItemEntity itemEntity = new ItemEntity(this.level(), (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), itemStack);
 				itemEntity.setDefaultPickUpDelay();
-				this.level().addFreshEntity(itemEntity);
+				serverLevelx.addFreshEntity(itemEntity);
 			});
 			this.playSound(SoundEvents.SNIFFER_DROP_SEED, 1.0F, 1.0F);
+			return;
 		}
 	}
 
@@ -438,14 +439,14 @@ public class Sniffer extends Animal {
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("snifferBrain");
-		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.getBrain().tick(serverLevel, this);
 		profilerFiller.popPush("snifferActivityUpdate");
 		SnifferAi.updateActivity(this);
 		profilerFiller.pop();
-		super.customServerAiStep();
+		super.customServerAiStep(serverLevel);
 	}
 
 	@Override

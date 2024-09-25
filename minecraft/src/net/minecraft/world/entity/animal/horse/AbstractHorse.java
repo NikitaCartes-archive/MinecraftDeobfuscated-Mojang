@@ -3,7 +3,6 @@ package net.minecraft.world.entity.animal.horse;
 import java.util.UUID;
 import java.util.function.DoubleSupplier;
 import java.util.function.IntUnaryOperator;
-import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
@@ -91,8 +90,13 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	private static final float MAX_HEALTH = generateMaxHealth(i -> i - 1);
 	private static final float BACKWARDS_MOVE_SPEED_FACTOR = 0.25F;
 	private static final float SIDEWAYS_MOVE_SPEED_FACTOR = 0.5F;
-	private static final Predicate<LivingEntity> PARENT_HORSE_SELECTOR = livingEntity -> livingEntity instanceof AbstractHorse
-			&& ((AbstractHorse)livingEntity).isBred();
+	private static final TargetingConditions.Selector PARENT_HORSE_SELECTOR = (livingEntity, serverLevel) -> {
+		if (livingEntity instanceof AbstractHorse abstractHorse && abstractHorse.isBred()) {
+			return true;
+		}
+
+		return false;
+	};
 	private static final TargetingConditions MOMMY_TARGETING = TargetingConditions.forNonCombat().range(16.0).ignoreLineOfSight().selector(PARENT_HORSE_SELECTOR);
 	private static final EntityDataAccessor<Byte> DATA_ID_FLAGS = SynchedEntityData.defineId(AbstractHorse.class, EntityDataSerializers.BYTE);
 	private static final int FLAG_TAME = 2;
@@ -364,8 +368,8 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		boolean bl = super.hurt(damageSource, f);
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		boolean bl = super.hurtServer(serverLevel, damageSource, f);
 		if (bl && this.random.nextInt(3) == 0) {
 			this.standIfPossible();
 		}
@@ -557,13 +561,13 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 	}
 
 	@Override
-	protected void dropEquipment() {
-		super.dropEquipment();
+	protected void dropEquipment(ServerLevel serverLevel) {
+		super.dropEquipment(serverLevel);
 		if (this.inventory != null) {
 			for (int i = 0; i < this.inventory.getContainerSize(); i++) {
 				ItemStack itemStack = this.inventory.getItem(i);
 				if (!itemStack.isEmpty() && !EnchantmentHelper.has(itemStack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
-					this.spawnAtLocation(itemStack);
+					this.spawnAtLocation(serverLevel, itemStack);
 				}
 			}
 		}
@@ -576,7 +580,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 		}
 
 		super.aiStep();
-		if (!this.level().isClientSide && this.isAlive()) {
+		if (this.level() instanceof ServerLevel serverLevel && this.isAlive()) {
 			if (this.random.nextInt(900) == 0 && this.deathTime == 0) {
 				this.heal(1.0F);
 			}
@@ -585,7 +589,7 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 				if (!this.isEating()
 					&& !this.isVehicle()
 					&& this.random.nextInt(300) == 0
-					&& this.level().getBlockState(this.blockPosition().below()).is(Blocks.GRASS_BLOCK)) {
+					&& serverLevel.getBlockState(this.blockPosition().below()).is(Blocks.GRASS_BLOCK)) {
 					this.setEating(true);
 				}
 
@@ -595,14 +599,16 @@ public abstract class AbstractHorse extends Animal implements ContainerListener,
 				}
 			}
 
-			this.followMommy();
+			this.followMommy(serverLevel);
+			return;
 		}
 	}
 
-	protected void followMommy() {
+	protected void followMommy(ServerLevel serverLevel) {
 		if (this.isBred() && this.isBaby() && !this.isEating()) {
-			LivingEntity livingEntity = this.level()
-				.getNearestEntity(AbstractHorse.class, MOMMY_TARGETING, this, this.getX(), this.getY(), this.getZ(), this.getBoundingBox().inflate(16.0));
+			LivingEntity livingEntity = serverLevel.getNearestEntity(
+				AbstractHorse.class, MOMMY_TARGETING, this, this.getX(), this.getY(), this.getZ(), this.getBoundingBox().inflate(16.0)
+			);
 			if (livingEntity != null && this.distanceToSqr(livingEntity) > 4.0) {
 				this.navigation.createPath(livingEntity, 0);
 			}

@@ -17,9 +17,9 @@ public class StartHuntingHoglin {
 					.apply(instance, (memoryAccessor, memoryAccessor2, memoryAccessor3, memoryAccessor4) -> (serverLevel, piglin, l) -> {
 							if (!piglin.isBaby() && !instance.tryGet(memoryAccessor4).map(list -> list.stream().anyMatch(StartHuntingHoglin::hasHuntedRecently)).isPresent()) {
 								Hoglin hoglin = instance.get(memoryAccessor);
-								PiglinAi.setAngerTarget(piglin, hoglin);
+								PiglinAi.setAngerTarget(serverLevel, piglin, hoglin);
 								PiglinAi.dontKillAnyMoreHoglinsForAWhile(piglin);
-								PiglinAi.broadcastAngerTarget(piglin, hoglin);
+								PiglinAi.broadcastAngerTarget(serverLevel, piglin, hoglin);
 								instance.tryGet(memoryAccessor4).ifPresent(list -> list.forEach(PiglinAi::dontKillAnyMoreHoglinsForAWhile));
 								return true;
 							} else {

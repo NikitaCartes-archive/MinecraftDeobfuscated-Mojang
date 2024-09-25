@@ -35,7 +35,7 @@ public class RemoveBlockGoal extends MoveToBlockGoal {
 
 	@Override
 	public boolean canUse() {
-		if (!this.removerMob.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+		if (!getServerLevel(this.removerMob).getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 			return false;
 		} else if (this.nextStartTick > 0) {
 			this.nextStartTick--;

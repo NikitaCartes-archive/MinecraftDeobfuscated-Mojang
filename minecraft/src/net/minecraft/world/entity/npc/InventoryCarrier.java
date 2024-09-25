@@ -2,6 +2,7 @@ package net.minecraft.world.entity.npc;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -12,9 +13,9 @@ public interface InventoryCarrier {
 
 	SimpleContainer getInventory();
 
-	static void pickUpItem(Mob mob, InventoryCarrier inventoryCarrier, ItemEntity itemEntity) {
+	static void pickUpItem(ServerLevel serverLevel, Mob mob, InventoryCarrier inventoryCarrier, ItemEntity itemEntity) {
 		ItemStack itemStack = itemEntity.getItem();
-		if (mob.wantsToPickUp(itemStack)) {
+		if (mob.wantsToPickUp(serverLevel, itemStack)) {
 			SimpleContainer simpleContainer = inventoryCarrier.getInventory();
 			boolean bl = simpleContainer.canAddItem(itemStack);
 			if (!bl) {

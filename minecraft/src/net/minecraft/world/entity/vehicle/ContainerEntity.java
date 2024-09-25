@@ -80,14 +80,12 @@ public interface ContainerEntity extends Container, MenuProvider {
 		}
 	}
 
-	default void chestVehicleDestroyed(DamageSource damageSource, Level level, Entity entity) {
-		if (level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-			Containers.dropContents(level, entity, this);
-			if (!level.isClientSide) {
-				Entity entity2 = damageSource.getDirectEntity();
-				if (entity2 != null && entity2.getType() == EntityType.PLAYER) {
-					PiglinAi.angerNearbyPiglins((Player)entity2, true);
-				}
+	default void chestVehicleDestroyed(DamageSource damageSource, ServerLevel serverLevel, Entity entity) {
+		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+			Containers.dropContents(serverLevel, entity, this);
+			Entity entity2 = damageSource.getDirectEntity();
+			if (entity2 != null && entity2.getType() == EntityType.PLAYER) {
+				PiglinAi.angerNearbyPiglins(serverLevel, (Player)entity2, true);
 			}
 		}
 	}

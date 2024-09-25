@@ -110,9 +110,9 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 			this.playSound(soundEvent, 1.0F, 1.0F);
 			return InteractionResult.SUCCESS;
 		} else if (itemStack.is(Items.SHEARS) && this.readyForShearing()) {
-			this.shear(SoundSource.PLAYERS, itemStack);
-			this.gameEvent(GameEvent.SHEAR, player);
-			if (!this.level().isClientSide) {
+			if (this.level() instanceof ServerLevel serverLevel) {
+				this.shear(serverLevel, SoundSource.PLAYERS, itemStack);
+				this.gameEvent(GameEvent.SHEAR, player);
 				itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 			}
 
@@ -163,18 +163,16 @@ public class MushroomCow extends Cow implements Shearable, VariantHolder<Mushroo
 	}
 
 	@Override
-	public void shear(SoundSource soundSource, ItemStack itemStack) {
-		this.level().playSound(null, this, SoundEvents.MOOSHROOM_SHEAR, soundSource, 1.0F, 1.0F);
-		if (!this.level().isClientSide()) {
-			this.convertTo(EntityType.COW, ConversionParams.single(this, false, false), cow -> {
-				((ServerLevel)this.level()).sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(0.5), this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
-				this.dropFromShearingLootTable(BuiltInLootTables.SHEAR_MOOSHROOM, itemStack, itemStackxx -> {
-					for (int i = 0; i < itemStackxx.getCount(); i++) {
-						this.level().addFreshEntity(new ItemEntity(this.level(), this.getX(), this.getY(1.0), this.getZ(), itemStackxx.copyWithCount(1)));
-					}
-				});
+	public void shear(ServerLevel serverLevel, SoundSource soundSource, ItemStack itemStack) {
+		serverLevel.playSound(null, this, SoundEvents.MOOSHROOM_SHEAR, soundSource, 1.0F, 1.0F);
+		this.convertTo(EntityType.COW, ConversionParams.single(this, false, false), cow -> {
+			serverLevel.sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(0.5), this.getZ(), 1, 0.0, 0.0, 0.0, 0.0);
+			this.dropFromShearingLootTable(serverLevel, BuiltInLootTables.SHEAR_MOOSHROOM, itemStack, (serverLevelxx, itemStackxx) -> {
+				for (int i = 0; i < itemStackxx.getCount(); i++) {
+					serverLevelxx.addFreshEntity(new ItemEntity(this.level(), this.getX(), this.getY(1.0), this.getZ(), itemStackxx.copyWithCount(1)));
+				}
 			});
-		}
+		});
 	}
 
 	@Override

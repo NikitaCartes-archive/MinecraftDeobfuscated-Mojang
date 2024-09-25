@@ -90,7 +90,7 @@ public abstract class TargetGoal extends Goal {
 	protected boolean canAttack(@Nullable LivingEntity livingEntity, TargetingConditions targetingConditions) {
 		if (livingEntity == null) {
 			return false;
-		} else if (!targetingConditions.test(this.mob, livingEntity)) {
+		} else if (!targetingConditions.test(getServerLevel(this.mob), this.mob, livingEntity)) {
 			return false;
 		} else if (!this.mob.isWithinRestriction(livingEntity.blockPosition())) {
 			return false;

@@ -54,7 +54,7 @@ public class ShearsDispenseItemBehavior extends OptionalDispenseItemBehavior {
 	private static boolean tryShearLivingEntity(ServerLevel serverLevel, BlockPos blockPos, ItemStack itemStack) {
 		for (LivingEntity livingEntity : serverLevel.getEntitiesOfClass(LivingEntity.class, new AABB(blockPos), EntitySelector.NO_SPECTATORS)) {
 			if (livingEntity instanceof Shearable shearable && shearable.readyForShearing()) {
-				shearable.shear(SoundSource.BLOCKS, itemStack);
+				shearable.shear(serverLevel, SoundSource.BLOCKS, itemStack);
 				serverLevel.gameEvent(null, GameEvent.SHEAR, blockPos);
 				return true;
 			}

@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
@@ -42,21 +43,21 @@ public class OminousItemSpawner extends Entity {
 	@Override
 	public void tick() {
 		super.tick();
-		if (this.level().isClientSide) {
-			this.tickClient();
+		if (this.level() instanceof ServerLevel serverLevel) {
+			this.tickServer(serverLevel);
 		} else {
-			this.tickServer();
+			this.tickClient();
 		}
 	}
 
-	private void tickServer() {
+	private void tickServer(ServerLevel serverLevel) {
 		if ((long)this.tickCount == this.spawnItemAfterTicks - 36L) {
-			this.level().playSound(null, this.blockPosition(), SoundEvents.TRIAL_SPAWNER_ABOUT_TO_SPAWN_ITEM, SoundSource.NEUTRAL);
+			serverLevel.playSound(null, this.blockPosition(), SoundEvents.TRIAL_SPAWNER_ABOUT_TO_SPAWN_ITEM, SoundSource.NEUTRAL);
 		}
 
 		if ((long)this.tickCount >= this.spawnItemAfterTicks) {
 			this.spawnItem();
-			this.kill();
+			this.kill(serverLevel);
 		}
 	}
 
@@ -173,5 +174,10 @@ public class OminousItemSpawner extends Entity {
 
 	private void setItem(ItemStack itemStack) {
 		this.getEntityData().set(DATA_ITEM, itemStack);
+	}
+
+	@Override
+	public final boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		return false;
 	}
 }

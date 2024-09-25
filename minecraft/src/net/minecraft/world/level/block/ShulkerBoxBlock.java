@@ -14,6 +14,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -103,12 +104,12 @@ public class ShulkerBoxBlock extends BaseEntityBlock {
 
 	@Override
 	protected InteractionResult useWithoutItem(BlockState blockState, Level level, BlockPos blockPos, Player player, BlockHitResult blockHitResult) {
-		if (!level.isClientSide
+		if (level instanceof ServerLevel serverLevel
 			&& level.getBlockEntity(blockPos) instanceof ShulkerBoxBlockEntity shulkerBoxBlockEntity
 			&& canOpen(blockState, level, blockPos, shulkerBoxBlockEntity)) {
 			player.openMenu(shulkerBoxBlockEntity);
 			player.awardStat(Stats.OPEN_SHULKER_BOX);
-			PiglinAi.angerNearbyPiglins(player, true);
+			PiglinAi.angerNearbyPiglins(serverLevel, player, true);
 		}
 
 		return InteractionResult.SUCCESS;

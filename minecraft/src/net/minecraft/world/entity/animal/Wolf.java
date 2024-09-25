@@ -2,7 +2,6 @@ package net.minecraft.world.entity.animal;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -61,6 +60,7 @@ import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.Llama;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -90,7 +90,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	private static final EntityDataAccessor<Integer> DATA_COLLAR_COLOR = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_REMAINING_ANGER_TIME = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Holder<WolfVariant>> DATA_VARIANT_ID = SynchedEntityData.defineId(Wolf.class, EntityDataSerializers.WOLF_VARIANT);
-	public static final Predicate<LivingEntity> PREY_SELECTOR = livingEntity -> {
+	public static final TargetingConditions.Selector PREY_SELECTOR = (livingEntity, serverLevel) -> {
 		EntityType<?> entityType = livingEntity.getType();
 		return entityType == EntityType.SHEEP || entityType == EntityType.RABBIT || entityType == EntityType.FOX;
 	};
@@ -337,15 +337,12 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (this.isInvulnerableTo(serverLevel, damageSource)) {
 			return false;
 		} else {
-			if (!this.level().isClientSide) {
-				this.setOrderedToSit(false);
-			}
-
-			return super.hurt(damageSource, f);
+			this.setOrderedToSit(false);
+			return super.hurtServer(serverLevel, damageSource, f);
 		}
 	}
 
@@ -355,9 +352,9 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 	}
 
 	@Override
-	protected void actuallyHurt(DamageSource damageSource, float f) {
+	protected void actuallyHurt(ServerLevel serverLevel, DamageSource damageSource, float f) {
 		if (!this.canArmorAbsorb(damageSource)) {
-			super.actuallyHurt(damageSource, f);
+			super.actuallyHurt(serverLevel, damageSource, f);
 		} else {
 			ItemStack itemStack = this.getBodyArmorItem();
 			int i = itemStack.getDamageValue();
@@ -365,19 +362,17 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 			itemStack.hurtAndBreak(Mth.ceil(f), this, EquipmentSlot.BODY);
 			if (Crackiness.WOLF_ARMOR.byDamage(i, j) != Crackiness.WOLF_ARMOR.byDamage(this.getBodyArmorItem())) {
 				this.playSound(SoundEvents.WOLF_ARMOR_CRACK);
-				if (this.level() instanceof ServerLevel serverLevel) {
-					serverLevel.sendParticles(
-						new ItemParticleOption(ParticleTypes.ITEM, Items.ARMADILLO_SCUTE.getDefaultInstance()),
-						this.getX(),
-						this.getY() + 1.0,
-						this.getZ(),
-						20,
-						0.2,
-						0.1,
-						0.2,
-						0.1
-					);
-				}
+				serverLevel.sendParticles(
+					new ItemParticleOption(ParticleTypes.ITEM, Items.ARMADILLO_SCUTE.getDefaultInstance()),
+					this.getX(),
+					this.getY() + 1.0,
+					this.getZ(),
+					20,
+					0.2,
+					0.1,
+					0.2,
+					0.1
+				);
 			}
 		}
 	}
@@ -407,7 +402,7 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 		Item item = itemStack.getItem();
 		if (this.isTame()) {
 			if (this.isFood(itemStack) && this.getHealth() < this.getMaxHealth()) {
-				itemStack.consume(1, player);
+				this.usePlayerItem(player, interactionHand, itemStack);
 				FoodProperties foodProperties = itemStack.get(DataComponents.FOOD);
 				float f = foodProperties != null ? (float)foodProperties.nutrition() : 1.0F;
 				this.heal(2.0F * f);
@@ -436,7 +431,10 @@ public class Wolf extends TamableAnimal implements NeutralMob, VariantHolder<Hol
 					this.playSound(SoundEvents.ARMOR_UNEQUIP_WOLF);
 					ItemStack itemStack2 = this.getBodyArmorItem();
 					this.setBodyArmorItem(ItemStack.EMPTY);
-					this.spawnAtLocation(itemStack2);
+					if (this.level() instanceof ServerLevel serverLevel) {
+						this.spawnAtLocation(serverLevel, itemStack2);
+					}
+
 					return InteractionResult.SUCCESS;
 				} else if (this.isInSittingPose()
 					&& this.isWearingBodyArmor()

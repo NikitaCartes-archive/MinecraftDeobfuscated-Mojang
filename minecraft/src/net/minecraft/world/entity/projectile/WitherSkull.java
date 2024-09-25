@@ -60,7 +60,7 @@ public class WitherSkull extends AbstractHurtingProjectile {
 			boolean bl;
 			if (this.getOwner() instanceof LivingEntity livingEntity) {
 				DamageSource damageSource = this.damageSources().witherSkull(this, livingEntity);
-				bl = var8.hurt(damageSource, 8.0F);
+				bl = var8.hurtServer(serverLevel, damageSource, 8.0F);
 				if (bl) {
 					if (var8.isAlive()) {
 						EnchantmentHelper.doPostAttackEffects(serverLevel, var8, damageSource);
@@ -69,7 +69,7 @@ public class WitherSkull extends AbstractHurtingProjectile {
 					}
 				}
 			} else {
-				bl = var8.hurt(this.damageSources().magic(), 5.0F);
+				bl = var8.hurtServer(serverLevel, this.damageSources().magic(), 5.0F);
 			}
 
 			if (bl && var8 instanceof LivingEntity livingEntityx) {
@@ -94,11 +94,6 @@ public class WitherSkull extends AbstractHurtingProjectile {
 			this.level().explode(this, this.getX(), this.getY(), this.getZ(), 1.0F, false, Level.ExplosionInteraction.MOB);
 			this.discard();
 		}
-	}
-
-	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		return false;
 	}
 
 	@Override

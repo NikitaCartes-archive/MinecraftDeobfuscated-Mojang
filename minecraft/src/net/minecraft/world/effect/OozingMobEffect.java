@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.ToIntFunction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
@@ -31,11 +32,10 @@ class OozingMobEffect extends MobEffect {
 	}
 
 	@Override
-	public void onMobRemoved(LivingEntity livingEntity, int i, Entity.RemovalReason removalReason) {
+	public void onMobRemoved(ServerLevel serverLevel, LivingEntity livingEntity, int i, Entity.RemovalReason removalReason) {
 		if (removalReason == Entity.RemovalReason.KILLED) {
 			int j = this.spawnedCount.applyAsInt(livingEntity.getRandom());
-			Level level = livingEntity.level();
-			int k = level.getGameRules().getInt(GameRules.RULE_MAX_ENTITY_CRAMMING);
+			int k = serverLevel.getGameRules().getInt(GameRules.RULE_MAX_ENTITY_CRAMMING);
 			int l = numberOfSlimesToSpawn(k, OozingMobEffect.NearbySlimes.closeTo(livingEntity), j);
 
 			for (int m = 0; m < l; m++) {

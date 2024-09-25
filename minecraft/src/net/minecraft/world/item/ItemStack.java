@@ -391,7 +391,7 @@ public final class ItemStack implements DataComponentHolder {
 		int i = itemStack.getCount();
 		ItemStack itemStack2 = this;
 		if (useRemainder != null) {
-			itemStack2 = useRemainder.convertIntoRemainder(livingEntity, this, i);
+			itemStack2 = useRemainder.convertIntoRemainder(this, i, livingEntity.hasInfiniteMaterials(), livingEntity::handleExtraItemsCreatedOnUse);
 		}
 
 		if (useCooldown != null) {

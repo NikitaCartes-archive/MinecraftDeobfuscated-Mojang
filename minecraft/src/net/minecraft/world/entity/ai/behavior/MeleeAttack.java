@@ -27,7 +27,7 @@ public class MeleeAttack {
 									&& instance.<NearestVisibleLivingEntities>get(memoryAccessor4).contains(livingEntity)) {
 									memoryAccessor.set(new EntityTracker(livingEntity, true));
 									mob.swing(InteractionHand.MAIN_HAND);
-									mob.doHurtTarget(livingEntity);
+									mob.doHurtTarget(serverLevel, livingEntity);
 									memoryAccessor3.setWithExpiry(true, (long)i);
 									return true;
 								} else {

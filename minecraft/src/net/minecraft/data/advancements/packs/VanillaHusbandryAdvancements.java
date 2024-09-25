@@ -47,6 +47,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.WolfVariant;
@@ -468,7 +469,9 @@ public class VanillaHusbandryAdvancements implements AdvancementSubProvider {
 				"ride_a_boat_with_a_goat",
 				StartRidingTrigger.TriggerInstance.playerStartsRiding(
 					EntityPredicate.Builder.entity()
-						.vehicle(EntityPredicate.Builder.entity().of(holderGetter, EntityType.BOAT).passenger(EntityPredicate.Builder.entity().of(holderGetter, EntityType.GOAT)))
+						.vehicle(
+							EntityPredicate.Builder.entity().of(holderGetter, EntityTypeTags.BOAT).passenger(EntityPredicate.Builder.entity().of(holderGetter, EntityType.GOAT))
+						)
 				)
 			)
 			.save(consumer, "husbandry/ride_a_boat_with_a_goat");

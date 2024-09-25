@@ -101,9 +101,9 @@ public class Sheep extends Animal implements Shearable {
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		this.eatAnimationTick = this.eatBlockGoal.getEatAnimationTick();
-		super.customServerAiStep();
+		super.customServerAiStep(serverLevel);
 	}
 
 	@Override
@@ -157,28 +157,29 @@ public class Sheep extends Animal implements Shearable {
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (itemStack.is(Items.SHEARS)) {
-			if (!this.level().isClientSide && this.readyForShearing()) {
-				this.shear(SoundSource.PLAYERS, itemStack);
+			if (this.level() instanceof ServerLevel serverLevel && this.readyForShearing()) {
+				this.shear(serverLevel, SoundSource.PLAYERS, itemStack);
 				this.gameEvent(GameEvent.SHEAR, player);
 				itemStack.hurtAndBreak(1, player, getSlotForHand(interactionHand));
 				return InteractionResult.SUCCESS_SERVER;
-			} else {
-				return InteractionResult.CONSUME;
 			}
+
+			return InteractionResult.CONSUME;
 		} else {
 			return super.mobInteract(player, interactionHand);
 		}
 	}
 
 	@Override
-	public void shear(SoundSource soundSource, ItemStack itemStack) {
-		this.level().playSound(null, this, SoundEvents.SHEEP_SHEAR, soundSource, 1.0F, 1.0F);
+	public void shear(ServerLevel serverLevel, SoundSource soundSource, ItemStack itemStack) {
+		serverLevel.playSound(null, this, SoundEvents.SHEEP_SHEAR, soundSource, 1.0F, 1.0F);
 		this.dropFromShearingLootTable(
+			serverLevel,
 			BuiltInLootTables.SHEAR_SHEEP,
 			itemStack,
-			itemStackx -> {
+			(serverLevelx, itemStackx) -> {
 				for (int i = 0; i < itemStackx.getCount(); i++) {
-					ItemEntity itemEntity = this.spawnAtLocation(itemStackx.copyWithCount(1), 1.0F);
+					ItemEntity itemEntity = this.spawnAtLocation(serverLevelx, itemStackx.copyWithCount(1), 1.0F);
 					if (itemEntity != null) {
 						itemEntity.setDeltaMovement(
 							itemEntity.getDeltaMovement()

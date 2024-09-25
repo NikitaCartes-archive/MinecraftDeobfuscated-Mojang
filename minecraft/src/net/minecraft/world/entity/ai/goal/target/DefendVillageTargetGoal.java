@@ -3,6 +3,7 @@ package net.minecraft.world.entity.ai.goal.target;
 import java.util.EnumSet;
 import java.util.List;
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -26,8 +27,9 @@ public class DefendVillageTargetGoal extends TargetGoal {
 	@Override
 	public boolean canUse() {
 		AABB aABB = this.golem.getBoundingBox().inflate(10.0, 8.0, 10.0);
-		List<? extends LivingEntity> list = this.golem.level().getNearbyEntities(Villager.class, this.attackTargeting, this.golem, aABB);
-		List<Player> list2 = this.golem.level().getNearbyPlayers(this.attackTargeting, this.golem, aABB);
+		ServerLevel serverLevel = getServerLevel(this.golem);
+		List<? extends LivingEntity> list = serverLevel.getNearbyEntities(Villager.class, this.attackTargeting, this.golem, aABB);
+		List<Player> list2 = serverLevel.getNearbyPlayers(this.attackTargeting, this.golem, aABB);
 
 		for (LivingEntity livingEntity : list) {
 			Villager villager = (Villager)livingEntity;

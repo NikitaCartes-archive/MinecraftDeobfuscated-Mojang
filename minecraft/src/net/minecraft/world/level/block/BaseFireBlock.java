@@ -5,6 +5,7 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -21,6 +22,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class BaseFireBlock extends Block {
 	private static final int SECONDS_ON_FIRE = 8;
+	private static final int MIN_FIRE_TICKS_TO_ADD = 1;
+	private static final int MAX_FIRE_TICKS_TO_ADD = 3;
 	private final float fireDamage;
 	protected static final float AABB_OFFSET = 1.0F;
 	protected static final VoxelShape DOWN_AABB = Block.box(0.0, 0.0, 0.0, 16.0, 1.0, 16.0);
@@ -128,9 +131,15 @@ public abstract class BaseFireBlock extends Block {
 	@Override
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		if (!entity.fireImmune()) {
-			entity.setRemainingFireTicks(entity.getRemainingFireTicks() + 1);
-			if (entity.getRemainingFireTicks() == 0) {
+			if (entity.getRemainingFireTicks() >= 0) {
+				if (entity instanceof ServerPlayer) {
+					int i = level.getRandom().nextInt(1, 3);
+					entity.setRemainingFireTicks(entity.getRemainingFireTicks() + i);
+				}
+
 				entity.igniteForSeconds(8.0F);
+			} else {
+				entity.setRemainingFireTicks(entity.getRemainingFireTicks() + 1);
 			}
 		}
 

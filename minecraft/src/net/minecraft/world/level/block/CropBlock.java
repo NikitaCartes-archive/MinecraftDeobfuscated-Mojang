@@ -164,8 +164,8 @@ public class CropBlock extends BushBlock implements BonemealableBlock {
 
 	@Override
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (entity instanceof Ravager && level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-			level.destroyBlock(blockPos, true, entity);
+		if (level instanceof ServerLevel serverLevel && entity instanceof Ravager && serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+			serverLevel.destroyBlock(blockPos, true, entity);
 		}
 
 		super.entityInside(blockState, level, blockPos, entity);

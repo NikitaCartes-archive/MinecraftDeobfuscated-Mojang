@@ -210,10 +210,10 @@ public class ZombieVillager extends Zombie implements VillagerDataHolder {
 	private void finishConversion(ServerLevel serverLevel) {
 		this.convertTo(
 			EntityType.VILLAGER,
-			ConversionParams.single(this, false, true),
+			ConversionParams.single(this, false, false),
 			villager -> {
 				for (EquipmentSlot equipmentSlot : this.dropPreservedEquipment(
-					itemStack -> !EnchantmentHelper.has(itemStack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)
+					serverLevel, itemStack -> !EnchantmentHelper.has(itemStack, EnchantmentEffectComponents.PREVENT_ARMOR_CHANGE)
 				)) {
 					SlotAccess slotAccess = villager.getSlot(equipmentSlot.getIndex() + 300);
 					slotAccess.set(this.getItemBySlot(equipmentSlot));

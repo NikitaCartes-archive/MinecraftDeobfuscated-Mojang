@@ -90,7 +90,7 @@ public class ShootTongue extends Behavior<Frog> {
 		if (optional.isPresent()) {
 			Entity entity = (Entity)optional.get();
 			if (entity.isAlive()) {
-				frog.doHurtTarget(entity);
+				frog.doHurtTarget(serverLevel, entity);
 				if (!entity.isAlive()) {
 					entity.remove(Entity.RemovalReason.KILLED);
 				}

@@ -174,7 +174,7 @@ public class Cat extends TamableAnimal implements VariantHolder<Holder<CatVarian
 	}
 
 	@Override
-	public void customServerAiStep() {
+	public void customServerAiStep(ServerLevel serverLevel) {
 		if (this.getMoveControl().hasWanted()) {
 			double d = this.getMoveControl().getSpeedModifier();
 			if (d == 0.6) {
@@ -568,18 +568,17 @@ public class Cat extends TamableAnimal implements VariantHolder<Holder<CatVarian
 			mutableBlockPos.set(this.cat.blockPosition());
 			this.cat
 				.dropFromGiftLootTable(
+					getServerLevel(this.cat),
 					BuiltInLootTables.CAT_MORNING_GIFT,
-					itemStack -> this.cat
-							.level()
-							.addFreshEntity(
-								new ItemEntity(
-									this.cat.level(),
-									(double)mutableBlockPos.getX() - (double)Mth.sin(this.cat.yBodyRot * (float) (Math.PI / 180.0)),
-									(double)mutableBlockPos.getY(),
-									(double)mutableBlockPos.getZ() + (double)Mth.cos(this.cat.yBodyRot * (float) (Math.PI / 180.0)),
-									itemStack
-								)
+					(serverLevel, itemStack) -> serverLevel.addFreshEntity(
+							new ItemEntity(
+								serverLevel,
+								(double)mutableBlockPos.getX() - (double)Mth.sin(this.cat.yBodyRot * (float) (Math.PI / 180.0)),
+								(double)mutableBlockPos.getY(),
+								(double)mutableBlockPos.getZ() + (double)Mth.cos(this.cat.yBodyRot * (float) (Math.PI / 180.0)),
+								itemStack
 							)
+						)
 				);
 		}
 

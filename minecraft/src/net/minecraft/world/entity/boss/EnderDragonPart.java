@@ -6,6 +6,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -50,8 +51,8 @@ public class EnderDragonPart extends Entity {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		return this.isInvulnerableTo(damageSource) ? false : this.parentMob.hurt(this, damageSource, f);
+	public final boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		return this.isInvulnerableToBase(damageSource) ? false : this.parentMob.hurt(serverLevel, this, damageSource, f);
 	}
 
 	@Override

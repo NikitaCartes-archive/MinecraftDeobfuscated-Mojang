@@ -7,6 +7,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.LivingEntity;
@@ -171,8 +172,8 @@ public class WardenAi {
 			10,
 			ImmutableList.of(
 				DIG_COOLDOWN_SETTER,
-				StopAttackingIfTargetInvalid.create(
-					livingEntity -> !warden.getAngerLevel().isAngry() || !warden.canTargetEntity(livingEntity), WardenAi::onTargetInvalid, false
+				StopAttackingIfTargetInvalid.<Warden>create(
+					(serverLevel, livingEntity) -> !warden.getAngerLevel().isAngry() || !warden.canTargetEntity(livingEntity), WardenAi::onTargetInvalid, false
 				),
 				SetEntityLookTarget.create(livingEntity -> isTarget(warden, livingEntity), (float)warden.getAttributeValue(Attributes.FOLLOW_RANGE)),
 				SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(1.2F),
@@ -187,7 +188,7 @@ public class WardenAi {
 		return warden.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET).filter(livingEntity2 -> livingEntity2 == livingEntity).isPresent();
 	}
 
-	private static void onTargetInvalid(Warden warden, LivingEntity livingEntity) {
+	private static void onTargetInvalid(ServerLevel serverLevel, Warden warden, LivingEntity livingEntity) {
 		if (!warden.canTargetEntity(livingEntity)) {
 			warden.clearAnger(livingEntity);
 		}

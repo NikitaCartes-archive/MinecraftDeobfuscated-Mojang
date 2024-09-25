@@ -59,7 +59,7 @@ import net.minecraft.world.entity.ai.sensing.Sensing;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BowItem;
@@ -148,7 +148,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 		Arrays.fill(this.armorDropChances, 0.085F);
 		Arrays.fill(this.handDropChances, 0.085F);
 		this.bodyArmorDropChance = 0.085F;
-		if (level != null && !level.isClientSide) {
+		if (level instanceof ServerLevel) {
 			this.registerGoals();
 		}
 	}
@@ -294,7 +294,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	}
 
 	@Override
-	protected int getBaseExperienceReward() {
+	protected int getBaseExperienceReward(ServerLevel serverLevel) {
 		if (this.xpReward > 0) {
 			int i = this.xpReward;
 
@@ -353,7 +353,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 
 	protected void updateControlFlags() {
 		boolean bl = !(this.getControllingPassenger() instanceof Mob);
-		boolean bl2 = !(this.getVehicle() instanceof Boat);
+		boolean bl2 = !(this.getVehicle() instanceof AbstractBoat);
 		this.goalSelector.setControlFlag(Goal.Flag.MOVE, bl);
 		this.goalSelector.setControlFlag(Goal.Flag.JUMP, bl && bl2);
 		this.goalSelector.setControlFlag(Goal.Flag.LOOK, bl);
@@ -490,8 +490,8 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	}
 
 	@Override
-	protected void dropFromLootTable(DamageSource damageSource, boolean bl) {
-		super.dropFromLootTable(damageSource, bl);
+	protected void dropFromLootTable(ServerLevel serverLevel, DamageSource damageSource, boolean bl) {
+		super.dropFromLootTable(serverLevel, damageSource, bl);
 		this.lootTable = Optional.empty();
 	}
 
@@ -535,13 +535,17 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 		super.aiStep();
 		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("looting");
-		if (!this.level().isClientSide && this.canPickUpLoot() && this.isAlive() && !this.dead && this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+		if (this.level() instanceof ServerLevel serverLevel
+			&& this.canPickUpLoot()
+			&& this.isAlive()
+			&& !this.dead
+			&& serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 			Vec3i vec3i = this.getPickupReach();
 
 			for (ItemEntity itemEntity : this.level()
 				.getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate((double)vec3i.getX(), (double)vec3i.getY(), (double)vec3i.getZ()))) {
-				if (!itemEntity.isRemoved() && !itemEntity.getItem().isEmpty() && !itemEntity.hasPickUpDelay() && this.wantsToPickUp(itemEntity.getItem())) {
-					this.pickUpItem(itemEntity);
+				if (!itemEntity.isRemoved() && !itemEntity.getItem().isEmpty() && !itemEntity.hasPickUpDelay() && this.wantsToPickUp(serverLevel, itemEntity.getItem())) {
+					this.pickUpItem(serverLevel, itemEntity);
 				}
 			}
 		}
@@ -553,9 +557,9 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 		return ITEM_PICKUP_REACH;
 	}
 
-	protected void pickUpItem(ItemEntity itemEntity) {
+	protected void pickUpItem(ServerLevel serverLevel, ItemEntity itemEntity) {
 		ItemStack itemStack = itemEntity.getItem();
-		ItemStack itemStack2 = this.equipItemIfPossible(itemStack.copy());
+		ItemStack itemStack2 = this.equipItemIfPossible(serverLevel, itemStack.copy());
 		if (!itemStack2.isEmpty()) {
 			this.onItemPickup(itemEntity);
 			this.take(itemEntity, itemStack2.getCount());
@@ -566,7 +570,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 		}
 	}
 
-	public ItemStack equipItemIfPossible(ItemStack itemStack) {
+	public ItemStack equipItemIfPossible(ServerLevel serverLevel, ItemStack itemStack) {
 		EquipmentSlot equipmentSlot = this.getEquipmentSlotForItem(itemStack);
 		ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
 		boolean bl = this.canReplaceCurrentItem(itemStack, itemStack2, equipmentSlot);
@@ -579,7 +583,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 		if (bl && this.canHoldItem(itemStack)) {
 			double d = (double)this.getEquipmentDropChance(equipmentSlot);
 			if (!itemStack2.isEmpty() && (double)Math.max(this.random.nextFloat() - 0.1F, 0.0F) < d) {
-				this.spawnAtLocation(itemStack2);
+				this.spawnAtLocation(serverLevel, itemStack2);
 			}
 
 			ItemStack itemStack3 = equipmentSlot.limit(itemStack);
@@ -681,7 +685,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 		return true;
 	}
 
-	public boolean wantsToPickUp(ItemStack itemStack) {
+	public boolean wantsToPickUp(ServerLevel serverLevel, ItemStack itemStack) {
 		return this.canHoldItem(itemStack);
 	}
 
@@ -752,7 +756,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 		this.navigation.tick();
 		profilerFiller.pop();
 		profilerFiller.push("mob tick");
-		this.customServerAiStep();
+		this.customServerAiStep((ServerLevel)this.level());
 		profilerFiller.pop();
 		profilerFiller.push("controls");
 		profilerFiller.push("move");
@@ -770,7 +774,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 		DebugPackets.sendGoalSelector(this.level(), this, this.goalSelector);
 	}
 
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 	}
 
 	public int getMaxHeadXRot() {
@@ -945,7 +949,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 						itemStack.setDamageValue(itemStack.getMaxDamage() - this.random.nextInt(1 + this.random.nextInt(Math.max(itemStack.getMaxDamage() - 3, 1))));
 					}
 
-					this.spawnAtLocation(itemStack);
+					this.spawnAtLocation(serverLevel, itemStack);
 					this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
 				}
 			}
@@ -960,11 +964,11 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 		};
 	}
 
-	public void dropPreservedEquipment() {
-		this.dropPreservedEquipment(itemStack -> true);
+	public void dropPreservedEquipment(ServerLevel serverLevel) {
+		this.dropPreservedEquipment(serverLevel, itemStack -> true);
 	}
 
-	public Set<EquipmentSlot> dropPreservedEquipment(Predicate<ItemStack> predicate) {
+	public Set<EquipmentSlot> dropPreservedEquipment(ServerLevel serverLevel, Predicate<ItemStack> predicate) {
 		Set<EquipmentSlot> set = new HashSet();
 
 		for (EquipmentSlot equipmentSlot : EquipmentSlot.VALUES) {
@@ -976,7 +980,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 					double d = (double)this.getEquipmentDropChance(equipmentSlot);
 					if (d > 1.0) {
 						this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
-						this.spawnAtLocation(itemStack);
+						this.spawnAtLocation(serverLevel, itemStack);
 					}
 				}
 			}
@@ -1398,16 +1402,13 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
+	public boolean doHurtTarget(ServerLevel serverLevel, Entity entity) {
 		float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		ItemStack itemStack = this.getWeaponItem();
 		DamageSource damageSource = (DamageSource)Optional.ofNullable(itemStack.getItem().getDamageSource(this)).orElse(this.damageSources().mobAttack(this));
-		if (this.level() instanceof ServerLevel serverLevel) {
-			f = EnchantmentHelper.modifyDamage(serverLevel, itemStack, entity, damageSource, f);
-		}
-
+		f = EnchantmentHelper.modifyDamage(serverLevel, itemStack, entity, damageSource, f);
 		f += itemStack.getItem().getAttackDamageBonus(entity, f, damageSource);
-		boolean bl = entity.hurt(damageSource, f);
+		boolean bl = entity.hurtServer(serverLevel, damageSource, f);
 		if (bl) {
 			float g = this.getKnockback(entity, damageSource);
 			if (g > 0.0F && entity instanceof LivingEntity livingEntity) {
@@ -1417,14 +1418,11 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
 				this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
 			}
 
-			if (this.level() instanceof ServerLevel serverLevel2) {
-				if (entity instanceof LivingEntity livingEntity2) {
-					itemStack.hurtEnemy(livingEntity2, this);
-				}
-
-				EnchantmentHelper.doPostAttackEffects(serverLevel2, entity, damageSource);
+			if (entity instanceof LivingEntity livingEntity) {
+				itemStack.hurtEnemy(livingEntity, this);
 			}
 
+			EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
 			this.setLastHurtMob(entity);
 			this.playAttackSound();
 		}

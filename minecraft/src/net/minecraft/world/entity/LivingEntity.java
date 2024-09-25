@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
@@ -90,7 +90,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.FlyingAnimal;
 import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
@@ -287,8 +286,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Override
-	public void kill() {
-		this.hurt(this.damageSources().genericKill(), Float.MAX_VALUE);
+	public void kill(ServerLevel serverLevel) {
+		this.hurtServer(serverLevel, this.damageSources().genericKill(), Float.MAX_VALUE);
 	}
 
 	public boolean canAttackType(EntityType<?> entityType) {
@@ -353,7 +352,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				float l = (float)Mth.ceil((double)this.fallDistance - e);
 				double m = Math.min((double)(0.2F + l / 15.0F), 2.5);
 				int n = (int)(150.0 * m);
-				((ServerLevel)this.level()).sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockState), f, g, h, n, 0.0, 0.0, 0.0, 0.15F);
+				serverLevel.sendParticles(new BlockParticleOption(ParticleTypes.BLOCK, blockState), f, g, h, n, 0.0, 0.0, 0.0, 0.15F);
 			}
 		}
 
@@ -395,15 +394,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 		if (this.isAlive()) {
 			boolean bl = this instanceof Player;
-			if (!this.level().isClientSide) {
+			if (this.level() instanceof ServerLevel serverLevel2) {
 				if (this.isInWall()) {
-					this.hurt(this.damageSources().inWall(), 1.0F);
+					this.hurtServer(serverLevel2, this.damageSources().inWall(), 1.0F);
 				} else if (bl && !this.level().getWorldBorder().isWithinBounds(this.getBoundingBox())) {
 					double d = this.level().getWorldBorder().getDistanceToBorder(this) + this.level().getWorldBorder().getDamageSafeZone();
 					if (d < 0.0) {
 						double e = this.level().getWorldBorder().getDamagePerBlock();
 						if (e > 0.0) {
-							this.hurt(this.damageSources().outOfBorder(), (float)Math.max(1, Mth.floor(-d * e)));
+							this.hurtServer(serverLevel2, this.damageSources().outOfBorder(), (float)Math.max(1, Mth.floor(-d * e)));
 						}
 					}
 				}
@@ -419,10 +418,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 						Vec3 vec3 = this.getDeltaMovement();
 
 						for (int i = 0; i < 8; i++) {
+							double e = this.random.nextDouble() - this.random.nextDouble();
 							double f = this.random.nextDouble() - this.random.nextDouble();
 							double g = this.random.nextDouble() - this.random.nextDouble();
-							double h = this.random.nextDouble() - this.random.nextDouble();
-							this.level().addParticle(ParticleTypes.BUBBLE, this.getX() + f, this.getY() + g, this.getZ() + h, vec3.x, vec3.y, vec3.z);
+							this.level().addParticle(ParticleTypes.BUBBLE, this.getX() + e, this.getY() + f, this.getZ() + g, vec3.x, vec3.y, vec3.z);
 						}
 
 						this.hurt(this.damageSources().drown(), 2.0F);
@@ -436,11 +435,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				this.setAirSupply(this.increaseAirSupply(this.getAirSupply()));
 			}
 
-			if (this.level() instanceof ServerLevel serverLevel2) {
+			if (this.level() instanceof ServerLevel serverLevel2x) {
 				BlockPos blockPos = this.blockPosition();
 				if (!Objects.equal(this.lastPos, blockPos)) {
 					this.lastPos = blockPos;
-					this.onChangedBlock(serverLevel2, blockPos);
+					this.onChangedBlock(serverLevel2x, blockPos);
 				}
 			}
 		}
@@ -575,10 +574,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public final int getExperienceReward(ServerLevel serverLevel, @Nullable Entity entity) {
-		return EnchantmentHelper.processMobExperience(serverLevel, entity, this, this.getBaseExperienceReward());
+		return EnchantmentHelper.processMobExperience(serverLevel, entity, this, this.getBaseExperienceReward(serverLevel));
 	}
 
-	protected int getBaseExperienceReward() {
+	protected int getBaseExperienceReward(ServerLevel serverLevel) {
 		return 0;
 	}
 
@@ -668,17 +667,17 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	@Override
 	public void remove(Entity.RemovalReason removalReason) {
-		if (removalReason == Entity.RemovalReason.KILLED || removalReason == Entity.RemovalReason.DISCARDED) {
-			this.triggerOnDeathMobEffects(removalReason);
+		if ((removalReason == Entity.RemovalReason.KILLED || removalReason == Entity.RemovalReason.DISCARDED) && this.level() instanceof ServerLevel serverLevel) {
+			this.triggerOnDeathMobEffects(serverLevel, removalReason);
 		}
 
 		super.remove(removalReason);
 		this.brain.clearMemories();
 	}
 
-	protected void triggerOnDeathMobEffects(Entity.RemovalReason removalReason) {
+	protected void triggerOnDeathMobEffects(ServerLevel serverLevel, Entity.RemovalReason removalReason) {
 		for (MobEffectInstance mobEffectInstance : this.getActiveEffects()) {
-			mobEffectInstance.onMobRemoved(this, removalReason);
+			mobEffectInstance.onMobRemoved(serverLevel, this, removalReason);
 		}
 
 		this.activeEffects.clear();
@@ -860,10 +859,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 	public boolean canAttack(LivingEntity livingEntity) {
 		return livingEntity instanceof Player && this.level().getDifficulty() == Difficulty.PEACEFUL ? false : livingEntity.canBeSeenAsEnemy();
-	}
-
-	public boolean canAttack(LivingEntity livingEntity, TargetingConditions targetingConditions) {
-		return targetingConditions.test(this, livingEntity);
 	}
 
 	public boolean canBeSeenAsEnemy() {
@@ -1077,17 +1072,15 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
-			return false;
-		} else if (this.level().isClientSide) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (this.isInvulnerableTo(serverLevel, damageSource)) {
 			return false;
 		} else if (this.isDeadOrDying()) {
 			return false;
 		} else if (damageSource.is(DamageTypeTags.IS_FIRE) && this.hasEffect(MobEffects.FIRE_RESISTANCE)) {
 			return false;
 		} else {
-			if (this.isSleeping() && !this.level().isClientSide) {
+			if (this.isSleeping()) {
 				this.stopSleeping();
 			}
 
@@ -1130,13 +1123,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					return false;
 				}
 
-				this.actuallyHurt(damageSource, f - this.lastHurt);
+				this.actuallyHurt(serverLevel, damageSource, f - this.lastHurt);
 				this.lastHurt = f;
 				bl2 = false;
 			} else {
 				this.lastHurt = f;
 				this.invulnerableTime = 20;
-				this.actuallyHurt(damageSource, f);
+				this.actuallyHurt(serverLevel, damageSource, f);
 				this.hurtDuration = 10;
 				this.hurtTime = this.hurtDuration;
 			}
@@ -1164,9 +1157,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 			if (bl2) {
 				if (bl) {
-					this.level().broadcastEntityEvent(this, (byte)29);
+					serverLevel.broadcastEntityEvent(this, (byte)29);
 				} else {
-					this.level().broadcastDamageEvent(this, damageSource);
+					serverLevel.broadcastDamageEvent(this, damageSource);
 				}
 
 				if (!damageSource.is(DamageTypeTags.NO_IMPACT) && (!bl || f > 0.0F)) {
@@ -1210,19 +1203,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				this.lastDamageStamp = this.level().getGameTime();
 
 				for (MobEffectInstance mobEffectInstance : this.getActiveEffects()) {
-					mobEffectInstance.onMobHurt(this, damageSource, f);
+					mobEffectInstance.onMobHurt(serverLevel, this, damageSource, f);
 				}
 			}
 
-			if (this instanceof ServerPlayer) {
-				CriteriaTriggers.ENTITY_HURT_PLAYER.trigger((ServerPlayer)this, damageSource, g, f, bl);
+			if (this instanceof ServerPlayer serverPlayer) {
+				CriteriaTriggers.ENTITY_HURT_PLAYER.trigger(serverPlayer, damageSource, g, f, bl);
 				if (h > 0.0F && h < 3.4028235E37F) {
-					((ServerPlayer)this).awardStat(Stats.DAMAGE_BLOCKED_BY_SHIELD, Math.round(h * 10.0F));
+					serverPlayer.awardStat(Stats.DAMAGE_BLOCKED_BY_SHIELD, Math.round(h * 10.0F));
 				}
 			}
 
-			if (entity2 instanceof ServerPlayer) {
-				CriteriaTriggers.PLAYER_HURT_ENTITY.trigger((ServerPlayer)entity2, this, damageSource, g, f, bl);
+			if (entity2 instanceof ServerPlayer serverPlayerx) {
+				CriteriaTriggers.PLAYER_HURT_ENTITY.trigger(serverPlayerx, this, damageSource, g, f, bl);
 			}
 
 			return bl3;
@@ -1355,19 +1348,19 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected void createWitherRose(@Nullable LivingEntity livingEntity) {
-		if (!this.level().isClientSide) {
-			boolean bl = false;
+		if (this.level() instanceof ServerLevel serverLevel) {
+			boolean var6 = false;
 			if (livingEntity instanceof WitherBoss) {
-				if (this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+				if (serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 					BlockPos blockPos = this.blockPosition();
 					BlockState blockState = Blocks.WITHER_ROSE.defaultBlockState();
 					if (this.level().getBlockState(blockPos).isAir() && blockState.canSurvive(this.level(), blockPos)) {
 						this.level().setBlock(blockPos, blockState, 3);
-						bl = true;
+						var6 = true;
 					}
 				}
 
-				if (!bl) {
+				if (!var6) {
 					ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), this.getY(), this.getZ(), new ItemStack(Items.WITHER_ROSE));
 					this.level().addFreshEntity(itemEntity);
 				}
@@ -1378,23 +1371,22 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	protected void dropAllDeathLoot(ServerLevel serverLevel, DamageSource damageSource) {
 		boolean bl = this.lastHurtByPlayerTime > 0;
 		if (this.shouldDropLoot() && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-			this.dropFromLootTable(damageSource, bl);
+			this.dropFromLootTable(serverLevel, damageSource, bl);
 			this.dropCustomDeathLoot(serverLevel, damageSource, bl);
 		}
 
-		this.dropEquipment();
-		this.dropExperience(damageSource.getEntity());
+		this.dropEquipment(serverLevel);
+		this.dropExperience(serverLevel, damageSource.getEntity());
 	}
 
-	protected void dropEquipment() {
+	protected void dropEquipment(ServerLevel serverLevel) {
 	}
 
-	protected void dropExperience(@Nullable Entity entity) {
-		if (this.level() instanceof ServerLevel serverLevel
-			&& !this.wasExperienceConsumed()
+	protected void dropExperience(ServerLevel serverLevel, @Nullable Entity entity) {
+		if (!this.wasExperienceConsumed()
 			&& (
 				this.isAlwaysExperienceDropper()
-					|| this.lastHurtByPlayerTime > 0 && this.shouldDropExperience() && this.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)
+					|| this.lastHurtByPlayerTime > 0 && this.shouldDropExperience() && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)
 			)) {
 			ExperienceOrb.award(serverLevel, this.position(), this.getExperienceReward(serverLevel, entity));
 		}
@@ -1412,11 +1404,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return this.level() instanceof ServerLevel serverLevel ? EnchantmentHelper.modifyKnockback(serverLevel, this.getWeaponItem(), entity, damageSource, f) : f;
 	}
 
-	protected void dropFromLootTable(DamageSource damageSource, boolean bl) {
+	protected void dropFromLootTable(ServerLevel serverLevel, DamageSource damageSource, boolean bl) {
 		Optional<ResourceKey<LootTable>> optional = this.getLootTable();
 		if (!optional.isEmpty()) {
-			LootTable lootTable = this.level().getServer().reloadableRegistries().getLootTable((ResourceKey<LootTable>)optional.get());
-			LootParams.Builder builder = new LootParams.Builder((ServerLevel)this.level())
+			LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable((ResourceKey<LootTable>)optional.get());
+			LootParams.Builder builder = new LootParams.Builder(serverLevel)
 				.withParameter(LootContextParams.THIS_ENTITY, this)
 				.withParameter(LootContextParams.ORIGIN, this.position())
 				.withParameter(LootContextParams.DAMAGE_SOURCE, damageSource)
@@ -1427,45 +1419,46 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			}
 
 			LootParams lootParams = builder.create(LootContextParamSets.ENTITY);
-			lootTable.getRandomItems(lootParams, this.getLootTableSeed(), this::spawnAtLocation);
+			lootTable.getRandomItems(lootParams, this.getLootTableSeed(), itemStack -> this.spawnAtLocation(serverLevel, itemStack));
 		}
 	}
 
-	public boolean dropFromGiftLootTable(ResourceKey<LootTable> resourceKey, Consumer<ItemStack> consumer) {
+	public boolean dropFromGiftLootTable(ServerLevel serverLevel, ResourceKey<LootTable> resourceKey, BiConsumer<ServerLevel, ItemStack> biConsumer) {
 		return this.dropFromLootTable(
+			serverLevel,
 			resourceKey,
 			builder -> builder.withParameter(LootContextParams.ORIGIN, this.position())
 					.withParameter(LootContextParams.THIS_ENTITY, this)
 					.create(LootContextParamSets.GIFT),
-			consumer
+			biConsumer
 		);
 	}
 
-	protected void dropFromShearingLootTable(ResourceKey<LootTable> resourceKey, ItemStack itemStack, Consumer<ItemStack> consumer) {
+	protected void dropFromShearingLootTable(
+		ServerLevel serverLevel, ResourceKey<LootTable> resourceKey, ItemStack itemStack, BiConsumer<ServerLevel, ItemStack> biConsumer
+	) {
 		this.dropFromLootTable(
+			serverLevel,
 			resourceKey,
 			builder -> builder.withParameter(LootContextParams.ORIGIN, this.position())
 					.withParameter(LootContextParams.THIS_ENTITY, this)
 					.withParameter(LootContextParams.TOOL, itemStack)
 					.create(LootContextParamSets.SHEARING),
-			consumer
+			biConsumer
 		);
 	}
 
-	protected boolean dropFromLootTable(ResourceKey<LootTable> resourceKey, Function<LootParams.Builder, LootParams> function, Consumer<ItemStack> consumer) {
-		if (!(this.level() instanceof ServerLevel serverLevel)) {
-			return false;
+	protected boolean dropFromLootTable(
+		ServerLevel serverLevel, ResourceKey<LootTable> resourceKey, Function<LootParams.Builder, LootParams> function, BiConsumer<ServerLevel, ItemStack> biConsumer
+	) {
+		LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(resourceKey);
+		LootParams lootParams = (LootParams)function.apply(new LootParams.Builder(serverLevel));
+		List<ItemStack> list = lootTable.getRandomItems(lootParams);
+		if (!list.isEmpty()) {
+			list.forEach(itemStack -> biConsumer.accept(serverLevel, itemStack));
+			return true;
 		} else {
-			LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(resourceKey);
-			LootParams lootParams = (LootParams)function.apply(new LootParams.Builder(serverLevel));
-			boolean bl = false;
-
-			for (ItemStack itemStack : lootTable.getRandomItems(lootParams)) {
-				consumer.accept(itemStack);
-				bl = true;
-			}
-
-			return bl;
+			return false;
 		}
 	}
 
@@ -1699,21 +1692,21 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 	}
 
-	protected void actuallyHurt(DamageSource damageSource, float f) {
-		if (!this.isInvulnerableTo(damageSource)) {
+	protected void actuallyHurt(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (!this.isInvulnerableTo(serverLevel, damageSource)) {
 			f = this.getDamageAfterArmorAbsorb(damageSource, f);
 			f = this.getDamageAfterMagicAbsorb(damageSource, f);
-			float var9 = Math.max(f - this.getAbsorptionAmount(), 0.0F);
-			this.setAbsorptionAmount(this.getAbsorptionAmount() - (f - var9));
-			float h = f - var9;
+			float var10 = Math.max(f - this.getAbsorptionAmount(), 0.0F);
+			this.setAbsorptionAmount(this.getAbsorptionAmount() - (f - var10));
+			float h = f - var10;
 			if (h > 0.0F && h < 3.4028235E37F && damageSource.getEntity() instanceof ServerPlayer serverPlayer) {
 				serverPlayer.awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(h * 10.0F));
 			}
 
-			if (var9 != 0.0F) {
-				this.getCombatTracker().recordDamage(damageSource, var9);
-				this.setHealth(this.getHealth() - var9);
-				this.setAbsorptionAmount(this.getAbsorptionAmount() - var9);
+			if (var10 != 0.0F) {
+				this.getCombatTracker().recordDamage(damageSource, var10);
+				this.setHealth(this.getHealth() - var10);
+				this.setAbsorptionAmount(this.getAbsorptionAmount() - var10);
 				this.gameEvent(GameEvent.ENTITY_DAMAGE);
 			}
 		}
@@ -1796,7 +1789,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.playSound(soundEvent, this.getSoundVolume(), (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 		}
 
-		this.hurt(this.damageSources().generic(), 0.0F);
 		this.lastDamageSource = damageSource;
 		this.lastDamageStamp = this.level().getGameTime();
 	}
@@ -2361,7 +2353,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		this.speed = f;
 	}
 
-	public boolean doHurtTarget(Entity entity) {
+	public boolean doHurtTarget(ServerLevel serverLevel, Entity entity) {
 		this.setLastHurtMob(entity);
 		return false;
 	}
@@ -2749,8 +2741,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 		this.removeFrost();
 		this.tryAddFrost();
-		if (!this.level().isClientSide && this.tickCount % 40 == 0 && this.isFullyFrozen() && this.canFreeze()) {
-			this.hurt(this.damageSources().freeze(), 1.0F);
+		if (this.level() instanceof ServerLevel serverLevel && this.tickCount % 40 == 0 && this.isFullyFrozen() && this.canFreeze()) {
+			this.hurtServer(serverLevel, this.damageSources().freeze(), 1.0F);
 		}
 
 		profilerFiller.pop();
@@ -2762,8 +2754,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 
 		this.pushEntities();
 		profilerFiller.pop();
-		if (!this.level().isClientSide && this.isSensitiveToWater() && this.isInWaterRainOrBubble()) {
-			this.hurt(this.damageSources().drown(), 1.0F);
+		if (this.level() instanceof ServerLevel serverLevel && this.isSensitiveToWater() && this.isInWaterRainOrBubble()) {
+			this.hurtServer(serverLevel, this.damageSources().drown(), 1.0F);
 		}
 	}
 
@@ -2814,12 +2806,12 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	protected void pushEntities() {
-		if (this.level().isClientSide()) {
+		if (!(this.level() instanceof ServerLevel serverLevel)) {
 			this.level().getEntities(EntityTypeTest.forClass(Player.class), this.getBoundingBox(), EntitySelector.pushableBy(this)).forEach(this::doPush);
 		} else {
 			List<Entity> list = this.level().getEntities(this, this.getBoundingBox(), EntitySelector.pushableBy(this));
 			if (!list.isEmpty()) {
-				int i = this.level().getGameRules().getInt(GameRules.RULE_MAX_ENTITY_CRAMMING);
+				int i = serverLevel.getGameRules().getInt(GameRules.RULE_MAX_ENTITY_CRAMMING);
 				if (i > 0 && list.size() > i - 1 && this.random.nextInt(4) == 0) {
 					int j = 0;
 
@@ -2830,7 +2822,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
 					}
 
 					if (j > i - 1) {
-						this.hurt(this.damageSources().cramming(), 6.0F);
+						this.hurtServer(serverLevel, this.damageSources().cramming(), 6.0F);
 					}
 				}
 
@@ -3158,6 +3150,9 @@ public abstract class LivingEntity extends Entity implements Attackable {
 				}
 			}
 		}
+	}
+
+	public void handleExtraItemsCreatedOnUse(ItemStack itemStack) {
 	}
 
 	public ItemStack getUseItem() {
@@ -3572,17 +3567,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return false;
 	}
 
-	@Override
-	public boolean isInvulnerableTo(DamageSource damageSource) {
-		if (super.isInvulnerableTo(damageSource)) {
-			return true;
-		} else {
-			if (this.level() instanceof ServerLevel serverLevel && EnchantmentHelper.isImmuneToDamage(serverLevel, this, damageSource)) {
-				return true;
-			}
-
-			return false;
-		}
+	public boolean isInvulnerableTo(ServerLevel serverLevel, DamageSource damageSource) {
+		return this.isInvulnerableToBase(damageSource) || EnchantmentHelper.isImmuneToDamage(serverLevel, this, damageSource);
 	}
 
 	public static boolean canGlideUsing(ItemStack itemStack, EquipmentSlot equipmentSlot) {

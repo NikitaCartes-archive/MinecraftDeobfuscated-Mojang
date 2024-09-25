@@ -26,7 +26,7 @@ public class NearestItemSensor extends Sensor<Mob> {
 		List<ItemEntity> list = serverLevel.getEntitiesOfClass(ItemEntity.class, mob.getBoundingBox().inflate(32.0, 16.0, 32.0), itemEntity -> true);
 		list.sort(Comparator.comparingDouble(mob::distanceToSqr));
 		Optional<ItemEntity> optional = list.stream()
-			.filter(itemEntity -> mob.wantsToPickUp(itemEntity.getItem()))
+			.filter(itemEntity -> mob.wantsToPickUp(serverLevel, itemEntity.getItem()))
 			.filter(itemEntity -> itemEntity.closerThan(mob, 32.0))
 			.filter(mob::hasLineOfSight)
 			.findFirst();

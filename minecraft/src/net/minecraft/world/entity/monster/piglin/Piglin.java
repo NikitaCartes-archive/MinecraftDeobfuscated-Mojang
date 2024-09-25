@@ -159,10 +159,10 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 		if (damageSource.getEntity() instanceof Creeper creeper && creeper.canDropMobsSkull()) {
 			ItemStack itemStack = new ItemStack(Items.PIGLIN_HEAD);
 			creeper.increaseDroppedSkulls();
-			this.spawnAtLocation(itemStack);
+			this.spawnAtLocation(serverLevel, itemStack);
 		}
 
-		this.inventory.removeAllItems().forEach(this::spawnAtLocation);
+		this.inventory.removeAllItems().forEach(itemStackx -> this.spawnAtLocation(serverLevel, itemStackx));
 	}
 
 	protected ItemStack addToInventory(ItemStack itemStack) {
@@ -265,8 +265,8 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 		InteractionResult interactionResult = super.mobInteract(player, interactionHand);
 		if (interactionResult.consumesAction()) {
 			return interactionResult;
-		} else if (!this.level().isClientSide) {
-			return PiglinAi.mobInteract(this, player, interactionHand);
+		} else if (this.level() instanceof ServerLevel serverLevel) {
+			return PiglinAi.mobInteract(serverLevel, this, player, interactionHand);
 		} else {
 			boolean bl = PiglinAi.canAdmire(this, player.getItemInHand(interactionHand)) && this.getArmPose() != PiglinArmPose.ADMIRING_ITEM;
 			return (InteractionResult)(bl ? InteractionResult.SUCCESS : InteractionResult.PASS);
@@ -305,24 +305,24 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("piglinBrain");
-		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.getBrain().tick(serverLevel, this);
 		profilerFiller.pop();
 		PiglinAi.updateActivity(this);
-		super.customServerAiStep();
+		super.customServerAiStep(serverLevel);
 	}
 
 	@Override
-	protected int getBaseExperienceReward() {
+	protected int getBaseExperienceReward(ServerLevel serverLevel) {
 		return this.xpReward;
 	}
 
 	@Override
 	protected void finishConversion(ServerLevel serverLevel) {
-		PiglinAi.cancelAdmiring(this);
-		this.inventory.removeAllItems().forEach(this::spawnAtLocation);
+		PiglinAi.cancelAdmiring(serverLevel, this);
+		this.inventory.removeAllItems().forEach(itemStack -> this.spawnAtLocation(serverLevel, itemStack));
 		super.finishConversion(serverLevel);
 	}
 
@@ -368,17 +368,13 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		boolean bl = super.hurt(damageSource, f);
-		if (this.level().isClientSide) {
-			return false;
-		} else {
-			if (bl && damageSource.getEntity() instanceof LivingEntity) {
-				PiglinAi.wasHurtBy(this, (LivingEntity)damageSource.getEntity());
-			}
-
-			return bl;
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		boolean bl = super.hurtServer(serverLevel, damageSource, f);
+		if (bl && damageSource.getEntity() instanceof LivingEntity livingEntity) {
+			PiglinAi.wasHurtBy(serverLevel, this, livingEntity);
 		}
+
+		return bl;
 	}
 
 	@Override
@@ -405,8 +401,8 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	}
 
 	@Override
-	public boolean wantsToPickUp(ItemStack itemStack) {
-		return this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && this.canPickUpLoot() && PiglinAi.wantsToPickup(this, itemStack);
+	public boolean wantsToPickUp(ServerLevel serverLevel, ItemStack itemStack) {
+		return serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && this.canPickUpLoot() && PiglinAi.wantsToPickup(this, itemStack);
 	}
 
 	protected boolean canReplaceCurrentItem(ItemStack itemStack) {
@@ -435,9 +431,9 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
 	}
 
 	@Override
-	protected void pickUpItem(ItemEntity itemEntity) {
+	protected void pickUpItem(ServerLevel serverLevel, ItemEntity itemEntity) {
 		this.onItemPickup(itemEntity);
-		PiglinAi.pickUpItem(this, itemEntity);
+		PiglinAi.pickUpItem(serverLevel, this, itemEntity);
 	}
 
 	@Override

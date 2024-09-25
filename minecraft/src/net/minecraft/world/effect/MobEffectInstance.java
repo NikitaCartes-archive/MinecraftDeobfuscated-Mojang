@@ -17,6 +17,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -210,7 +211,9 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 	public boolean tick(LivingEntity livingEntity, Runnable runnable) {
 		if (this.hasRemainingDuration()) {
 			int i = this.isInfiniteDuration() ? livingEntity.tickCount : this.duration;
-			if (this.effect.value().shouldApplyEffectTickThisTick(i, this.amplifier) && !this.effect.value().applyEffectTick(livingEntity, this.amplifier)) {
+			if (livingEntity.level() instanceof ServerLevel serverLevel
+				&& this.effect.value().shouldApplyEffectTickThisTick(i, this.amplifier)
+				&& !this.effect.value().applyEffectTick(serverLevel, livingEntity, this.amplifier)) {
 				livingEntity.removeEffect(this.effect);
 			}
 
@@ -242,12 +245,12 @@ public class MobEffectInstance implements Comparable<MobEffectInstance> {
 		this.effect.value().onEffectStarted(livingEntity, this.amplifier);
 	}
 
-	public void onMobRemoved(LivingEntity livingEntity, Entity.RemovalReason removalReason) {
-		this.effect.value().onMobRemoved(livingEntity, this.amplifier, removalReason);
+	public void onMobRemoved(ServerLevel serverLevel, LivingEntity livingEntity, Entity.RemovalReason removalReason) {
+		this.effect.value().onMobRemoved(serverLevel, livingEntity, this.amplifier, removalReason);
 	}
 
-	public void onMobHurt(LivingEntity livingEntity, DamageSource damageSource, float f) {
-		this.effect.value().onMobHurt(livingEntity, this.amplifier, damageSource, f);
+	public void onMobHurt(ServerLevel serverLevel, LivingEntity livingEntity, DamageSource damageSource, float f) {
+		this.effect.value().onMobHurt(serverLevel, livingEntity, this.amplifier, damageSource, f);
 	}
 
 	public String getDescriptionId() {

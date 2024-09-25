@@ -3,6 +3,7 @@ package net.minecraft.world.entity.boss.enderdragon.phases;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
@@ -32,10 +33,10 @@ public class DragonDeathPhase extends AbstractDragonPhaseInstance {
 	}
 
 	@Override
-	public void doServerTick() {
+	public void doServerTick(ServerLevel serverLevel) {
 		this.time++;
 		if (this.targetLocation == null) {
-			BlockPos blockPos = this.dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, EndPodiumFeature.getLocation(this.dragon.getFightOrigin()));
+			BlockPos blockPos = serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, EndPodiumFeature.getLocation(this.dragon.getFightOrigin()));
 			this.targetLocation = Vec3.atBottomCenterOf(blockPos);
 		}
 

@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.Mth;
@@ -67,8 +68,8 @@ public abstract class SpellcasterIllager extends AbstractIllager {
 	}
 
 	@Override
-	protected void customServerAiStep() {
-		super.customServerAiStep();
+	protected void customServerAiStep(ServerLevel serverLevel) {
+		super.customServerAiStep(serverLevel);
 		if (this.spellCastingTickCount > 0) {
 			this.spellCastingTickCount--;
 		}

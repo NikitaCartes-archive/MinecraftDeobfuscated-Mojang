@@ -109,19 +109,19 @@ public class PiglinBrute extends AbstractPiglin {
 	}
 
 	@Override
-	public boolean wantsToPickUp(ItemStack itemStack) {
-		return itemStack.is(Items.GOLDEN_AXE) ? super.wantsToPickUp(itemStack) : false;
+	public boolean wantsToPickUp(ServerLevel serverLevel, ItemStack itemStack) {
+		return itemStack.is(Items.GOLDEN_AXE) ? super.wantsToPickUp(serverLevel, itemStack) : false;
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("piglinBruteBrain");
-		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.getBrain().tick(serverLevel, this);
 		profilerFiller.pop();
 		PiglinBruteAi.updateActivity(this);
 		PiglinBruteAi.maybePlayActivitySound(this);
-		super.customServerAiStep();
+		super.customServerAiStep(serverLevel);
 	}
 
 	@Override
@@ -130,17 +130,13 @@ public class PiglinBrute extends AbstractPiglin {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		boolean bl = super.hurt(damageSource, f);
-		if (this.level().isClientSide) {
-			return false;
-		} else {
-			if (bl && damageSource.getEntity() instanceof LivingEntity) {
-				PiglinBruteAi.wasHurtBy(this, (LivingEntity)damageSource.getEntity());
-			}
-
-			return bl;
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		boolean bl = super.hurtServer(serverLevel, damageSource, f);
+		if (bl && damageSource.getEntity() instanceof LivingEntity livingEntity) {
+			PiglinBruteAi.wasHurtBy(serverLevel, this, livingEntity);
 		}
+
+		return bl;
 	}
 
 	@Override

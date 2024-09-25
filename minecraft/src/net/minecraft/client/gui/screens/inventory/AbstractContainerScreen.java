@@ -113,13 +113,7 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		Slot slot = this.hoveredSlot;
 		this.hoveredSlot = this.getHoveredSlot((double)i, (double)j);
 		this.renderSlotHighlightBack(guiGraphics);
-
-		for (Slot slot2 : this.menu.slots) {
-			if (slot2.isActive()) {
-				this.renderSlot(guiGraphics, slot2);
-			}
-		}
-
+		this.renderSlots(guiGraphics);
 		this.renderSlotHighlightFront(guiGraphics);
 		if (slot != null && slot != this.hoveredSlot) {
 			this.onStopHovering(slot);
@@ -158,6 +152,14 @@ public abstract class AbstractContainerScreen<T extends AbstractContainerMenu> e
 		}
 
 		guiGraphics.pose().popPose();
+	}
+
+	protected void renderSlots(GuiGraphics guiGraphics) {
+		for (Slot slot : this.menu.slots) {
+			if (slot.isActive()) {
+				this.renderSlot(guiGraphics, slot);
+			}
+		}
 	}
 
 	@Override

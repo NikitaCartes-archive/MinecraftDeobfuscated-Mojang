@@ -112,15 +112,15 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
-		if (!(entity instanceof LivingEntity)) {
-			return false;
-		} else {
+	public boolean doHurtTarget(ServerLevel serverLevel, Entity entity) {
+		if (entity instanceof LivingEntity livingEntity) {
 			this.attackAnimationRemainingTicks = 10;
 			this.level().broadcastEntityEvent(this, (byte)4);
 			this.makeSound(SoundEvents.HOGLIN_ATTACK);
-			HoglinAi.onHitTarget(this, (LivingEntity)entity);
-			return HoglinBase.hurtAndThrowTarget(this, (LivingEntity)entity);
+			HoglinAi.onHitTarget(this, livingEntity);
+			return HoglinBase.hurtAndThrowTarget(serverLevel, this, livingEntity);
+		} else {
+			return false;
 		}
 	}
 
@@ -132,17 +132,13 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		boolean bl = super.hurt(damageSource, f);
-		if (this.level().isClientSide) {
-			return false;
-		} else {
-			if (bl && damageSource.getEntity() instanceof LivingEntity) {
-				HoglinAi.wasHurtBy(this, (LivingEntity)damageSource.getEntity());
-			}
-
-			return bl;
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		boolean bl = super.hurtServer(serverLevel, damageSource, f);
+		if (bl && damageSource.getEntity() instanceof LivingEntity livingEntity) {
+			HoglinAi.wasHurtBy(serverLevel, this, livingEntity);
 		}
+
+		return bl;
 	}
 
 	@Override
@@ -161,10 +157,10 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("hoglinBrain");
-		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.getBrain().tick(serverLevel, this);
 		profilerFiller.pop();
 		HoglinAi.updateActivity(this);
 		if (this.isConverting()) {
@@ -261,7 +257,7 @@ public class Hoglin extends Animal implements Enemy, HoglinBase {
 	}
 
 	@Override
-	protected int getBaseExperienceReward() {
+	protected int getBaseExperienceReward(ServerLevel serverLevel) {
 		return this.xpReward;
 	}
 

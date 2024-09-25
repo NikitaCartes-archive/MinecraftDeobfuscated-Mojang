@@ -13,6 +13,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -412,7 +413,7 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
 		if (this.isClosed()) {
 			Entity entity = damageSource.getDirectEntity();
 			if (entity instanceof AbstractArrow) {
@@ -420,7 +421,7 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 			}
 		}
 
-		if (!super.hurt(damageSource, f)) {
+		if (!super.hurtServer(serverLevel, damageSource, f)) {
 			return false;
 		} else {
 			if ((double)this.getHealth() < (double)this.getMaxHealth() * 0.5 && this.random.nextInt(4) == 0) {
@@ -624,7 +625,7 @@ public class Shulker extends AbstractGolem implements VariantHolder<Optional<Dye
 
 	static class ShulkerDefenseAttackGoal extends NearestAttackableTargetGoal<LivingEntity> {
 		public ShulkerDefenseAttackGoal(Shulker shulker) {
-			super(shulker, LivingEntity.class, 10, true, false, livingEntity -> livingEntity instanceof Enemy);
+			super(shulker, LivingEntity.class, 10, true, false, (livingEntity, serverLevel) -> livingEntity instanceof Enemy);
 		}
 
 		@Override

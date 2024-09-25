@@ -14,8 +14,8 @@ class WindChargedMobEffect extends MobEffect {
 	}
 
 	@Override
-	public void onMobRemoved(LivingEntity livingEntity, int i, Entity.RemovalReason removalReason) {
-		if (removalReason == Entity.RemovalReason.KILLED && livingEntity.level() instanceof ServerLevel serverLevel) {
+	public void onMobRemoved(ServerLevel serverLevel, LivingEntity livingEntity, int i, Entity.RemovalReason removalReason) {
+		if (removalReason == Entity.RemovalReason.KILLED) {
 			double d = livingEntity.getX();
 			double e = livingEntity.getY() + (double)(livingEntity.getBbHeight() / 2.0F);
 			double f = livingEntity.getZ();

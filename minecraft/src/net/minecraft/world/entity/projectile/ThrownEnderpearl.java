@@ -146,7 +146,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 						if (player != null) {
 							player.resetFallDistance();
 							player.resetCurrentImpulseContext();
-							player.hurt(this.damageSources().enderPearl(), 5.0F);
+							player.hurtServer(serverPlayer.serverLevel(), this.damageSources().enderPearl(), 5.0F);
 						}
 
 						this.playSound(serverLevel, vec34);
@@ -181,19 +181,27 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 
 	@Override
 	public void tick() {
-		int i = SectionPos.blockToSectionCoord(this.position().x());
-		int j = SectionPos.blockToSectionCoord(this.position().z());
-		Entity entity = this.getOwner();
-		if (entity instanceof ServerPlayer && !entity.isAlive() && this.level().getGameRules().getBoolean(GameRules.RULE_ENDER_PEARLS_VANISH_ON_DEATH)) {
-			this.discard();
-		} else {
+		int i;
+		int j;
+		Entity entity;
+		label26: {
+			i = SectionPos.blockToSectionCoord(this.position().x());
+			j = SectionPos.blockToSectionCoord(this.position().z());
+			entity = this.getOwner();
+			if (entity instanceof ServerPlayer serverPlayer
+				&& !entity.isAlive()
+				&& serverPlayer.serverLevel().getGameRules().getBoolean(GameRules.RULE_ENDER_PEARLS_VANISH_ON_DEATH)) {
+				this.discard();
+				break label26;
+			}
+
 			super.tick();
 		}
 
 		BlockPos blockPos = BlockPos.containing(this.position());
 		if ((--this.ticketTimer <= 0L || i != SectionPos.blockToSectionCoord(blockPos.getX()) || j != SectionPos.blockToSectionCoord(blockPos.getZ()))
-			&& entity instanceof ServerPlayer serverPlayer) {
-			this.ticketTimer = serverPlayer.registerAndUpdateEnderPearlTicket(this);
+			&& entity instanceof ServerPlayer serverPlayer2) {
+			this.ticketTimer = serverPlayer2.registerAndUpdateEnderPearlTicket(this);
 		}
 	}
 

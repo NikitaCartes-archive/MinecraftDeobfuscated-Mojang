@@ -91,7 +91,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		AttributeInstance attributeInstance = this.getAttribute(Attributes.MOVEMENT_SPEED);
 		if (this.isAngry()) {
 			if (!this.isBaby() && !attributeInstance.hasModifier(SPEED_MODIFIER_ATTACKING_ID)) {
@@ -103,7 +103,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 			attributeInstance.removeModifier(SPEED_MODIFIER_ATTACKING_ID);
 		}
 
-		this.updatePersistentAnger((ServerLevel)this.level(), true);
+		this.updatePersistentAnger(serverLevel, true);
 		if (this.getTarget() != null) {
 			this.maybeAlertOthers();
 		}
@@ -112,7 +112,7 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 			this.lastHurtByPlayerTime = this.tickCount;
 		}
 
-		super.customServerAiStep();
+		super.customServerAiStep(serverLevel);
 	}
 
 	private void maybePlayFirstAngerSound() {
@@ -241,12 +241,12 @@ public class ZombifiedPiglin extends Zombie implements NeutralMob {
 	}
 
 	@Override
-	public boolean isPreventingPlayerRest(Player player) {
-		return this.isAngryAt(player);
+	public boolean isPreventingPlayerRest(ServerLevel serverLevel, Player player) {
+		return this.isAngryAt(player, serverLevel);
 	}
 
 	@Override
-	public boolean wantsToPickUp(ItemStack itemStack) {
+	public boolean wantsToPickUp(ServerLevel serverLevel, ItemStack itemStack) {
 		return this.canHoldItem(itemStack);
 	}
 }

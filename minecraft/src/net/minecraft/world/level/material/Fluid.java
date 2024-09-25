@@ -8,6 +8,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.IdMapper;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
@@ -53,10 +54,10 @@ public abstract class Fluid {
 	protected void animateTick(Level level, BlockPos blockPos, FluidState fluidState, RandomSource randomSource) {
 	}
 
-	protected void tick(Level level, BlockPos blockPos, BlockState blockState, FluidState fluidState) {
+	protected void tick(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, FluidState fluidState) {
 	}
 
-	protected void randomTick(Level level, BlockPos blockPos, FluidState fluidState, RandomSource randomSource) {
+	protected void randomTick(ServerLevel serverLevel, BlockPos blockPos, FluidState fluidState, RandomSource randomSource) {
 	}
 
 	@Nullable

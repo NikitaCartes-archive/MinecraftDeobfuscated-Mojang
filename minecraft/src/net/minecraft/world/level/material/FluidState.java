@@ -11,6 +11,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
@@ -72,8 +73,8 @@ public final class FluidState extends StateHolder<Fluid, FluidState> {
 		return false;
 	}
 
-	public void tick(Level level, BlockPos blockPos, BlockState blockState) {
-		this.getType().tick(level, blockPos, blockState, this);
+	public void tick(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState) {
+		this.getType().tick(serverLevel, blockPos, blockState, this);
 	}
 
 	public void animateTick(Level level, BlockPos blockPos, RandomSource randomSource) {
@@ -84,8 +85,8 @@ public final class FluidState extends StateHolder<Fluid, FluidState> {
 		return this.getType().isRandomlyTicking();
 	}
 
-	public void randomTick(Level level, BlockPos blockPos, RandomSource randomSource) {
-		this.getType().randomTick(level, blockPos, this, randomSource);
+	public void randomTick(ServerLevel serverLevel, BlockPos blockPos, RandomSource randomSource) {
+		this.getType().randomTick(serverLevel, blockPos, this, randomSource);
 	}
 
 	public Vec3 getFlow(BlockGetter blockGetter, BlockPos blockPos) {

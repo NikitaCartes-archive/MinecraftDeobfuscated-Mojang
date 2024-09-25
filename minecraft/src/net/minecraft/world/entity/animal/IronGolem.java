@@ -75,7 +75,10 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 		this.targetSelector.addGoal(3, new NearestAttackableTargetGoal(this, Player.class, 10, true, false, this::isAngryAt));
 		this.targetSelector
 			.addGoal(
-				3, new NearestAttackableTargetGoal(this, Mob.class, 5, false, false, livingEntity -> livingEntity instanceof Enemy && !(livingEntity instanceof Creeper))
+				3,
+				new NearestAttackableTargetGoal(
+					this, Mob.class, 5, false, false, (livingEntity, serverLevel) -> livingEntity instanceof Enemy && !(livingEntity instanceof Creeper)
+				)
 			);
 		this.targetSelector.addGoal(4, new ResetUniversalAngerTargetGoal<>(this, false));
 	}
@@ -184,20 +187,18 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
+	public boolean doHurtTarget(ServerLevel serverLevel, Entity entity) {
 		this.attackAnimationTick = 10;
-		this.level().broadcastEntityEvent(this, (byte)4);
+		serverLevel.broadcastEntityEvent(this, (byte)4);
 		float f = this.getAttackDamage();
 		float g = (int)f > 0 ? f / 2.0F + (float)this.random.nextInt((int)f) : f;
 		DamageSource damageSource = this.damageSources().mobAttack(this);
-		boolean bl = entity.hurt(damageSource, g);
+		boolean bl = entity.hurtServer(serverLevel, damageSource, g);
 		if (bl) {
 			double d = entity instanceof LivingEntity livingEntity ? livingEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) : 0.0;
 			double e = Math.max(0.0, 1.0 - d);
 			entity.setDeltaMovement(entity.getDeltaMovement().add(0.0, 0.4F * e, 0.0));
-			if (this.level() instanceof ServerLevel serverLevel) {
-				EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
-			}
+			EnchantmentHelper.doPostAttackEffects(serverLevel, entity, damageSource);
 		}
 
 		this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.0F, 1.0F);
@@ -205,9 +206,9 @@ public class IronGolem extends AbstractGolem implements NeutralMob {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
 		Crackiness.Level level = this.getCrackiness();
-		boolean bl = super.hurt(damageSource, f);
+		boolean bl = super.hurtServer(serverLevel, damageSource, f);
 		if (bl && this.getCrackiness() != level) {
 			this.playSound(SoundEvents.IRON_GOLEM_DAMAGE, 1.0F, 1.0F);
 		}

@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.EntityTypeTags;
@@ -77,8 +78,10 @@ public class PowderSnowBlock extends Block implements BucketPickup {
 		}
 
 		entity.setIsInPowderSnow(true);
-		if (!level.isClientSide) {
-			if (entity.isOnFire() && (level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) || entity instanceof Player) && entity.mayInteract(level, blockPos)) {
+		if (level instanceof ServerLevel serverLevel) {
+			if (entity.isOnFire()
+				&& (serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) || entity instanceof Player)
+				&& entity.mayInteract(serverLevel, blockPos)) {
 				level.destroyBlock(blockPos, false);
 			}
 

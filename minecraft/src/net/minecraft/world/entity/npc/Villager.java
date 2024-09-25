@@ -258,10 +258,10 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("villagerBrain");
-		this.getBrain().tick((ServerLevel)this.level(), this);
+		this.getBrain().tick(serverLevel, this);
 		profilerFiller.pop();
 		if (this.assignProfessionWhenSpawned) {
 			this.assignProfessionWhenSpawned = false;
@@ -279,16 +279,16 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			}
 		}
 
-		if (this.lastTradedPlayer != null && this.level() instanceof ServerLevel) {
-			((ServerLevel)this.level()).onReputationEvent(ReputationEventType.TRADE, this.lastTradedPlayer, this);
-			this.level().broadcastEntityEvent(this, (byte)14);
+		if (this.lastTradedPlayer != null) {
+			serverLevel.onReputationEvent(ReputationEventType.TRADE, this.lastTradedPlayer, this);
+			serverLevel.broadcastEntityEvent(this, (byte)14);
 			this.lastTradedPlayer = null;
 		}
 
 		if (!this.isNoAi() && this.random.nextInt(100) == 0) {
-			Raid raid = ((ServerLevel)this.level()).getRaidAt(this.blockPosition());
+			Raid raid = serverLevel.getRaidAt(this.blockPosition());
 			if (raid != null && raid.isActive() && !raid.isOver()) {
-				this.level().broadcastEntityEvent(this, (byte)42);
+				serverLevel.broadcastEntityEvent(this, (byte)42);
 			}
 		}
 
@@ -296,7 +296,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 			this.stopTrading();
 		}
 
-		super.customServerAiStep();
+		super.customServerAiStep(serverLevel);
 	}
 
 	@Override
@@ -788,12 +788,12 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
 	}
 
 	@Override
-	protected void pickUpItem(ItemEntity itemEntity) {
-		InventoryCarrier.pickUpItem(this, this, itemEntity);
+	protected void pickUpItem(ServerLevel serverLevel, ItemEntity itemEntity) {
+		InventoryCarrier.pickUpItem(serverLevel, this, this, itemEntity);
 	}
 
 	@Override
-	public boolean wantsToPickUp(ItemStack itemStack) {
+	public boolean wantsToPickUp(ServerLevel serverLevel, ItemStack itemStack) {
 		Item item = itemStack.getItem();
 		return (itemStack.is(ItemTags.VILLAGER_PICKS_UP) || this.getVillagerData().getProfession().requestedItems().contains(item))
 			&& this.getInventory().canAddItem(itemStack);

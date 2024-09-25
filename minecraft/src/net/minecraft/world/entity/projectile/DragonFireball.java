@@ -3,7 +3,6 @@ package net.minecraft.world.entity.projectile;
 import java.util.List;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -58,11 +57,6 @@ public class DragonFireball extends AbstractHurtingProjectile {
 				this.discard();
 			}
 		}
-	}
-
-	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		return false;
 	}
 
 	@Override

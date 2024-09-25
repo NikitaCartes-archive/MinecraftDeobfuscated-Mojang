@@ -36,13 +36,13 @@ public abstract class BlockAttachedEntity extends Entity {
 
 	@Override
 	public void tick() {
-		if (!this.level().isClientSide) {
+		if (this.level() instanceof ServerLevel serverLevel) {
 			this.checkBelowWorld();
 			if (this.checkInterval++ == 100) {
 				this.checkInterval = 0;
 				if (!this.isRemoved() && !this.survives()) {
 					this.discard();
-					this.dropItem(null);
+					this.dropItem(serverLevel, null);
 				}
 			}
 		}
@@ -58,23 +58,28 @@ public abstract class BlockAttachedEntity extends Entity {
 	@Override
 	public boolean skipAttackInteraction(Entity entity) {
 		if (entity instanceof Player player) {
-			return !this.level().mayInteract(player, this.pos) ? true : this.hurt(this.damageSources().playerAttack(player), 0.0F);
+			return !this.level().mayInteract(player, this.pos) ? true : this.hurtOrSimulate(this.damageSources().playerAttack(player), 0.0F);
 		} else {
 			return false;
 		}
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
+	public boolean hurtClient(DamageSource damageSource) {
+		return !this.isInvulnerableToBase(damageSource);
+	}
+
+	@Override
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (this.isInvulnerableToBase(damageSource)) {
 			return false;
-		} else if (!this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && damageSource.getEntity() instanceof Mob) {
+		} else if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && damageSource.getEntity() instanceof Mob) {
 			return false;
 		} else {
-			if (!this.isRemoved() && !this.level().isClientSide) {
-				this.kill();
+			if (!this.isRemoved()) {
+				this.kill(serverLevel);
 				this.markHurt();
-				this.dropItem(damageSource.getEntity());
+				this.dropItem(serverLevel, damageSource.getEntity());
 			}
 
 			return true;
@@ -88,17 +93,17 @@ public abstract class BlockAttachedEntity extends Entity {
 
 	@Override
 	public void move(MoverType moverType, Vec3 vec3) {
-		if (!this.level().isClientSide && !this.isRemoved() && vec3.lengthSqr() > 0.0) {
-			this.kill();
-			this.dropItem(null);
+		if (this.level() instanceof ServerLevel serverLevel && !this.isRemoved() && vec3.lengthSqr() > 0.0) {
+			this.kill(serverLevel);
+			this.dropItem(serverLevel, null);
 		}
 	}
 
 	@Override
 	public void push(double d, double e, double f) {
-		if (!this.level().isClientSide && !this.isRemoved() && d * d + e * e + f * f > 0.0) {
-			this.kill();
-			this.dropItem(null);
+		if (this.level() instanceof ServerLevel serverLevel && !this.isRemoved() && d * d + e * e + f * f > 0.0) {
+			this.kill(serverLevel);
+			this.dropItem(serverLevel, null);
 		}
 	}
 
@@ -120,7 +125,7 @@ public abstract class BlockAttachedEntity extends Entity {
 		}
 	}
 
-	public abstract void dropItem(@Nullable Entity entity);
+	public abstract void dropItem(ServerLevel serverLevel, @Nullable Entity entity);
 
 	@Override
 	protected boolean repositionEntityAfterLoad() {

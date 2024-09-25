@@ -3,6 +3,7 @@ package net.minecraft.world.entity.boss.enderdragon.phases;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
@@ -21,11 +22,9 @@ public class DragonTakeoffPhase extends AbstractDragonPhaseInstance {
 	}
 
 	@Override
-	public void doServerTick() {
+	public void doServerTick(ServerLevel serverLevel) {
 		if (!this.firstTick && this.currentPath != null) {
-			BlockPos blockPos = this.dragon
-				.level()
-				.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(this.dragon.getFightOrigin()));
+			BlockPos blockPos = serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(this.dragon.getFightOrigin()));
 			if (!blockPos.closerToCenterThan(this.dragon.position(), 10.0)) {
 				this.dragon.getPhaseManager().setPhase(EnderDragonPhase.HOLDING_PATTERN);
 			}

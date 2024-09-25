@@ -4,8 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import java.util.Optional;
-import java.util.function.Predicate;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -81,7 +81,7 @@ public class PiglinBruteAi {
 			Activity.FIGHT,
 			10,
 			ImmutableList.of(
-				StopAttackingIfTargetInvalid.<Mob>create((Predicate<LivingEntity>)(livingEntity -> !isNearestValidAttackTarget(piglinBrute, livingEntity))),
+				StopAttackingIfTargetInvalid.<Mob>create((serverLevel, livingEntity) -> !isNearestValidAttackTarget(serverLevel, piglinBrute, livingEntity)),
 				SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(1.0F),
 				MeleeAttack.create(20)
 			),
@@ -126,13 +126,13 @@ public class PiglinBruteAi {
 		piglinBrute.setAggressive(brain.hasMemoryValue(MemoryModuleType.ATTACK_TARGET));
 	}
 
-	private static boolean isNearestValidAttackTarget(AbstractPiglin abstractPiglin, LivingEntity livingEntity) {
-		return findNearestValidAttackTarget(abstractPiglin).filter(livingEntity2 -> livingEntity2 == livingEntity).isPresent();
+	private static boolean isNearestValidAttackTarget(ServerLevel serverLevel, AbstractPiglin abstractPiglin, LivingEntity livingEntity) {
+		return findNearestValidAttackTarget(serverLevel, abstractPiglin).filter(livingEntity2 -> livingEntity2 == livingEntity).isPresent();
 	}
 
-	private static Optional<? extends LivingEntity> findNearestValidAttackTarget(AbstractPiglin abstractPiglin) {
+	private static Optional<? extends LivingEntity> findNearestValidAttackTarget(ServerLevel serverLevel, AbstractPiglin abstractPiglin) {
 		Optional<LivingEntity> optional = BehaviorUtils.getLivingEntityFromUUIDMemory(abstractPiglin, MemoryModuleType.ANGRY_AT);
-		if (optional.isPresent() && Sensor.isEntityAttackableIgnoringLineOfSight(abstractPiglin, (LivingEntity)optional.get())) {
+		if (optional.isPresent() && Sensor.isEntityAttackableIgnoringLineOfSight(serverLevel, abstractPiglin, (LivingEntity)optional.get())) {
 			return optional;
 		} else {
 			Optional<? extends LivingEntity> optional2 = abstractPiglin.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER);
@@ -140,9 +140,9 @@ public class PiglinBruteAi {
 		}
 	}
 
-	protected static void wasHurtBy(PiglinBrute piglinBrute, LivingEntity livingEntity) {
+	protected static void wasHurtBy(ServerLevel serverLevel, PiglinBrute piglinBrute, LivingEntity livingEntity) {
 		if (!(livingEntity instanceof AbstractPiglin)) {
-			PiglinAi.maybeRetaliate(piglinBrute, livingEntity);
+			PiglinAi.maybeRetaliate(serverLevel, piglinBrute, livingEntity);
 		}
 	}
 

@@ -30,9 +30,9 @@ public class PlayerSensor extends Sensor<LivingEntity> {
 			.collect(Collectors.toList());
 		Brain<?> brain = livingEntity.getBrain();
 		brain.setMemory(MemoryModuleType.NEAREST_PLAYERS, list);
-		List<Player> list2 = (List<Player>)list.stream().filter(player -> isEntityTargetable(livingEntity, player)).collect(Collectors.toList());
+		List<Player> list2 = (List<Player>)list.stream().filter(player -> isEntityTargetable(serverLevel, livingEntity, player)).collect(Collectors.toList());
 		brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER, list2.isEmpty() ? null : (Player)list2.get(0));
-		Optional<Player> optional = list2.stream().filter(player -> isEntityAttackable(livingEntity, player)).findFirst();
+		Optional<Player> optional = list2.stream().filter(player -> isEntityAttackable(serverLevel, livingEntity, player)).findFirst();
 		brain.setMemory(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, optional);
 	}
 

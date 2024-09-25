@@ -314,12 +314,12 @@ public class Panda extends Animal {
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
+	public boolean doHurtTarget(ServerLevel serverLevel, Entity entity) {
 		if (!this.isAggressive()) {
 			this.didBite = true;
 		}
 
-		return super.doHurtTarget(entity);
+		return super.doHurtTarget(serverLevel, entity);
 	}
 
 	@Override
@@ -514,13 +514,13 @@ public class Panda extends Animal {
 			}
 		}
 
-		if (!level.isClientSide() && level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
-			this.dropFromGiftLootTable(BuiltInLootTables.PANDA_SNEEZE, this::spawnAtLocation);
+		if (this.level() instanceof ServerLevel serverLevel && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+			this.dropFromGiftLootTable(serverLevel, BuiltInLootTables.PANDA_SNEEZE, this::spawnAtLocation);
 		}
 	}
 
 	@Override
-	protected void pickUpItem(ItemEntity itemEntity) {
+	protected void pickUpItem(ServerLevel serverLevel, ItemEntity itemEntity) {
 		if (this.getItemBySlot(EquipmentSlot.MAINHAND).isEmpty() && canPickUpAndEat(itemEntity)) {
 			this.onItemPickup(itemEntity);
 			ItemStack itemStack = itemEntity.getItem();
@@ -532,12 +532,9 @@ public class Panda extends Animal {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (!this.level().isClientSide) {
-			this.sit(false);
-		}
-
-		return super.hurt(damageSource, f);
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		this.sit(false);
+		return super.hurtServer(serverLevel, damageSource, f);
 	}
 
 	@Nullable
@@ -624,7 +621,7 @@ public class Panda extends Animal {
 				this.usePlayerItem(player, interactionHand, itemStack);
 				this.setInLove(player);
 			} else {
-				if (this.level().isClientSide || this.isSitting() || this.isInWater()) {
+				if (!(this.level() instanceof ServerLevel serverLevel) || this.isSitting() || this.isInWater()) {
 					return InteractionResult.PASS;
 				}
 
@@ -632,7 +629,7 @@ public class Panda extends Animal {
 				this.eat(true);
 				ItemStack itemStack2 = this.getItemBySlot(EquipmentSlot.MAINHAND);
 				if (!itemStack2.isEmpty() && !player.hasInfiniteMaterials()) {
-					this.spawnAtLocation(itemStack2);
+					this.spawnAtLocation(serverLevel, itemStack2);
 				}
 
 				this.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(itemStack.getItem(), 1));
@@ -919,23 +916,20 @@ public class Panda extends Animal {
 				return false;
 			} else {
 				if (this.lookAt == null) {
+					ServerLevel serverLevel = getServerLevel(this.mob);
 					if (this.lookAtType == Player.class) {
-						this.lookAt = this.mob.level().getNearestPlayer(this.lookAtContext, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+						this.lookAt = serverLevel.getNearestPlayer(this.lookAtContext, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
 					} else {
-						this.lookAt = this.mob
-							.level()
-							.getNearestEntity(
-								this.mob
-									.level()
-									.getEntitiesOfClass(
-										this.lookAtType, this.mob.getBoundingBox().inflate((double)this.lookDistance, 3.0, (double)this.lookDistance), livingEntity -> true
-									),
-								this.lookAtContext,
-								this.mob,
-								this.mob.getX(),
-								this.mob.getEyeY(),
-								this.mob.getZ()
-							);
+						this.lookAt = serverLevel.getNearestEntity(
+							this.mob
+								.level()
+								.getEntitiesOfClass(this.lookAtType, this.mob.getBoundingBox().inflate((double)this.lookDistance, 3.0, (double)this.lookDistance), livingEntity -> true),
+							this.lookAtContext,
+							this.mob,
+							this.mob.getX(),
+							this.mob.getEyeY(),
+							this.mob.getZ()
+						);
 					}
 				}
 
@@ -1086,7 +1080,7 @@ public class Panda extends Animal {
 		public void stop() {
 			ItemStack itemStack = Panda.this.getItemBySlot(EquipmentSlot.MAINHAND);
 			if (!itemStack.isEmpty()) {
-				Panda.this.spawnAtLocation(itemStack);
+				Panda.this.spawnAtLocation(getServerLevel(Panda.this.level()), itemStack);
 				Panda.this.setItemSlot(EquipmentSlot.MAINHAND, ItemStack.EMPTY);
 				int i = Panda.this.isLazy() ? Panda.this.random.nextInt(50) + 10 : Panda.this.random.nextInt(150) + 10;
 				this.cooldown = Panda.this.tickCount + i * 20;

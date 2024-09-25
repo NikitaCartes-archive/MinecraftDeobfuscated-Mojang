@@ -163,7 +163,7 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 	@Override
 	public void removeComponentsFromTag(CompoundTag compoundTag) {
 		compoundTag.remove("CustomName");
-		compoundTag.remove("Lock");
+		compoundTag.remove("lock");
 		compoundTag.remove("Items");
 	}
 }

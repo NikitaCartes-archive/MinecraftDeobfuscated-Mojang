@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.animal;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.AgeableMob;
@@ -29,8 +30,8 @@ public abstract class AgeableWaterCreature extends AgeableMob {
 	}
 
 	@Override
-	public int getBaseExperienceReward() {
-		return 1 + this.level().random.nextInt(3);
+	public int getBaseExperienceReward(ServerLevel serverLevel) {
+		return 1 + this.random.nextInt(3);
 	}
 
 	protected void handleAirSupply(int i) {

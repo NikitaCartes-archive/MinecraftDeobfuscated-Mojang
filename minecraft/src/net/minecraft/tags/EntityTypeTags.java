@@ -39,6 +39,7 @@ public interface EntityTypeTags {
 	TagKey<EntityType<?>> IMMUNE_TO_OOZING = create("immune_to_oozing");
 	TagKey<EntityType<?>> IMMUNE_TO_INFESTED = create("immune_to_infested");
 	TagKey<EntityType<?>> REDIRECTABLE_PROJECTILE = create("redirectable_projectile");
+	TagKey<EntityType<?>> BOAT = create("boat");
 
 	private static TagKey<EntityType<?>> create(String string) {
 		return TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.withDefaultNamespace(string));

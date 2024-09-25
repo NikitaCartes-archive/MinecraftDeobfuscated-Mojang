@@ -53,7 +53,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 
 @Environment(EnvType.CLIENT)
-public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<CreativeModeInventoryScreen.ItemPickerMenu> {
+public class CreativeModeInventoryScreen extends AbstractContainerScreen<CreativeModeInventoryScreen.ItemPickerMenu> {
 	private static final ResourceLocation SCROLLER_SPRITE = ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller");
 	private static final ResourceLocation SCROLLER_DISABLED_SPRITE = ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller_disabled");
 	private static final ResourceLocation[] UNSELECTED_TOP_TABS = new ResourceLocation[]{
@@ -114,6 +114,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	private boolean hasClickedOutside;
 	private final Set<TagKey<Item>> visibleTags = new HashSet();
 	private final boolean displayOperatorCreativeTab;
+	private final EffectsInInventory effects;
 
 	public CreativeModeInventoryScreen(LocalPlayer localPlayer, FeatureFlagSet featureFlagSet, boolean bl) {
 		super(new CreativeModeInventoryScreen.ItemPickerMenu(localPlayer), localPlayer.getInventory(), CommonComponents.EMPTY);
@@ -122,6 +123,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		this.imageWidth = 195;
 		this.displayOperatorCreativeTab = bl;
 		this.tryRebuildTabContents(localPlayer.connection.searchTrees(), featureFlagSet, this.hasPermissions(localPlayer), localPlayer.level().registryAccess());
+		this.effects = new EffectsInInventory(this);
 	}
 
 	private boolean hasPermissions(Player player) {
@@ -665,6 +667,7 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
 		super.render(guiGraphics, i, j, f);
+		this.effects.render(guiGraphics, i, j, f);
 
 		for (CreativeModeTab creativeModeTab : CreativeModeTabs.tabs()) {
 			if (this.checkTabHovering(guiGraphics, creativeModeTab, i, j)) {
@@ -679,6 +682,11 @@ public class CreativeModeInventoryScreen extends EffectRenderingInventoryScreen<
 		}
 
 		this.renderTooltip(guiGraphics, i, j);
+	}
+
+	@Override
+	public boolean showsActiveEffects() {
+		return this.effects.canSeeEffects();
 	}
 
 	@Override

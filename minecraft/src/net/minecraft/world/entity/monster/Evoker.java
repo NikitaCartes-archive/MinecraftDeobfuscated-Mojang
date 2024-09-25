@@ -92,11 +92,6 @@ public class Evoker extends SpellcasterIllager {
 	}
 
 	@Override
-	protected void customServerAiStep() {
-		super.customServerAiStep();
-	}
-
-	@Override
 	protected boolean considersEntityAsAlly(Entity entity) {
 		if (entity == this) {
 			return true;
@@ -240,7 +235,9 @@ public class Evoker extends SpellcasterIllager {
 			if (!super.canUse()) {
 				return false;
 			} else {
-				int i = Evoker.this.level().getNearbyEntities(Vex.class, this.vexCountTargeting, Evoker.this, Evoker.this.getBoundingBox().inflate(16.0)).size();
+				int i = getServerLevel(Evoker.this.level())
+					.getNearbyEntities(Vex.class, this.vexCountTargeting, Evoker.this, Evoker.this.getBoundingBox().inflate(16.0))
+					.size();
 				return Evoker.this.random.nextInt(8) + 1 > i;
 			}
 		}
@@ -293,7 +290,7 @@ public class Evoker extends SpellcasterIllager {
 	public class EvokerWololoSpellGoal extends SpellcasterIllager.SpellcasterUseSpellGoal {
 		private final TargetingConditions wololoTargeting = TargetingConditions.forNonCombat()
 			.range(16.0)
-			.selector(livingEntity -> ((Sheep)livingEntity).getColor() == DyeColor.BLUE);
+			.selector((livingEntity, serverLevel) -> ((Sheep)livingEntity).getColor() == DyeColor.BLUE);
 
 		@Override
 		public boolean canUse() {
@@ -303,16 +300,18 @@ public class Evoker extends SpellcasterIllager {
 				return false;
 			} else if (Evoker.this.tickCount < this.nextAttackTickCount) {
 				return false;
-			} else if (!Evoker.this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
-				return false;
 			} else {
-				List<Sheep> list = Evoker.this.level()
-					.getNearbyEntities(Sheep.class, this.wololoTargeting, Evoker.this, Evoker.this.getBoundingBox().inflate(16.0, 4.0, 16.0));
-				if (list.isEmpty()) {
+				ServerLevel serverLevel = getServerLevel(Evoker.this.level());
+				if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 					return false;
 				} else {
-					Evoker.this.setWololoTarget((Sheep)list.get(Evoker.this.random.nextInt(list.size())));
-					return true;
+					List<Sheep> list = serverLevel.getNearbyEntities(Sheep.class, this.wololoTargeting, Evoker.this, Evoker.this.getBoundingBox().inflate(16.0, 4.0, 16.0));
+					if (list.isEmpty()) {
+						return false;
+					} else {
+						Evoker.this.setWololoTarget((Sheep)list.get(Evoker.this.random.nextInt(list.size())));
+						return true;
+					}
 				}
 			}
 		}

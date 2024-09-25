@@ -6,44 +6,38 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.client.gui.screens.recipebook.CraftingRecipeBookComponent;
-import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
-import net.minecraft.client.gui.screens.recipebook.RecipeUpdateListener;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.inventory.Slot;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
-public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMenu> implements RecipeUpdateListener {
+public class InventoryScreen extends AbstractRecipeBookScreen<InventoryMenu> {
 	private float xMouse;
 	private float yMouse;
-	private final RecipeBookComponent<?> recipeBookComponent;
-	private boolean widthTooNarrow;
 	private boolean buttonClicked;
+	private final EffectsInInventory effects;
 
 	public InventoryScreen(Player player) {
-		super(player.inventoryMenu, player.getInventory(), Component.translatable("container.crafting"));
+		super(player.inventoryMenu, new CraftingRecipeBookComponent(player.inventoryMenu), player.getInventory(), Component.translatable("container.crafting"));
 		this.titleLabelX = 97;
-		this.recipeBookComponent = new CraftingRecipeBookComponent(player.inventoryMenu);
+		this.effects = new EffectsInInventory(this);
 	}
 
 	@Override
 	public void containerTick() {
+		super.containerTick();
 		if (this.minecraft.gameMode.hasInfiniteItems()) {
 			this.minecraft
 				.setScreen(
 					new CreativeModeInventoryScreen(this.minecraft.player, this.minecraft.player.connection.enabledFeatures(), this.minecraft.options.operatorItemsTab().get())
 				);
-		} else {
-			this.recipeBookComponent.tick();
 		}
 	}
 
@@ -56,17 +50,17 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 				);
 		} else {
 			super.init();
-			this.widthTooNarrow = this.width < 379;
-			this.recipeBookComponent.init(this.width, this.height, this.minecraft, this.widthTooNarrow);
-			this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
-			this.addRenderableWidget(new ImageButton(this.leftPos + 104, this.height / 2 - 22, 20, 18, RecipeBookComponent.RECIPE_BUTTON_SPRITES, button -> {
-				this.recipeBookComponent.toggleVisibility();
-				this.leftPos = this.recipeBookComponent.updateScreenPosition(this.width, this.imageWidth);
-				button.setPosition(this.leftPos + 104, this.height / 2 - 22);
-				this.buttonClicked = true;
-			}));
-			this.addWidget(this.recipeBookComponent);
 		}
+	}
+
+	@Override
+	protected ScreenPosition getRecipeBookButtonPosition() {
+		return new ScreenPosition(this.leftPos + 104, this.height / 2 - 22);
+	}
+
+	@Override
+	protected void onRecipeBookButtonClick() {
+		this.buttonClicked = true;
 	}
 
 	@Override
@@ -76,19 +70,20 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		if (this.recipeBookComponent.isVisible() && this.widthTooNarrow) {
-			this.renderBackground(guiGraphics, i, j, f);
-			this.recipeBookComponent.render(guiGraphics, i, j, f);
-		} else {
-			super.render(guiGraphics, i, j, f);
-			this.recipeBookComponent.render(guiGraphics, i, j, f);
-			this.recipeBookComponent.renderGhostRecipe(guiGraphics, this.leftPos, this.topPos, false);
-		}
-
-		this.renderTooltip(guiGraphics, i, j);
-		this.recipeBookComponent.renderTooltip(guiGraphics, i, j, this.hoveredSlot);
+		super.render(guiGraphics, i, j, f);
+		this.effects.render(guiGraphics, i, j, f);
 		this.xMouse = (float)i;
 		this.yMouse = (float)j;
+	}
+
+	@Override
+	public boolean showsActiveEffects() {
+		return this.effects.canSeeEffects();
+	}
+
+	@Override
+	protected boolean isBiggerResultSlot() {
+		return false;
 	}
 
 	@Override
@@ -158,31 +153,6 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 	}
 
 	@Override
-	public boolean keyPressed(int i, int j, int k) {
-		return this.recipeBookComponent.keyPressed(i, j, k) ? true : super.keyPressed(i, j, k);
-	}
-
-	@Override
-	public boolean charTyped(char c, int i) {
-		return this.recipeBookComponent.charTyped(c, i) ? true : super.charTyped(c, i);
-	}
-
-	@Override
-	protected boolean isHovering(int i, int j, int k, int l, double d, double e) {
-		return (!this.widthTooNarrow || !this.recipeBookComponent.isVisible()) && super.isHovering(i, j, k, l, d, e);
-	}
-
-	@Override
-	public boolean mouseClicked(double d, double e, int i) {
-		if (this.recipeBookComponent.mouseClicked(d, e, i)) {
-			this.setFocused(this.recipeBookComponent);
-			return true;
-		} else {
-			return this.widthTooNarrow && this.recipeBookComponent.isVisible() ? false : super.mouseClicked(d, e, i);
-		}
-	}
-
-	@Override
 	public boolean mouseReleased(double d, double e, int i) {
 		if (this.buttonClicked) {
 			this.buttonClicked = false;
@@ -190,27 +160,5 @@ public class InventoryScreen extends EffectRenderingInventoryScreen<InventoryMen
 		} else {
 			return super.mouseReleased(d, e, i);
 		}
-	}
-
-	@Override
-	protected boolean hasClickedOutside(double d, double e, int i, int j, int k) {
-		boolean bl = d < (double)i || e < (double)j || d >= (double)(i + this.imageWidth) || e >= (double)(j + this.imageHeight);
-		return this.recipeBookComponent.hasClickedOutside(d, e, this.leftPos, this.topPos, this.imageWidth, this.imageHeight, k) && bl;
-	}
-
-	@Override
-	protected void slotClicked(Slot slot, int i, int j, ClickType clickType) {
-		super.slotClicked(slot, i, j, clickType);
-		this.recipeBookComponent.slotClicked(slot);
-	}
-
-	@Override
-	public void recipesUpdated() {
-		this.recipeBookComponent.recipesUpdated();
-	}
-
-	@Override
-	public RecipeBookComponent getRecipeBookComponent() {
-		return this.recipeBookComponent;
 	}
 }

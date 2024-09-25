@@ -4,7 +4,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -30,7 +30,7 @@ public class WaterlilyBlock extends BushBlock {
 	@Override
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
 		super.entityInside(blockState, level, blockPos, entity);
-		if (level instanceof ServerLevel && entity instanceof Boat) {
+		if (level instanceof ServerLevel && entity instanceof AbstractBoat) {
 			level.destroyBlock(new BlockPos(blockPos), true, entity);
 		}
 	}

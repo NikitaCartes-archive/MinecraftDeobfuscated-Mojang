@@ -111,7 +111,6 @@ import net.minecraft.client.renderer.blockentity.DecoratedPotRenderer;
 import net.minecraft.client.renderer.blockentity.HangingSignRenderer;
 import net.minecraft.client.renderer.blockentity.SignRenderer;
 import net.minecraft.client.renderer.entity.WitherSkullRenderer;
-import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.level.block.state.properties.WoodType;
 
 @Environment(EnvType.CLIENT)
@@ -418,28 +417,33 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.ZOMBIFIED_PIGLIN_BABY, layerDefinition18.apply(HumanoidModel.BABY_TRANSFORMER));
 		builder.put(ModelLayers.ZOMBIFIED_PIGLIN_BABY_INNER_ARMOR, layerDefinition4.apply(HumanoidModel.BABY_TRANSFORMER));
 		builder.put(ModelLayers.ZOMBIFIED_PIGLIN_BABY_OUTER_ARMOR, layerDefinition3.apply(HumanoidModel.BABY_TRANSFORMER));
+		builder.put(ModelLayers.BAMBOO_RAFT, RaftModel.createRaftModel());
+		builder.put(ModelLayers.BAMBOO_CHEST_RAFT, RaftModel.createChestRaftModel());
 		LayerDefinition layerDefinition52 = BoatModel.createBoatModel();
 		LayerDefinition layerDefinition53 = BoatModel.createChestBoatModel();
-		LayerDefinition layerDefinition54 = RaftModel.createRaftModel();
-		LayerDefinition layerDefinition55 = RaftModel.createChestRaftModel();
-
-		for (Boat.Type type : Boat.Type.values()) {
-			if (type == Boat.Type.BAMBOO) {
-				builder.put(ModelLayers.createBoatModelName(type), layerDefinition54);
-				builder.put(ModelLayers.createChestBoatModelName(type), layerDefinition55);
-			} else {
-				builder.put(ModelLayers.createBoatModelName(type), layerDefinition52);
-				builder.put(ModelLayers.createChestBoatModelName(type), layerDefinition53);
-			}
-		}
-
-		LayerDefinition layerDefinition56 = SignRenderer.createSignLayer(true);
-		LayerDefinition layerDefinition57 = SignRenderer.createSignLayer(false);
-		LayerDefinition layerDefinition58 = HangingSignRenderer.createHangingSignLayer();
+		builder.put(ModelLayers.OAK_BOAT, layerDefinition52);
+		builder.put(ModelLayers.OAK_CHEST_BOAT, layerDefinition53);
+		builder.put(ModelLayers.SPRUCE_BOAT, layerDefinition52);
+		builder.put(ModelLayers.SPRUCE_CHEST_BOAT, layerDefinition53);
+		builder.put(ModelLayers.BIRCH_BOAT, layerDefinition52);
+		builder.put(ModelLayers.BIRCH_CHEST_BOAT, layerDefinition53);
+		builder.put(ModelLayers.JUNGLE_BOAT, layerDefinition52);
+		builder.put(ModelLayers.JUNGLE_CHEST_BOAT, layerDefinition53);
+		builder.put(ModelLayers.ACACIA_BOAT, layerDefinition52);
+		builder.put(ModelLayers.ACACIA_CHEST_BOAT, layerDefinition53);
+		builder.put(ModelLayers.CHERRY_BOAT, layerDefinition52);
+		builder.put(ModelLayers.CHERRY_CHEST_BOAT, layerDefinition53);
+		builder.put(ModelLayers.DARK_OAK_BOAT, layerDefinition52);
+		builder.put(ModelLayers.DARK_OAK_CHEST_BOAT, layerDefinition53);
+		builder.put(ModelLayers.MANGROVE_BOAT, layerDefinition52);
+		builder.put(ModelLayers.MANGROVE_CHEST_BOAT, layerDefinition53);
+		LayerDefinition layerDefinition54 = SignRenderer.createSignLayer(true);
+		LayerDefinition layerDefinition55 = SignRenderer.createSignLayer(false);
+		LayerDefinition layerDefinition56 = HangingSignRenderer.createHangingSignLayer();
 		WoodType.values().forEach(woodType -> {
-			builder.put(ModelLayers.createStandingSignModelName(woodType), layerDefinition56);
-			builder.put(ModelLayers.createWallSignModelName(woodType), layerDefinition57);
-			builder.put(ModelLayers.createHangingSignModelName(woodType), layerDefinition58);
+			builder.put(ModelLayers.createStandingSignModelName(woodType), layerDefinition54);
+			builder.put(ModelLayers.createWallSignModelName(woodType), layerDefinition55);
+			builder.put(ModelLayers.createHangingSignModelName(woodType), layerDefinition56);
 		});
 		ImmutableMap<ModelLayerLocation, LayerDefinition> immutableMap = builder.build();
 		List<ModelLayerLocation> list = (List<ModelLayerLocation>)ModelLayers.getKnownLocations()

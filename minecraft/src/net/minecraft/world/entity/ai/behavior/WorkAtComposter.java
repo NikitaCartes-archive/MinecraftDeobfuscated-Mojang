@@ -26,7 +26,7 @@ public class WorkAtComposter extends WorkAtPoi {
 			GlobalPos globalPos = (GlobalPos)optional.get();
 			BlockState blockState = serverLevel.getBlockState(globalPos.pos());
 			if (blockState.is(Blocks.COMPOSTER)) {
-				this.makeBread(villager);
+				this.makeBread(serverLevel, villager);
 				this.compostItems(serverLevel, villager, globalPos, blockState);
 			}
 		}
@@ -74,7 +74,7 @@ public class WorkAtComposter extends WorkAtPoi {
 		serverLevel.levelEvent(1500, blockPos, blockState2 != blockState ? 1 : 0);
 	}
 
-	private void makeBread(Villager villager) {
+	private void makeBread(ServerLevel serverLevel, Villager villager) {
 		SimpleContainer simpleContainer = villager.getInventory();
 		if (simpleContainer.countItem(Items.BREAD) <= 36) {
 			int i = simpleContainer.countItem(Items.WHEAT);
@@ -86,7 +86,7 @@ public class WorkAtComposter extends WorkAtPoi {
 				simpleContainer.removeItemType(Items.WHEAT, m);
 				ItemStack itemStack = simpleContainer.addItem(new ItemStack(Items.BREAD, l));
 				if (!itemStack.isEmpty()) {
-					villager.spawnAtLocation(itemStack, 0.5F);
+					villager.spawnAtLocation(serverLevel, itemStack, 0.5F);
 				}
 			}
 		}

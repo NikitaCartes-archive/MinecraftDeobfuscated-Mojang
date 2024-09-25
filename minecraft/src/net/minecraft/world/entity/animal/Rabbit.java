@@ -174,7 +174,7 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
 	}
 
 	@Override
-	public void customServerAiStep() {
+	public void customServerAiStep(ServerLevel serverLevel) {
 		if (this.jumpDelayTicks > 0) {
 			this.jumpDelayTicks--;
 		}
@@ -531,7 +531,7 @@ public class Rabbit extends Animal implements VariantHolder<Rabbit.Variant> {
 		@Override
 		public boolean canUse() {
 			if (this.nextStartTick <= 0) {
-				if (!this.rabbit.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+				if (!getServerLevel(this.rabbit).getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 					return false;
 				}
 

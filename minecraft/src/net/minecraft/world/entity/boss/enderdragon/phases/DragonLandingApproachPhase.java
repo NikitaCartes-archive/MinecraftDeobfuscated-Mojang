@@ -3,6 +3,7 @@ package net.minecraft.world.entity.boss.enderdragon.phases;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.player.Player;
@@ -35,10 +36,10 @@ public class DragonLandingApproachPhase extends AbstractDragonPhaseInstance {
 	}
 
 	@Override
-	public void doServerTick() {
+	public void doServerTick(ServerLevel serverLevel) {
 		double d = this.targetLocation == null ? 0.0 : this.targetLocation.distanceToSqr(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
 		if (d < 100.0 || d > 22500.0 || this.dragon.horizontalCollision || this.dragon.verticalCollision) {
-			this.findNewTarget();
+			this.findNewTarget(serverLevel);
 		}
 	}
 
@@ -48,15 +49,11 @@ public class DragonLandingApproachPhase extends AbstractDragonPhaseInstance {
 		return this.targetLocation;
 	}
 
-	private void findNewTarget() {
+	private void findNewTarget(ServerLevel serverLevel) {
 		if (this.currentPath == null || this.currentPath.isDone()) {
 			int i = this.dragon.findClosestNode();
-			BlockPos blockPos = this.dragon
-				.level()
-				.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(this.dragon.getFightOrigin()));
-			Player player = this.dragon
-				.level()
-				.getNearestPlayer(NEAR_EGG_TARGETING, this.dragon, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
+			BlockPos blockPos = serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(this.dragon.getFightOrigin()));
+			Player player = serverLevel.getNearestPlayer(NEAR_EGG_TARGETING, this.dragon, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
 			int j;
 			if (player != null) {
 				Vec3 vec3 = new Vec3(player.getX(), 0.0, player.getZ()).normalize();

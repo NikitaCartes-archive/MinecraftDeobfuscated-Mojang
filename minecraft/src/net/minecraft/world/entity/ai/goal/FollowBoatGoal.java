@@ -9,7 +9,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.phys.Vec3;
 
 public class FollowBoatGoal extends Goal {
@@ -25,11 +25,11 @@ public class FollowBoatGoal extends Goal {
 
 	@Override
 	public boolean canUse() {
-		List<Boat> list = this.mob.level().getEntitiesOfClass(Boat.class, this.mob.getBoundingBox().inflate(5.0));
+		List<AbstractBoat> list = this.mob.level().getEntitiesOfClass(AbstractBoat.class, this.mob.getBoundingBox().inflate(5.0));
 		boolean bl = false;
 
-		for (Boat boat : list) {
-			Entity entity = boat.getControllingPassenger();
+		for (AbstractBoat abstractBoat : list) {
+			Entity entity = abstractBoat.getControllingPassenger();
 			if (entity instanceof Player && (Mth.abs(((Player)entity).xxa) > 0.0F || Mth.abs(((Player)entity).zza) > 0.0F)) {
 				bl = true;
 				break;
@@ -51,8 +51,8 @@ public class FollowBoatGoal extends Goal {
 
 	@Override
 	public void start() {
-		for (Boat boat : this.mob.level().getEntitiesOfClass(Boat.class, this.mob.getBoundingBox().inflate(5.0))) {
-			if (boat.getControllingPassenger() instanceof Player player) {
+		for (AbstractBoat abstractBoat : this.mob.level().getEntitiesOfClass(AbstractBoat.class, this.mob.getBoundingBox().inflate(5.0))) {
+			if (abstractBoat.getControllingPassenger() instanceof Player player) {
 				this.following = player;
 				break;
 			}

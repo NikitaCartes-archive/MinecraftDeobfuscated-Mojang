@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.boss.enderdragon.phases;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -17,13 +18,15 @@ public class DragonSittingScanningPhase extends AbstractDragonSittingPhase {
 
 	public DragonSittingScanningPhase(EnderDragon enderDragon) {
 		super(enderDragon);
-		this.scanTargeting = TargetingConditions.forCombat().range(20.0).selector(livingEntity -> Math.abs(livingEntity.getY() - enderDragon.getY()) <= 10.0);
+		this.scanTargeting = TargetingConditions.forCombat()
+			.range(20.0)
+			.selector((livingEntity, serverLevel) -> Math.abs(livingEntity.getY() - enderDragon.getY()) <= 10.0);
 	}
 
 	@Override
-	public void doServerTick() {
+	public void doServerTick(ServerLevel serverLevel) {
 		this.scanningTime++;
-		LivingEntity livingEntity = this.dragon.level().getNearestPlayer(this.scanTargeting, this.dragon, this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
+		LivingEntity livingEntity = serverLevel.getNearestPlayer(this.scanTargeting, this.dragon, this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
 		if (livingEntity != null) {
 			if (this.scanningTime > 25) {
 				this.dragon.getPhaseManager().setPhase(EnderDragonPhase.SITTING_ATTACKING);
@@ -51,7 +54,7 @@ public class DragonSittingScanningPhase extends AbstractDragonSittingPhase {
 				}
 			}
 		} else if (this.scanningTime >= 100) {
-			livingEntity = this.dragon.level().getNearestPlayer(CHARGE_TARGETING, this.dragon, this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
+			livingEntity = serverLevel.getNearestPlayer(CHARGE_TARGETING, this.dragon, this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
 			this.dragon.getPhaseManager().setPhase(EnderDragonPhase.TAKEOFF);
 			if (livingEntity != null) {
 				this.dragon.getPhaseManager().setPhase(EnderDragonPhase.CHARGING_PLAYER);

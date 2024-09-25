@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
@@ -57,20 +58,20 @@ public class MinecartTNT extends AbstractMinecart {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
 		if (damageSource.getDirectEntity() instanceof AbstractArrow abstractArrow && abstractArrow.isOnFire()) {
 			DamageSource damageSource2 = this.damageSources().explosion(this, damageSource.getEntity());
 			this.explode(damageSource2, abstractArrow.getDeltaMovement().lengthSqr());
 		}
 
-		return super.hurt(damageSource, f);
+		return super.hurtServer(serverLevel, damageSource, f);
 	}
 
 	@Override
-	public void destroy(DamageSource damageSource) {
+	public void destroy(ServerLevel serverLevel, DamageSource damageSource) {
 		double d = this.getDeltaMovement().horizontalDistanceSqr();
 		if (!damageSourceIgnitesTnt(damageSource) && !(d >= 0.01F)) {
-			this.destroy(this.getDropItem());
+			this.destroy(serverLevel, this.getDropItem());
 		} else {
 			if (this.fuse < 0) {
 				this.primeFuse();
@@ -94,20 +95,19 @@ public class MinecartTNT extends AbstractMinecart {
 	}
 
 	protected void explode(@Nullable DamageSource damageSource, double d) {
-		if (!this.level().isClientSide) {
+		if (this.level() instanceof ServerLevel serverLevel) {
 			double e = Math.min(Math.sqrt(d), 5.0);
-			this.level()
-				.explode(
-					this,
-					damageSource,
-					null,
-					this.getX(),
-					this.getY(),
-					this.getZ(),
-					(float)((double)this.explosionPowerBase + this.random.nextDouble() * 1.5 * e),
-					false,
-					Level.ExplosionInteraction.TNT
-				);
+			serverLevel.explode(
+				this,
+				damageSource,
+				null,
+				this.getX(),
+				this.getY(),
+				this.getZ(),
+				(float)((double)this.explosionPowerBase + this.random.nextDouble() * 1.5 * e),
+				false,
+				Level.ExplosionInteraction.TNT
+			);
 			this.discard();
 		}
 	}

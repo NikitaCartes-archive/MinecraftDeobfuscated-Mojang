@@ -206,7 +206,7 @@ public abstract class Raider extends PatrollingMonster {
 	}
 
 	@Override
-	protected void pickUpItem(ItemEntity itemEntity) {
+	protected void pickUpItem(ServerLevel serverLevel, ItemEntity itemEntity) {
 		ItemStack itemStack = itemEntity.getItem();
 		boolean bl = this.hasActiveRaid() && this.getCurrentRaid().getLeader(this.getWave()) != null;
 		if (this.hasActiveRaid()
@@ -216,7 +216,7 @@ public abstract class Raider extends PatrollingMonster {
 			ItemStack itemStack2 = this.getItemBySlot(equipmentSlot);
 			double d = (double)this.getEquipmentDropChance(equipmentSlot);
 			if (!itemStack2.isEmpty() && (double)Math.max(this.random.nextFloat() - 0.1F, 0.0F) < d) {
-				this.spawnAtLocation(itemStack2);
+				this.spawnAtLocation(serverLevel, itemStack2);
 			}
 
 			this.onItemPickup(itemEntity);
@@ -226,7 +226,7 @@ public abstract class Raider extends PatrollingMonster {
 			this.getCurrentRaid().setLeader(this.getWave(), this);
 			this.setPatrolLeader(true);
 		} else {
-			super.pickUpItem(itemEntity);
+			super.pickUpItem(serverLevel, itemEntity);
 		}
 	}
 
@@ -249,12 +249,12 @@ public abstract class Raider extends PatrollingMonster {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
 		if (this.hasActiveRaid()) {
 			this.getCurrentRaid().updateBossbar();
 		}
 
-		return super.hurt(damageSource, f);
+		return super.hurtServer(serverLevel, damageSource, f);
 	}
 
 	@Nullable
@@ -294,7 +294,8 @@ public abstract class Raider extends PatrollingMonster {
 			super.start();
 			this.mob.getNavigation().stop();
 
-			for (Raider raider : this.mob.level().getNearbyEntities(Raider.class, this.shoutTargeting, this.mob, this.mob.getBoundingBox().inflate(8.0, 8.0, 8.0))) {
+			for (Raider raider : getServerLevel(this.mob)
+				.getNearbyEntities(Raider.class, this.shoutTargeting, this.mob, this.mob.getBoundingBox().inflate(8.0, 8.0, 8.0))) {
 				raider.setTarget(this.mob.getTarget());
 			}
 		}
@@ -304,7 +305,8 @@ public abstract class Raider extends PatrollingMonster {
 			super.stop();
 			LivingEntity livingEntity = this.mob.getTarget();
 			if (livingEntity != null) {
-				for (Raider raider : this.mob.level().getNearbyEntities(Raider.class, this.shoutTargeting, this.mob, this.mob.getBoundingBox().inflate(8.0, 8.0, 8.0))) {
+				for (Raider raider : getServerLevel(this.mob)
+					.getNearbyEntities(Raider.class, this.shoutTargeting, this.mob, this.mob.getBoundingBox().inflate(8.0, 8.0, 8.0))) {
 					raider.setTarget(livingEntity);
 					raider.setAggressive(true);
 				}
@@ -422,7 +424,7 @@ public abstract class Raider extends PatrollingMonster {
 		@Override
 		public void tick() {
 			if (this.pursuedBannerItemEntity != null && this.pursuedBannerItemEntity.closerThan(this.mob, 1.414)) {
-				this.mob.pickUpItem(this.pursuedBannerItemEntity);
+				this.mob.pickUpItem(getServerLevel(Raider.this.level()), this.pursuedBannerItemEntity);
 			}
 		}
 	}

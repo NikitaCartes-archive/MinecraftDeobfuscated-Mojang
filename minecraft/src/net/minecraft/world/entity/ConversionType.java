@@ -4,6 +4,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
+import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.scores.Scoreboard;
 
@@ -84,7 +85,7 @@ public enum ConversionType {
 		mob2.setAbsorptionAmount(mob.getAbsorptionAmount());
 
 		for (MobEffectInstance mobEffectInstance : mob.getActiveEffects()) {
-			mob2.addEffect(mobEffectInstance);
+			mob2.addEffect(new MobEffectInstance(mobEffectInstance));
 		}
 
 		if (mob.isBaby()) {
@@ -130,6 +131,10 @@ public enum ConversionType {
 			if (mob.getTeam() != null && mob.getTeam() == conversionParams.team()) {
 				scoreboard.removePlayerFromTeam(mob.getStringUUID(), mob.getTeam());
 			}
+		}
+
+		if (mob instanceof Zombie zombie && zombie.canBreakDoors() && mob2 instanceof Zombie zombie2) {
+			zombie2.setCanBreakDoors(true);
 		}
 	}
 }

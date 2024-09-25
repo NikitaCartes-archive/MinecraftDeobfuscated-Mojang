@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -18,33 +19,32 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectUtil;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 
 @Environment(EnvType.CLIENT)
-public abstract class EffectRenderingInventoryScreen<T extends AbstractContainerMenu> extends AbstractContainerScreen<T> {
+public class EffectsInInventory {
 	private static final ResourceLocation EFFECT_BACKGROUND_LARGE_SPRITE = ResourceLocation.withDefaultNamespace("container/inventory/effect_background_large");
 	private static final ResourceLocation EFFECT_BACKGROUND_SMALL_SPRITE = ResourceLocation.withDefaultNamespace("container/inventory/effect_background_small");
+	private final AbstractContainerScreen<?> screen;
+	private final Minecraft minecraft;
 
-	public EffectRenderingInventoryScreen(T abstractContainerMenu, Inventory inventory, Component component) {
-		super(abstractContainerMenu, inventory, component);
+	public EffectsInInventory(AbstractContainerScreen<?> abstractContainerScreen) {
+		this.screen = abstractContainerScreen;
+		this.minecraft = Minecraft.getInstance();
 	}
 
-	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.render(guiGraphics, i, j, f);
 		this.renderEffects(guiGraphics, i, j);
 	}
 
 	public boolean canSeeEffects() {
-		int i = this.leftPos + this.imageWidth + 2;
-		int j = this.width - i;
+		int i = this.screen.leftPos + this.screen.imageWidth + 2;
+		int j = this.screen.width - i;
 		return j >= 32;
 	}
 
 	private void renderEffects(GuiGraphics guiGraphics, int i, int j) {
-		int k = this.leftPos + this.imageWidth + 2;
-		int l = this.width - k;
+		int k = this.screen.leftPos + this.screen.imageWidth + 2;
+		int l = this.screen.width - k;
 		Collection<MobEffectInstance> collection = this.minecraft.player.getActiveEffects();
 		if (!collection.isEmpty() && l >= 32) {
 			boolean bl = l >= 120;
@@ -53,13 +53,13 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 				m = 132 / (collection.size() - 1);
 			}
 
-			Iterable<MobEffectInstance> iterable = Ordering.natural().sortedCopy(collection);
+			Iterable<MobEffectInstance> iterable = Ordering.natural().<MobEffectInstance>sortedCopy(collection);
 			this.renderBackgrounds(guiGraphics, k, m, iterable, bl);
 			this.renderIcons(guiGraphics, k, m, iterable, bl);
 			if (bl) {
 				this.renderLabels(guiGraphics, k, m, iterable);
 			} else if (i >= k && i <= k + 33) {
-				int n = this.topPos;
+				int n = this.screen.topPos;
 				MobEffectInstance mobEffectInstance = null;
 
 				for (MobEffectInstance mobEffectInstance2 : iterable) {
@@ -74,14 +74,14 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 					List<Component> list = List.of(
 						this.getEffectName(mobEffectInstance), MobEffectUtil.formatDuration(mobEffectInstance, 1.0F, this.minecraft.level.tickRateManager().tickrate())
 					);
-					guiGraphics.renderTooltip(this.font, list, Optional.empty(), i, j);
+					guiGraphics.renderTooltip(this.screen.getFont(), list, Optional.empty(), i, j);
 				}
 			}
 		}
 	}
 
 	private void renderBackgrounds(GuiGraphics guiGraphics, int i, int j, Iterable<MobEffectInstance> iterable, boolean bl) {
-		int k = this.topPos;
+		int k = this.screen.topPos;
 
 		for (MobEffectInstance mobEffectInstance : iterable) {
 			if (bl) {
@@ -96,7 +96,7 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 
 	private void renderIcons(GuiGraphics guiGraphics, int i, int j, Iterable<MobEffectInstance> iterable, boolean bl) {
 		MobEffectTextureManager mobEffectTextureManager = this.minecraft.getMobEffectTextures();
-		int k = this.topPos;
+		int k = this.screen.topPos;
 
 		for (MobEffectInstance mobEffectInstance : iterable) {
 			Holder<MobEffect> holder = mobEffectInstance.getEffect();
@@ -107,13 +107,13 @@ public abstract class EffectRenderingInventoryScreen<T extends AbstractContainer
 	}
 
 	private void renderLabels(GuiGraphics guiGraphics, int i, int j, Iterable<MobEffectInstance> iterable) {
-		int k = this.topPos;
+		int k = this.screen.topPos;
 
 		for (MobEffectInstance mobEffectInstance : iterable) {
 			Component component = this.getEffectName(mobEffectInstance);
-			guiGraphics.drawString(this.font, component, i + 10 + 18, k + 6, 16777215);
+			guiGraphics.drawString(this.screen.getFont(), component, i + 10 + 18, k + 6, 16777215);
 			Component component2 = MobEffectUtil.formatDuration(mobEffectInstance, 1.0F, this.minecraft.level.tickRateManager().tickrate());
-			guiGraphics.drawString(this.font, component2, i + 10 + 18, k + 6 + 10, 8355711);
+			guiGraphics.drawString(this.screen.getFont(), component2, i + 10 + 18, k + 6 + 10, 8355711);
 			k += j;
 		}
 	}

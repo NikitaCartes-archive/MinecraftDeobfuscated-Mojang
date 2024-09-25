@@ -11,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
@@ -172,23 +173,23 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 				);
 		}
 
-		if (!this.level().isClientSide && this.life > this.lifetime) {
-			this.explode();
+		if (this.life > this.lifetime && this.level() instanceof ServerLevel serverLevel) {
+			this.explode(serverLevel);
 		}
 	}
 
-	private void explode() {
-		this.level().broadcastEntityEvent(this, (byte)17);
+	private void explode(ServerLevel serverLevel) {
+		serverLevel.broadcastEntityEvent(this, (byte)17);
 		this.gameEvent(GameEvent.EXPLODE, this.getOwner());
-		this.dealExplosionDamage();
+		this.dealExplosionDamage(serverLevel);
 		this.discard();
 	}
 
 	@Override
 	protected void onHitEntity(EntityHitResult entityHitResult) {
 		super.onHitEntity(entityHitResult);
-		if (!this.level().isClientSide) {
-			this.explode();
+		if (this.level() instanceof ServerLevel serverLevel) {
+			this.explode(serverLevel);
 		}
 	}
 
@@ -196,8 +197,8 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 	protected void onHitBlock(BlockHitResult blockHitResult) {
 		BlockPos blockPos = new BlockPos(blockHitResult.getBlockPos());
 		this.level().getBlockState(blockPos).entityInside(this.level(), blockPos, this);
-		if (!this.level().isClientSide() && this.hasExplosion()) {
-			this.explode();
+		if (this.level() instanceof ServerLevel serverLevel && this.hasExplosion()) {
+			this.explode(serverLevel);
 		}
 
 		super.onHitBlock(blockHitResult);
@@ -207,7 +208,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 		return !this.getExplosions().isEmpty();
 	}
 
-	private void dealExplosionDamage() {
+	private void dealExplosionDamage(ServerLevel serverLevel) {
 		float f = 0.0F;
 		List<FireworkExplosion> list = this.getExplosions();
 		if (!list.isEmpty()) {
@@ -216,7 +217,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 
 		if (f > 0.0F) {
 			if (this.attachedToEntity != null) {
-				this.attachedToEntity.hurt(this.damageSources().fireworks(this, this.getOwner()), 5.0F + (float)(list.size() * 2));
+				this.attachedToEntity.hurtServer(serverLevel, this.damageSources().fireworks(this, this.getOwner()), 5.0F + (float)(list.size() * 2));
 			}
 
 			double d = 5.0;
@@ -237,7 +238,7 @@ public class FireworkRocketEntity extends Projectile implements ItemSupplier {
 
 					if (bl) {
 						float g = f * (float)Math.sqrt((5.0 - (double)this.distanceTo(livingEntity)) / 5.0);
-						livingEntity.hurt(this.damageSources().fireworks(this, this.getOwner()), g);
+						livingEntity.hurtServer(serverLevel, this.damageSources().fireworks(this, this.getOwner()), g);
 					}
 				}
 			}

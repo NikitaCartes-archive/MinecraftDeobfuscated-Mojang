@@ -10,7 +10,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.Container;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -91,16 +90,6 @@ public class Horse extends AbstractHorse implements VariantHolder<Variant> {
 
 	public Markings getMarkings() {
 		return Markings.byId((this.getTypeVariant() & 0xFF00) >> 8);
-	}
-
-	@Override
-	public void containerChanged(Container container) {
-		ItemStack itemStack = this.getBodyArmorItem();
-		super.containerChanged(container);
-		ItemStack itemStack2 = this.getBodyArmorItem();
-		if (this.tickCount > 20 && this.isEquippableInSlot(itemStack2, EquipmentSlot.BODY) && itemStack != itemStack2) {
-			this.playSound(SoundEvents.HORSE_ARMOR, 0.5F, 1.0F);
-		}
 	}
 
 	@Override

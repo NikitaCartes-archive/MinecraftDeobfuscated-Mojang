@@ -84,20 +84,25 @@ public class EndCrystal extends Entity {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
+	public final boolean hurtClient(DamageSource damageSource) {
+		return this.isInvulnerableToBase(damageSource) ? false : !(damageSource.getEntity() instanceof EnderDragon);
+	}
+
+	@Override
+	public final boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (this.isInvulnerableToBase(damageSource)) {
 			return false;
 		} else if (damageSource.getEntity() instanceof EnderDragon) {
 			return false;
 		} else {
-			if (!this.isRemoved() && !this.level().isClientSide) {
+			if (!this.isRemoved()) {
 				this.remove(Entity.RemovalReason.KILLED);
 				if (!damageSource.is(DamageTypeTags.IS_EXPLOSION)) {
 					DamageSource damageSource2 = damageSource.getEntity() != null ? this.damageSources().explosion(this, damageSource.getEntity()) : null;
-					this.level().explode(this, damageSource2, null, this.getX(), this.getY(), this.getZ(), 6.0F, false, Level.ExplosionInteraction.BLOCK);
+					serverLevel.explode(this, damageSource2, null, this.getX(), this.getY(), this.getZ(), 6.0F, false, Level.ExplosionInteraction.BLOCK);
 				}
 
-				this.onDestroyedBy(damageSource);
+				this.onDestroyedBy(serverLevel, damageSource);
 			}
 
 			return true;
@@ -105,17 +110,15 @@ public class EndCrystal extends Entity {
 	}
 
 	@Override
-	public void kill() {
-		this.onDestroyedBy(this.damageSources().generic());
-		super.kill();
+	public void kill(ServerLevel serverLevel) {
+		this.onDestroyedBy(serverLevel, this.damageSources().generic());
+		super.kill(serverLevel);
 	}
 
-	private void onDestroyedBy(DamageSource damageSource) {
-		if (this.level() instanceof ServerLevel) {
-			EndDragonFight endDragonFight = ((ServerLevel)this.level()).getDragonFight();
-			if (endDragonFight != null) {
-				endDragonFight.onCrystalDestroyed(this, damageSource);
-			}
+	private void onDestroyedBy(ServerLevel serverLevel, DamageSource damageSource) {
+		EndDragonFight endDragonFight = serverLevel.getDragonFight();
+		if (endDragonFight != null) {
+			endDragonFight.onCrystalDestroyed(this, damageSource);
 		}
 	}
 

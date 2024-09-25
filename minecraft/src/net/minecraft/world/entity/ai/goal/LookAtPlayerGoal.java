@@ -1,7 +1,9 @@
 package net.minecraft.world.entity.ai.goal;
 
 import java.util.EnumSet;
+import java.util.function.Predicate;
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
@@ -37,7 +39,8 @@ public class LookAtPlayerGoal extends Goal {
 		this.onlyHorizontal = bl;
 		this.setFlags(EnumSet.of(Goal.Flag.LOOK));
 		if (class_ == Player.class) {
-			this.lookAtContext = TargetingConditions.forNonCombat().range((double)f).selector(livingEntity -> EntitySelector.notRiding(mob).test(livingEntity));
+			Predicate<Entity> predicate = EntitySelector.notRiding(mob);
+			this.lookAtContext = TargetingConditions.forNonCombat().range((double)f).selector((livingEntity, serverLevel) -> predicate.test(livingEntity));
 		} else {
 			this.lookAtContext = TargetingConditions.forNonCombat().range((double)f);
 		}
@@ -52,21 +55,20 @@ public class LookAtPlayerGoal extends Goal {
 				this.lookAt = this.mob.getTarget();
 			}
 
+			ServerLevel serverLevel = getServerLevel(this.mob);
 			if (this.lookAtType == Player.class) {
-				this.lookAt = this.mob.level().getNearestPlayer(this.lookAtContext, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
+				this.lookAt = serverLevel.getNearestPlayer(this.lookAtContext, this.mob, this.mob.getX(), this.mob.getEyeY(), this.mob.getZ());
 			} else {
-				this.lookAt = this.mob
-					.level()
-					.getNearestEntity(
-						this.mob
-							.level()
-							.getEntitiesOfClass(this.lookAtType, this.mob.getBoundingBox().inflate((double)this.lookDistance, 3.0, (double)this.lookDistance), livingEntity -> true),
-						this.lookAtContext,
-						this.mob,
-						this.mob.getX(),
-						this.mob.getEyeY(),
-						this.mob.getZ()
-					);
+				this.lookAt = serverLevel.getNearestEntity(
+					this.mob
+						.level()
+						.getEntitiesOfClass(this.lookAtType, this.mob.getBoundingBox().inflate((double)this.lookDistance, 3.0, (double)this.lookDistance), livingEntity -> true),
+					this.lookAtContext,
+					this.mob,
+					this.mob.getX(),
+					this.mob.getEyeY(),
+					this.mob.getZ()
+				);
 			}
 
 			return this.lookAt != null;

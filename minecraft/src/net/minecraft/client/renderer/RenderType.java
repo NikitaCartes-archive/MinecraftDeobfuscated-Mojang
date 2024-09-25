@@ -982,7 +982,7 @@ public abstract class RenderType extends RenderStateShard {
 	}
 
 	public static RenderType eyes(ResourceLocation resourceLocation) {
-		return (RenderType)EYES.apply(resourceLocation, ADDITIVE_TRANSPARENCY);
+		return (RenderType)EYES.apply(resourceLocation, TRANSLUCENT_TRANSPARENCY);
 	}
 
 	public static RenderType breezeEyes(ResourceLocation resourceLocation) {

@@ -4,6 +4,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -26,24 +27,39 @@ public abstract class VehicleEntity extends Entity {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.level().isClientSide || this.isRemoved()) {
+	public boolean hurtClient(DamageSource damageSource) {
+		return true;
+	}
+
+	@Override
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (this.isRemoved()) {
 			return true;
-		} else if (this.isInvulnerableTo(damageSource)) {
+		} else if (this.isInvulnerableToBase(damageSource)) {
 			return false;
 		} else {
-			this.setHurtDir(-this.getHurtDir());
-			this.setHurtTime(10);
-			this.markHurt();
-			this.setDamage(this.getDamage() + f * 10.0F);
-			this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
-			boolean bl = damageSource.getEntity() instanceof Player && ((Player)damageSource.getEntity()).getAbilities().instabuild;
+			boolean var10000;
+			label32: {
+				this.setHurtDir(-this.getHurtDir());
+				this.setHurtTime(10);
+				this.markHurt();
+				this.setDamage(this.getDamage() + f * 10.0F);
+				this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
+				if (damageSource.getEntity() instanceof Player player && player.getAbilities().instabuild) {
+					var10000 = true;
+					break label32;
+				}
+
+				var10000 = false;
+			}
+
+			boolean bl = var10000;
 			if ((bl || !(this.getDamage() > 40.0F)) && !this.shouldSourceDestroy(damageSource)) {
 				if (bl) {
 					this.discard();
 				}
 			} else {
-				this.destroy(damageSource);
+				this.destroy(serverLevel, damageSource);
 			}
 
 			return true;
@@ -56,15 +72,15 @@ public abstract class VehicleEntity extends Entity {
 
 	@Override
 	public boolean ignoreExplosion(Explosion explosion) {
-		return explosion.getIndirectSourceEntity() instanceof Mob && !this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
+		return explosion.getIndirectSourceEntity() instanceof Mob && !explosion.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING);
 	}
 
-	public void destroy(Item item) {
-		this.kill();
-		if (this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+	public void destroy(ServerLevel serverLevel, Item item) {
+		this.kill(serverLevel);
+		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 			ItemStack itemStack = new ItemStack(item);
 			itemStack.set(DataComponents.CUSTOM_NAME, this.getCustomName());
-			this.spawnAtLocation(itemStack);
+			this.spawnAtLocation(serverLevel, itemStack);
 		}
 	}
 
@@ -99,8 +115,8 @@ public abstract class VehicleEntity extends Entity {
 		return this.entityData.get(DATA_ID_HURTDIR);
 	}
 
-	protected void destroy(DamageSource damageSource) {
-		this.destroy(this.getDropItem());
+	protected void destroy(ServerLevel serverLevel, DamageSource damageSource) {
+		this.destroy(serverLevel, this.getDropItem());
 	}
 
 	@Override
@@ -108,5 +124,5 @@ public abstract class VehicleEntity extends Entity {
 		return 10;
 	}
 
-	abstract Item getDropItem();
+	protected abstract Item getDropItem();
 }

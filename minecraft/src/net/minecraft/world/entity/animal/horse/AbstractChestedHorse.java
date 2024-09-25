@@ -5,6 +5,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -64,13 +65,10 @@ public abstract class AbstractChestedHorse extends AbstractHorse {
 	}
 
 	@Override
-	protected void dropEquipment() {
-		super.dropEquipment();
+	protected void dropEquipment(ServerLevel serverLevel) {
+		super.dropEquipment(serverLevel);
 		if (this.hasChest()) {
-			if (!this.level().isClientSide) {
-				this.spawnAtLocation(Blocks.CHEST);
-			}
-
+			this.spawnAtLocation(serverLevel, Blocks.CHEST);
 			this.setChest(false);
 		}
 	}

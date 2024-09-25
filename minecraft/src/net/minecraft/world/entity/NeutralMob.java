@@ -75,26 +75,26 @@ public interface NeutralMob {
 		}
 	}
 
-	default boolean isAngryAt(LivingEntity livingEntity) {
+	default boolean isAngryAt(LivingEntity livingEntity, ServerLevel serverLevel) {
 		if (!this.canAttack(livingEntity)) {
 			return false;
 		} else {
-			return livingEntity.getType() == EntityType.PLAYER && this.isAngryAtAllPlayers(livingEntity.level())
+			return livingEntity.getType() == EntityType.PLAYER && this.isAngryAtAllPlayers(serverLevel)
 				? true
 				: livingEntity.getUUID().equals(this.getPersistentAngerTarget());
 		}
 	}
 
-	default boolean isAngryAtAllPlayers(Level level) {
-		return level.getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER) && this.isAngry() && this.getPersistentAngerTarget() == null;
+	default boolean isAngryAtAllPlayers(ServerLevel serverLevel) {
+		return serverLevel.getGameRules().getBoolean(GameRules.RULE_UNIVERSAL_ANGER) && this.isAngry() && this.getPersistentAngerTarget() == null;
 	}
 
 	default boolean isAngry() {
 		return this.getRemainingPersistentAngerTime() > 0;
 	}
 
-	default void playerDied(Player player) {
-		if (player.level().getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {
+	default void playerDied(ServerLevel serverLevel, Player player) {
+		if (serverLevel.getGameRules().getBoolean(GameRules.RULE_FORGIVE_DEAD_PLAYERS)) {
 			if (player.getUUID().equals(this.getPersistentAngerTarget())) {
 				this.stopBeingAngry();
 			}

@@ -38,7 +38,7 @@ public class SmallFireball extends Fireball {
 			int i = var7.getRemainingFireTicks();
 			var7.igniteForSeconds(5.0F);
 			DamageSource damageSource = this.damageSources().fireball(this, entity2);
-			if (!var7.hurt(damageSource, 5.0F)) {
+			if (!var7.hurtServer(serverLevel, damageSource, 5.0F)) {
 				var7.setRemainingFireTicks(i);
 			} else {
 				EnchantmentHelper.doPostAttackEffects(serverLevel, var7, damageSource);
@@ -49,9 +49,9 @@ public class SmallFireball extends Fireball {
 	@Override
 	protected void onHitBlock(BlockHitResult blockHitResult) {
 		super.onHitBlock(blockHitResult);
-		if (!this.level().isClientSide) {
+		if (this.level() instanceof ServerLevel serverLevel) {
 			Entity entity = this.getOwner();
-			if (!(entity instanceof Mob) || this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+			if (!(entity instanceof Mob) || serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 				BlockPos blockPos = blockHitResult.getBlockPos().relative(blockHitResult.getDirection());
 				if (this.level().isEmptyBlock(blockPos)) {
 					this.level().setBlockAndUpdate(blockPos, BaseFireBlock.getState(this.level(), blockPos));
@@ -66,10 +66,5 @@ public class SmallFireball extends Fireball {
 		if (!this.level().isClientSide) {
 			this.discard();
 		}
-	}
-
-	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		return false;
 	}
 }

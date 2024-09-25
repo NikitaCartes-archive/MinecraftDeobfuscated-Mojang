@@ -24,7 +24,7 @@ public class KillCommand {
 
 	private static int kill(CommandSourceStack commandSourceStack, Collection<? extends Entity> collection) {
 		for (Entity entity : collection) {
-			entity.kill();
+			entity.kill(commandSourceStack.getLevel());
 		}
 
 		if (collection.size() == 1) {

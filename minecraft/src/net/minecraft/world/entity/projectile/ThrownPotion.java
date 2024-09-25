@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -82,33 +83,35 @@ public class ThrownPotion extends ThrowableItemProjectile {
 	@Override
 	protected void onHit(HitResult hitResult) {
 		super.onHit(hitResult);
-		if (!this.level().isClientSide) {
+		if (this.level() instanceof ServerLevel serverLevel) {
 			ItemStack itemStack = this.getItem();
 			PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
 			if (potionContents.is(Potions.WATER)) {
-				this.applyWater();
+				this.applyWater(serverLevel);
 			} else if (potionContents.hasEffects()) {
 				if (this.isLingering()) {
 					this.makeAreaOfEffectCloud(potionContents);
 				} else {
-					this.applySplash(potionContents.getAllEffects(), hitResult.getType() == HitResult.Type.ENTITY ? ((EntityHitResult)hitResult).getEntity() : null);
+					this.applySplash(
+						serverLevel, potionContents.getAllEffects(), hitResult.getType() == HitResult.Type.ENTITY ? ((EntityHitResult)hitResult).getEntity() : null
+					);
 				}
 			}
 
 			int i = potionContents.potion().isPresent() && ((Potion)((Holder)potionContents.potion().get()).value()).hasInstantEffects() ? 2007 : 2002;
-			this.level().levelEvent(i, this.blockPosition(), potionContents.getColor());
+			serverLevel.levelEvent(i, this.blockPosition(), potionContents.getColor());
 			this.discard();
 		}
 	}
 
-	private void applyWater() {
+	private void applyWater(ServerLevel serverLevel) {
 		AABB aABB = this.getBoundingBox().inflate(4.0, 2.0, 4.0);
 
 		for (LivingEntity livingEntity : this.level().getEntitiesOfClass(LivingEntity.class, aABB, WATER_SENSITIVE_OR_ON_FIRE)) {
 			double d = this.distanceToSqr(livingEntity);
 			if (d < 16.0) {
 				if (livingEntity.isSensitiveToWater()) {
-					livingEntity.hurt(this.damageSources().indirectMagic(this, this.getOwner()), 1.0F);
+					livingEntity.hurtServer(serverLevel, this.damageSources().indirectMagic(this, this.getOwner()), 1.0F);
 				}
 
 				if (livingEntity.isOnFire() && livingEntity.isAlive()) {
@@ -122,9 +125,9 @@ public class ThrownPotion extends ThrowableItemProjectile {
 		}
 	}
 
-	private void applySplash(Iterable<MobEffectInstance> iterable, @Nullable Entity entity) {
+	private void applySplash(ServerLevel serverLevel, Iterable<MobEffectInstance> iterable, @Nullable Entity entity) {
 		AABB aABB = this.getBoundingBox().inflate(4.0, 2.0, 4.0);
-		List<LivingEntity> list = this.level().getEntitiesOfClass(LivingEntity.class, aABB);
+		List<LivingEntity> list = serverLevel.getEntitiesOfClass(LivingEntity.class, aABB);
 		if (!list.isEmpty()) {
 			Entity entity2 = this.getEffectSource();
 
@@ -142,7 +145,7 @@ public class ThrownPotion extends ThrowableItemProjectile {
 						for (MobEffectInstance mobEffectInstance : iterable) {
 							Holder<MobEffect> holder = mobEffectInstance.getEffect();
 							if (holder.value().isInstantenous()) {
-								holder.value().applyInstantenousEffect(this, this.getOwner(), livingEntity, mobEffectInstance.getAmplifier(), e);
+								holder.value().applyInstantenousEffect(serverLevel, this, this.getOwner(), livingEntity, mobEffectInstance.getAmplifier(), e);
 							} else {
 								int i = mobEffectInstance.mapDuration(ix -> (int)(e * (double)ix + 0.5));
 								MobEffectInstance mobEffectInstance2 = new MobEffectInstance(

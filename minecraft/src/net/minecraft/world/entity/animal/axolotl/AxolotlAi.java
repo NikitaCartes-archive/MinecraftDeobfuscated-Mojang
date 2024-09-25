@@ -7,6 +7,7 @@ import com.mojang.datafixers.util.Pair;
 import java.util.Optional;
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
@@ -163,7 +164,7 @@ public class AxolotlAi {
 		return livingEntity.isInWaterOrBubble() ? 0.5F : 0.15F;
 	}
 
-	private static Optional<? extends LivingEntity> findNearestValidAttackTarget(Axolotl axolotl) {
+	private static Optional<? extends LivingEntity> findNearestValidAttackTarget(ServerLevel serverLevel, Axolotl axolotl) {
 		return BehaviorUtils.isBreeding(axolotl) ? Optional.empty() : axolotl.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE);
 	}
 

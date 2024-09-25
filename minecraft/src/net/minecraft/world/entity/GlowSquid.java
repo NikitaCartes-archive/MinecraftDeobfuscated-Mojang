@@ -86,8 +86,8 @@ public class GlowSquid extends Squid {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		boolean bl = super.hurt(damageSource, f);
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		boolean bl = super.hurtServer(serverLevel, damageSource, f);
 		if (bl) {
 			this.setDarkTicks(100);
 		}

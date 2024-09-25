@@ -4,6 +4,7 @@ import java.util.EnumSet;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
@@ -80,15 +81,15 @@ public class Silverfish extends Monster {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (this.isInvulnerableTo(serverLevel, damageSource)) {
 			return false;
 		} else {
 			if ((damageSource.getEntity() != null || damageSource.is(DamageTypeTags.ALWAYS_TRIGGERS_SILVERFISH)) && this.friendsGoal != null) {
 				this.friendsGoal.notifyHurt();
 			}
 
-			return super.hurt(damageSource, f);
+			return super.hurtServer(serverLevel, damageSource, f);
 		}
 	}
 
@@ -140,7 +141,7 @@ public class Silverfish extends Monster {
 				return false;
 			} else {
 				RandomSource randomSource = this.mob.getRandom();
-				if (this.mob.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && randomSource.nextInt(reducedTickDelay(10)) == 0) {
+				if (getServerLevel(this.mob).getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && randomSource.nextInt(reducedTickDelay(10)) == 0) {
 					this.selectedDirection = Direction.getRandom(randomSource);
 					BlockPos blockPos = BlockPos.containing(this.mob.getX(), this.mob.getY() + 0.5, this.mob.getZ()).relative(this.selectedDirection);
 					BlockState blockState = this.mob.level().getBlockState(blockPos);
@@ -211,7 +212,7 @@ public class Silverfish extends Monster {
 							BlockState blockState = level.getBlockState(blockPos2);
 							Block block = blockState.getBlock();
 							if (block instanceof InfestedBlock) {
-								if (level.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
+								if (getServerLevel(level).getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING)) {
 									level.destroyBlock(blockPos2, true, this.silverfish);
 								} else {
 									level.setBlock(blockPos2, ((InfestedBlock)block).hostStateByInfested(level.getBlockState(blockPos2)), 3);

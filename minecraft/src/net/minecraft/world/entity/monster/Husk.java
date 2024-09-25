@@ -1,6 +1,7 @@
 package net.minecraft.world.entity.monster;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
@@ -53,8 +54,8 @@ public class Husk extends Zombie {
 	}
 
 	@Override
-	public boolean doHurtTarget(Entity entity) {
-		boolean bl = super.doHurtTarget(entity);
+	public boolean doHurtTarget(ServerLevel serverLevel, Entity entity) {
+		boolean bl = super.doHurtTarget(serverLevel, entity);
 		if (bl && this.getMainHandItem().isEmpty() && entity instanceof LivingEntity) {
 			float f = this.level().getCurrentDifficultyAt(this.blockPosition()).getEffectiveDifficulty();
 			((LivingEntity)entity).addEffect(new MobEffectInstance(MobEffects.HUNGER, 140 * (int)f), this);

@@ -1,5 +1,6 @@
 package net.minecraft.world.effect;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
@@ -9,8 +10,8 @@ class SaturationMobEffect extends InstantenousMobEffect {
 	}
 
 	@Override
-	public boolean applyEffectTick(LivingEntity livingEntity, int i) {
-		if (!livingEntity.level().isClientSide && livingEntity instanceof Player player) {
+	public boolean applyEffectTick(ServerLevel serverLevel, LivingEntity livingEntity, int i) {
+		if (livingEntity instanceof Player player) {
 			player.getFoodData().eat(i + 1, 1.0F);
 		}
 

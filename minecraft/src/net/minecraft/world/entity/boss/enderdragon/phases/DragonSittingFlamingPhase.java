@@ -3,6 +3,7 @@ package net.minecraft.world.entity.boss.enderdragon.phases;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -48,7 +49,7 @@ public class DragonSittingFlamingPhase extends AbstractDragonSittingPhase {
 	}
 
 	@Override
-	public void doServerTick() {
+	public void doServerTick(ServerLevel serverLevel) {
 		this.flameTicks++;
 		if (this.flameTicks >= 200) {
 			if (this.flameCount >= 4) {
@@ -65,7 +66,7 @@ public class DragonSittingFlamingPhase extends AbstractDragonSittingPhase {
 			double h = g;
 			BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(d, g, e);
 
-			while (this.dragon.level().isEmptyBlock(mutableBlockPos)) {
+			while (serverLevel.isEmptyBlock(mutableBlockPos)) {
 				if (--h < 0.0) {
 					h = g;
 					break;
@@ -75,13 +76,13 @@ public class DragonSittingFlamingPhase extends AbstractDragonSittingPhase {
 			}
 
 			h = (double)(Mth.floor(h) + 1);
-			this.flame = new AreaEffectCloud(this.dragon.level(), d, h, e);
+			this.flame = new AreaEffectCloud(serverLevel, d, h, e);
 			this.flame.setOwner(this.dragon);
 			this.flame.setRadius(5.0F);
 			this.flame.setDuration(200);
 			this.flame.setParticle(ParticleTypes.DRAGON_BREATH);
 			this.flame.addEffect(new MobEffectInstance(MobEffects.HARM));
-			this.dragon.level().addFreshEntity(this.flame);
+			serverLevel.addFreshEntity(this.flame);
 		}
 	}
 

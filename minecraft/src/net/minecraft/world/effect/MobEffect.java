@@ -20,6 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
@@ -68,12 +69,12 @@ public class MobEffect implements FeatureElement {
 		return this.blendDurationTicks;
 	}
 
-	public boolean applyEffectTick(LivingEntity livingEntity, int i) {
+	public boolean applyEffectTick(ServerLevel serverLevel, LivingEntity livingEntity, int i) {
 		return true;
 	}
 
-	public void applyInstantenousEffect(@Nullable Entity entity, @Nullable Entity entity2, LivingEntity livingEntity, int i, double d) {
-		this.applyEffectTick(livingEntity, i);
+	public void applyInstantenousEffect(ServerLevel serverLevel, @Nullable Entity entity, @Nullable Entity entity2, LivingEntity livingEntity, int i, double d) {
+		this.applyEffectTick(serverLevel, livingEntity, i);
 	}
 
 	public boolean shouldApplyEffectTickThisTick(int i, int j) {
@@ -91,10 +92,10 @@ public class MobEffect implements FeatureElement {
 			);
 	}
 
-	public void onMobRemoved(LivingEntity livingEntity, int i, Entity.RemovalReason removalReason) {
+	public void onMobRemoved(ServerLevel serverLevel, LivingEntity livingEntity, int i, Entity.RemovalReason removalReason) {
 	}
 
-	public void onMobHurt(LivingEntity livingEntity, int i, DamageSource damageSource, float f) {
+	public void onMobHurt(ServerLevel serverLevel, LivingEntity livingEntity, int i, DamageSource damageSource, float f) {
 	}
 
 	public boolean isInstantenous() {

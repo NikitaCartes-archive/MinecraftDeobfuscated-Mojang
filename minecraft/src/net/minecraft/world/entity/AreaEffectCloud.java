@@ -21,6 +21,7 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
@@ -132,13 +133,17 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 	@Override
 	public void tick() {
 		super.tick();
+		if (this.level() instanceof ServerLevel serverLevel) {
+			this.serverTick(serverLevel);
+		} else {
+			this.clientTick();
+		}
+	}
+
+	private void clientTick() {
 		boolean bl = this.isWaiting();
 		float f = this.getRadius();
-		if (this.level().isClientSide) {
-			if (bl && this.random.nextBoolean()) {
-				return;
-			}
-
+		if (!bl || !this.random.nextBoolean()) {
 			ParticleOptions particleOptions = this.getParticle();
 			int i;
 			float g;
@@ -168,85 +173,88 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 					this.level().addAlwaysVisibleParticle(particleOptions, d, e, l, (0.5 - this.random.nextDouble()) * 0.15, 0.01F, (0.5 - this.random.nextDouble()) * 0.15);
 				}
 			}
-		} else {
-			if (this.tickCount >= this.waitTime + this.duration) {
-				this.discard();
-				return;
-			}
+		}
+	}
 
+	private void serverTick(ServerLevel serverLevel) {
+		if (this.tickCount >= this.waitTime + this.duration) {
+			this.discard();
+		} else {
+			boolean bl = this.isWaiting();
 			boolean bl2 = this.tickCount < this.waitTime;
 			if (bl != bl2) {
 				this.setWaiting(bl2);
 			}
 
-			if (bl2) {
-				return;
-			}
-
-			if (this.radiusPerTick != 0.0F) {
-				f += this.radiusPerTick;
-				if (f < 0.5F) {
-					this.discard();
-					return;
-				}
-
-				this.setRadius(f);
-			}
-
-			if (this.tickCount % 5 == 0) {
-				this.victims.entrySet().removeIf(entry -> this.tickCount >= (Integer)entry.getValue());
-				if (!this.potionContents.hasEffects()) {
-					this.victims.clear();
-				} else {
-					List<MobEffectInstance> list = Lists.<MobEffectInstance>newArrayList();
-					if (this.potionContents.potion().isPresent()) {
-						for (MobEffectInstance mobEffectInstance : ((Potion)((Holder)this.potionContents.potion().get()).value()).getEffects()) {
-							list.add(
-								new MobEffectInstance(
-									mobEffectInstance.getEffect(),
-									mobEffectInstance.mapDuration(i -> i / 4),
-									mobEffectInstance.getAmplifier(),
-									mobEffectInstance.isAmbient(),
-									mobEffectInstance.isVisible()
-								)
-							);
-						}
+			if (!bl2) {
+				float f = this.getRadius();
+				if (this.radiusPerTick != 0.0F) {
+					f += this.radiusPerTick;
+					if (f < 0.5F) {
+						this.discard();
+						return;
 					}
 
-					list.addAll(this.potionContents.customEffects());
-					List<LivingEntity> list2 = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox());
-					if (!list2.isEmpty()) {
-						for (LivingEntity livingEntity : list2) {
-							if (!this.victims.containsKey(livingEntity) && livingEntity.isAffectedByPotions() && !list.stream().noneMatch(livingEntity::canBeAffected)) {
-								double m = livingEntity.getX() - this.getX();
-								double n = livingEntity.getZ() - this.getZ();
-								double o = m * m + n * n;
-								if (o <= (double)(f * f)) {
-									this.victims.put(livingEntity, this.tickCount + this.reapplicationDelay);
+					this.setRadius(f);
+				}
 
-									for (MobEffectInstance mobEffectInstance2 : list) {
-										if (mobEffectInstance2.getEffect().value().isInstantenous()) {
-											mobEffectInstance2.getEffect().value().applyInstantenousEffect(this, this.getOwner(), livingEntity, mobEffectInstance2.getAmplifier(), 0.5);
-										} else {
-											livingEntity.addEffect(new MobEffectInstance(mobEffectInstance2), this);
+				if (this.tickCount % 5 == 0) {
+					this.victims.entrySet().removeIf(entry -> this.tickCount >= (Integer)entry.getValue());
+					if (!this.potionContents.hasEffects()) {
+						this.victims.clear();
+					} else {
+						List<MobEffectInstance> list = Lists.<MobEffectInstance>newArrayList();
+						if (this.potionContents.potion().isPresent()) {
+							for (MobEffectInstance mobEffectInstance : ((Potion)((Holder)this.potionContents.potion().get()).value()).getEffects()) {
+								list.add(
+									new MobEffectInstance(
+										mobEffectInstance.getEffect(),
+										mobEffectInstance.mapDuration(i -> i / 4),
+										mobEffectInstance.getAmplifier(),
+										mobEffectInstance.isAmbient(),
+										mobEffectInstance.isVisible()
+									)
+								);
+							}
+						}
+
+						list.addAll(this.potionContents.customEffects());
+						List<LivingEntity> list2 = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox());
+						if (!list2.isEmpty()) {
+							for (LivingEntity livingEntity : list2) {
+								if (!this.victims.containsKey(livingEntity) && livingEntity.isAffectedByPotions() && !list.stream().noneMatch(livingEntity::canBeAffected)) {
+									double d = livingEntity.getX() - this.getX();
+									double e = livingEntity.getZ() - this.getZ();
+									double g = d * d + e * e;
+									if (g <= (double)(f * f)) {
+										this.victims.put(livingEntity, this.tickCount + this.reapplicationDelay);
+
+										for (MobEffectInstance mobEffectInstance2 : list) {
+											if (mobEffectInstance2.getEffect().value().isInstantenous()) {
+												mobEffectInstance2.getEffect()
+													.value()
+													.applyInstantenousEffect(serverLevel, this, this.getOwner(), livingEntity, mobEffectInstance2.getAmplifier(), 0.5);
+											} else {
+												livingEntity.addEffect(new MobEffectInstance(mobEffectInstance2), this);
+											}
 										}
-									}
 
-									if (this.radiusOnUse != 0.0F) {
-										f += this.radiusOnUse;
-										if (f < 0.5F) {
-											this.discard();
-											return;
+										if (this.radiusOnUse != 0.0F) {
+											f += this.radiusOnUse;
+											if (f < 0.5F) {
+												this.discard();
+												return;
+											}
+
+											this.setRadius(f);
 										}
 
-										this.setRadius(f);
-									}
-
-									if (this.durationOnUse != 0) {
-										this.duration = this.duration + this.durationOnUse;
-										if (this.duration <= 0) {
-											this.discard();
-											return;
+										if (this.durationOnUse != 0) {
+											this.duration = this.duration + this.durationOnUse;
+											if (this.duration <= 0) {
+												this.discard();
+												return;
+											}
 										}
 									}
 								}
@@ -376,5 +384,10 @@ public class AreaEffectCloud extends Entity implements TraceableEntity {
 	@Override
 	public EntityDimensions getDimensions(Pose pose) {
 		return EntityDimensions.scalable(this.getRadius() * 2.0F, 0.5F);
+	}
+
+	@Override
+	public final boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		return false;
 	}
 }

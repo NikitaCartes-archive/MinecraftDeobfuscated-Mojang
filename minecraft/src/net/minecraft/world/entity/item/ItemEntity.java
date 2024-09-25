@@ -194,13 +194,16 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	}
 
 	private void setUnderwaterMovement() {
-		Vec3 vec3 = this.getDeltaMovement();
-		this.setDeltaMovement(vec3.x * 0.99F, vec3.y + (double)(vec3.y < 0.06F ? 5.0E-4F : 0.0F), vec3.z * 0.99F);
+		this.setFluidMovement(0.99F);
 	}
 
 	private void setUnderLavaMovement() {
+		this.setFluidMovement(0.95F);
+	}
+
+	private void setFluidMovement(double d) {
 		Vec3 vec3 = this.getDeltaMovement();
-		this.setDeltaMovement(vec3.x * 0.95F, vec3.y + (double)(vec3.y < 0.06F ? 5.0E-4F : 0.0F), vec3.z * 0.95F);
+		this.setDeltaMovement(vec3.x * d, vec3.y + (double)(vec3.y < 0.06F ? 5.0E-4F : 0.0F), vec3.z * d);
 	}
 
 	private void mergeWithNeighbours() {
@@ -270,15 +273,18 @@ public class ItemEntity extends Entity implements TraceableEntity {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
+	public final boolean hurtClient(DamageSource damageSource) {
+		return this.isInvulnerableToBase(damageSource) ? false : this.getItem().canBeHurtBy(damageSource);
+	}
+
+	@Override
+	public final boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (this.isInvulnerableToBase(damageSource)) {
 			return false;
-		} else if (!this.level().getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && damageSource.getEntity() instanceof Mob) {
+		} else if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_MOBGRIEFING) && damageSource.getEntity() instanceof Mob) {
 			return false;
 		} else if (!this.getItem().canBeHurtBy(damageSource)) {
 			return false;
-		} else if (this.level().isClientSide) {
-			return true;
 		} else {
 			this.markHurt();
 			this.health = (int)((float)this.health - f);

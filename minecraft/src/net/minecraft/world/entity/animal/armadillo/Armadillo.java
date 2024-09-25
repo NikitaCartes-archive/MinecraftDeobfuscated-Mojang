@@ -132,16 +132,16 @@ public class Armadillo extends Animal {
 	}
 
 	@Override
-	protected void customServerAiStep() {
+	protected void customServerAiStep(ServerLevel serverLevel) {
 		ProfilerFiller profilerFiller = Profiler.get();
 		profilerFiller.push("armadilloBrain");
-		((Brain<Armadillo>)this.brain).tick((ServerLevel)this.level(), this);
+		((Brain<Armadillo>)this.brain).tick(serverLevel, this);
 		profilerFiller.pop();
 		profilerFiller.push("armadilloActivityUpdate");
 		ArmadilloAi.updateActivity(this);
 		profilerFiller.pop();
 		if (this.isAlive() && !this.isBaby() && --this.scuteTime <= 0) {
-			if (this.dropFromGiftLootTable(BuiltInLootTables.ARMADILLO_SHED, this::spawnAtLocation)) {
+			if (this.dropFromGiftLootTable(serverLevel, BuiltInLootTables.ARMADILLO_SHED, this::spawnAtLocation)) {
 				this.playSound(SoundEvents.ARMADILLO_SCUTE_DROP, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 				this.gameEvent(GameEvent.ENTITY_PLACE);
 			}
@@ -149,7 +149,7 @@ public class Armadillo extends Animal {
 			this.scuteTime = this.pickNextScuteDropTime();
 		}
 
-		super.customServerAiStep();
+		super.customServerAiStep(serverLevel);
 	}
 
 	private int pickNextScuteDropTime() {
@@ -279,17 +279,17 @@ public class Armadillo extends Animal {
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
 		if (this.isScared()) {
 			f = (f - 1.0F) / 2.0F;
 		}
 
-		return super.hurt(damageSource, f);
+		return super.hurtServer(serverLevel, damageSource, f);
 	}
 
 	@Override
-	protected void actuallyHurt(DamageSource damageSource, float f) {
-		super.actuallyHurt(damageSource, f);
+	protected void actuallyHurt(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		super.actuallyHurt(serverLevel, damageSource, f);
 		if (!this.isNoAi() && !this.isDeadOrDying()) {
 			if (damageSource.getEntity() instanceof LivingEntity) {
 				this.getBrain().setMemoryWithExpiry(MemoryModuleType.DANGER_DETECTED_RECENTLY, true, 80L);
@@ -317,9 +317,12 @@ public class Armadillo extends Animal {
 		if (this.isBaby()) {
 			return false;
 		} else {
-			this.spawnAtLocation(new ItemStack(Items.ARMADILLO_SCUTE));
-			this.gameEvent(GameEvent.ENTITY_INTERACT);
-			this.playSound(SoundEvents.ARMADILLO_BRUSH);
+			if (this.level() instanceof ServerLevel serverLevel) {
+				this.spawnAtLocation(serverLevel, new ItemStack(Items.ARMADILLO_SCUTE));
+				this.gameEvent(GameEvent.ENTITY_INTERACT);
+				this.playSound(SoundEvents.ARMADILLO_BRUSH);
+			}
+
 			return true;
 		}
 	}

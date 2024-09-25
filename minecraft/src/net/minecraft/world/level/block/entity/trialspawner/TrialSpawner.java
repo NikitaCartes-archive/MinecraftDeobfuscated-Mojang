@@ -178,11 +178,11 @@ public final class TrialSpawner {
 		return this.entitySelector;
 	}
 
-	public boolean canSpawnInLevel(Level level) {
+	public boolean canSpawnInLevel(ServerLevel serverLevel) {
 		if (this.overridePeacefulAndMobSpawnRule) {
 			return true;
 		} else {
-			return level.getDifficulty() == Difficulty.PEACEFUL ? false : level.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING);
+			return serverLevel.getDifficulty() == Difficulty.PEACEFUL ? false : serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING);
 		}
 	}
 

@@ -43,6 +43,16 @@ public record ArmorMaterial(
 			);
 	}
 
+	public Item.Properties animalProperties(Item.Properties properties, SoundEvent soundEvent, HolderSet<EntityType<?>> holderSet) {
+		return properties.durability(ArmorType.BODY.getDurability(this.durability))
+			.attributes(this.createAttributes(ArmorType.BODY))
+			.repairable(this.repairIngredient)
+			.component(
+				DataComponents.EQUIPPABLE,
+				Equippable.builder(EquipmentSlot.BODY).setEquipSound(Holder.direct(soundEvent)).setModel(this.modelId).setAllowedEntities(holderSet).build()
+			);
+	}
+
 	private ItemAttributeModifiers createAttributes(ArmorType armorType) {
 		int i = (Integer)this.defense.getOrDefault(armorType, 0);
 		ItemAttributeModifiers.Builder builder = ItemAttributeModifiers.builder();

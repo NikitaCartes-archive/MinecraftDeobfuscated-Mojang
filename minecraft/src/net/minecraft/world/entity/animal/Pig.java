@@ -155,10 +155,10 @@ public class Pig extends Animal implements ItemSteerable, Saddleable {
 	}
 
 	@Override
-	protected void dropEquipment() {
-		super.dropEquipment();
+	protected void dropEquipment(ServerLevel serverLevel) {
+		super.dropEquipment(serverLevel);
 		if (this.isSaddled()) {
-			this.spawnAtLocation(Items.SADDLE);
+			this.spawnAtLocation(serverLevel, Items.SADDLE);
 		}
 	}
 

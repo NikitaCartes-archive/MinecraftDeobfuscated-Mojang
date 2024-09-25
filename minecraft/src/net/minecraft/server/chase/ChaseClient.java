@@ -181,7 +181,15 @@ public class ChaseClient {
 						ServerPlayer serverPlayer = (ServerPlayer)list.get(0);
 						ServerLevel serverLevel = this.server.overworld();
 						CommandSourceStack commandSourceStack = new CommandSourceStack(
-							serverPlayer, Vec3.atLowerCornerOf(serverLevel.getSharedSpawnPos()), Vec2.ZERO, serverLevel, 4, "", CommonComponents.EMPTY, this.server, serverPlayer
+							serverPlayer.commandSource(),
+							Vec3.atLowerCornerOf(serverLevel.getSharedSpawnPos()),
+							Vec2.ZERO,
+							serverLevel,
+							4,
+							"",
+							CommonComponents.EMPTY,
+							this.server,
+							serverPlayer
 						);
 						Commands commands = this.server.getCommands();
 						commands.performPrefixedCommand(commandSourceStack, string);

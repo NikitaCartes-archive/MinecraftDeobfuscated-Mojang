@@ -88,7 +88,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileDeflection;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.AbstractBoat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -96,7 +96,6 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -135,7 +134,7 @@ import net.minecraft.world.scores.ScoreHolder;
 import net.minecraft.world.scores.Team;
 import org.slf4j.Logger;
 
-public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess, CommandSource, ScoreHolder {
+public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess, ScoreHolder {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String ID_TAG = "id";
 	public static final String PASSENGERS_TAG = "Passengers";
@@ -328,7 +327,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return this.tags.remove(string);
 	}
 
-	public void kill() {
+	public void kill(ServerLevel serverLevel) {
 		this.remove(Entity.RemovalReason.KILLED);
 		this.gameEvent(GameEvent.ENTITY_DIE);
 	}
@@ -433,8 +432,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			this.boardingCooldown--;
 		}
 
-		this.xRotO = this.getXRot();
-		this.yRotO = this.getYRot();
 		this.handlePortal();
 		if (this.canSpawnSprintParticle()) {
 			this.spawnSprintParticle();
@@ -445,26 +442,28 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		this.updateInWaterStateAndDoFluidPushing();
 		this.updateFluidOnEyes();
 		this.updateSwimming();
-		if (this.level().isClientSide) {
+		if (this.level() instanceof ServerLevel serverLevel) {
+			if (this.remainingFireTicks > 0) {
+				if (this.fireImmune()) {
+					this.setRemainingFireTicks(this.remainingFireTicks - 4);
+					if (this.remainingFireTicks < 0) {
+						this.clearFire();
+					}
+				} else {
+					if (this.remainingFireTicks % 20 == 0 && !this.isInLava()) {
+						this.hurtServer(serverLevel, this.damageSources().onFire(), 1.0F);
+					}
+
+					this.setRemainingFireTicks(this.remainingFireTicks - 1);
+				}
+
+				if (this.getTicksFrozen() > 0) {
+					this.setTicksFrozen(0);
+					this.level().levelEvent(null, 1009, this.blockPosition, 1);
+				}
+			}
+		} else {
 			this.clearFire();
-		} else if (this.remainingFireTicks > 0) {
-			if (this.fireImmune()) {
-				this.setRemainingFireTicks(this.remainingFireTicks - 4);
-				if (this.remainingFireTicks < 0) {
-					this.clearFire();
-				}
-			} else {
-				if (this.remainingFireTicks % 20 == 0 && !this.isInLava()) {
-					this.hurt(this.damageSources().onFire(), 1.0F);
-				}
-
-				this.setRemainingFireTicks(this.remainingFireTicks - 1);
-			}
-
-			if (this.getTicksFrozen() > 0) {
-				this.setTicksFrozen(0);
-				this.level().levelEvent(null, 1009, this.blockPosition, 1);
-			}
 		}
 
 		if (this.isInLava()) {
@@ -478,8 +477,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		}
 
 		this.firstTick = false;
-		if (!this.level().isClientSide && this instanceof Leashable) {
-			Leashable.tickLeash((Entity)((Leashable)this));
+		if (this.level() instanceof ServerLevel serverLevelx && this instanceof Leashable) {
+			Leashable.tickLeash(serverLevelx, (Entity)((Leashable)this));
 		}
 
 		profilerFiller.pop();
@@ -520,8 +519,13 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	public void lavaHurt() {
 		if (!this.fireImmune()) {
 			this.igniteForSeconds(15.0F);
-			if (this.hurt(this.damageSources().lava(), 4.0F) && this.shouldPlayLavaHurtSound()) {
-				this.playSound(SoundEvents.GENERIC_BURN, 0.4F, 2.0F + this.random.nextFloat() * 0.4F);
+			if (this.level() instanceof ServerLevel serverLevel
+				&& this.hurtServer(serverLevel, this.damageSources().lava(), 4.0F)
+				&& this.shouldPlayLavaHurtSound()
+				&& !this.isSilent()) {
+				serverLevel.playSound(
+					null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_BURN, this.getSoundSource(), 0.4F, 2.0F + this.random.nextFloat() * 0.4F
+				);
 			}
 		}
 	}
@@ -1284,7 +1288,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	void updateInWaterStateAndDoWaterCurrentPushing() {
-		if (this.getVehicle() instanceof Boat boat && !boat.isUnderWater()) {
+		if (this.getVehicle() instanceof AbstractBoat abstractBoat && !abstractBoat.isUnderWater()) {
 			this.wasTouchingWater = false;
 			return;
 		}
@@ -1306,7 +1310,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		this.wasEyeInWater = this.isEyeInFluid(FluidTags.WATER);
 		this.fluidOnEyes.clear();
 		double d = this.getEyeY();
-		if (this.getVehicle() instanceof Boat boat && !boat.isUnderWater() && boat.getBoundingBox().maxY >= d && boat.getBoundingBox().minY <= d) {
+		if (this.getVehicle() instanceof AbstractBoat abstractBoat
+			&& !abstractBoat.isUnderWater()
+			&& abstractBoat.getBoundingBox().maxY >= d
+			&& abstractBoat.getBoundingBox().minY <= d) {
 			return;
 		}
 
@@ -1562,13 +1569,22 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		this.hurtMarked = true;
 	}
 
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
-			return false;
-		} else {
-			this.markHurt();
-			return false;
+	@Deprecated
+	public final void hurt(DamageSource damageSource, float f) {
+		if (this.level instanceof ServerLevel serverLevel) {
+			this.hurtServer(serverLevel, damageSource, f);
 		}
+	}
+
+	@Deprecated
+	public final boolean hurtOrSimulate(DamageSource damageSource, float f) {
+		return this.level instanceof ServerLevel serverLevel ? this.hurtServer(serverLevel, damageSource, f) : this.hurtClient(damageSource);
+	}
+
+	public abstract boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f);
+
+	public boolean hurtClient(DamageSource damageSource) {
+		return false;
 	}
 
 	public final Vec3 getViewVector(float f) {
@@ -1897,30 +1913,28 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	@Nullable
-	public ItemEntity spawnAtLocation(ItemLike itemLike) {
-		return this.spawnAtLocation(itemLike, 0);
+	public ItemEntity spawnAtLocation(ServerLevel serverLevel, ItemLike itemLike) {
+		return this.spawnAtLocation(serverLevel, itemLike, 0);
 	}
 
 	@Nullable
-	public ItemEntity spawnAtLocation(ItemLike itemLike, int i) {
-		return this.spawnAtLocation(new ItemStack(itemLike), (float)i);
+	public ItemEntity spawnAtLocation(ServerLevel serverLevel, ItemLike itemLike, int i) {
+		return this.spawnAtLocation(serverLevel, new ItemStack(itemLike), (float)i);
 	}
 
 	@Nullable
-	public ItemEntity spawnAtLocation(ItemStack itemStack) {
-		return this.spawnAtLocation(itemStack, 0.0F);
+	public ItemEntity spawnAtLocation(ServerLevel serverLevel, ItemStack itemStack) {
+		return this.spawnAtLocation(serverLevel, itemStack, 0.0F);
 	}
 
 	@Nullable
-	public ItemEntity spawnAtLocation(ItemStack itemStack, float f) {
+	public ItemEntity spawnAtLocation(ServerLevel serverLevel, ItemStack itemStack, float f) {
 		if (itemStack.isEmpty()) {
 			return null;
-		} else if (this.level().isClientSide) {
-			return null;
 		} else {
-			ItemEntity itemEntity = new ItemEntity(this.level(), this.getX(), this.getY() + (double)f, this.getZ(), itemStack);
+			ItemEntity itemEntity = new ItemEntity(serverLevel, this.getX(), this.getY() + (double)f, this.getZ(), itemStack);
 			itemEntity.setDefaultPickUpDelay();
-			this.level().addFreshEntity(itemEntity);
+			serverLevel.addFreshEntity(itemEntity);
 			return itemEntity;
 		}
 	}
@@ -2422,7 +2436,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			this.igniteForSeconds(8.0F);
 		}
 
-		this.hurt(this.damageSources().lightningBolt(), 5.0F);
+		this.hurtServer(serverLevel, this.damageSources().lightningBolt(), 5.0F);
 	}
 
 	public void onAboveBubbleCol(boolean bl) {
@@ -2570,7 +2584,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			);
 	}
 
-	public boolean isInvulnerableTo(DamageSource damageSource) {
+	protected final boolean isInvulnerableToBase(DamageSource damageSource) {
 		return this.isRemoved()
 			|| this.invulnerable && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damageSource.isCreativePlayer()
 			|| damageSource.is(DamageTypeTags.IS_FIRE) && this.fireImmune()
@@ -2625,7 +2639,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 					this.removeAfterChangingDimensions();
 				}
 
-				entityx.teleportSetPosition(dimensionTransition);
+				entityx.teleportSetPosition(PositionMoveRotation.of(dimensionTransition), dimensionTransition.relatives());
 				if (this != entityx) {
 					serverLevel2.addDuringTeleport(entityx);
 				}
@@ -2646,18 +2660,16 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return null;
 	}
 
-	protected void teleportSetPosition(DimensionTransition dimensionTransition) {
-		PositionMoveRotation positionMoveRotation = PositionMoveRotation.of(dimensionTransition);
-		PositionMoveRotation positionMoveRotation2 = PositionMoveRotation.calculateAbsolute(
-			PositionMoveRotation.of(this), positionMoveRotation, dimensionTransition.relatives()
-		);
-		this.setPosRaw(positionMoveRotation2.position().x, positionMoveRotation2.position().y, positionMoveRotation2.position().z);
-		this.setYRot(positionMoveRotation2.yRot());
-		this.setYHeadRot(positionMoveRotation2.yRot());
-		this.setXRot(positionMoveRotation2.xRot());
+	public void teleportSetPosition(PositionMoveRotation positionMoveRotation, Set<Relative> set) {
+		PositionMoveRotation positionMoveRotation2 = PositionMoveRotation.of(this);
+		PositionMoveRotation positionMoveRotation3 = PositionMoveRotation.calculateAbsolute(positionMoveRotation2, positionMoveRotation, set);
+		this.setPosRaw(positionMoveRotation3.position().x, positionMoveRotation3.position().y, positionMoveRotation3.position().z);
+		this.setYRot(positionMoveRotation3.yRot());
+		this.setYHeadRot(positionMoveRotation3.yRot());
+		this.setXRot(positionMoveRotation3.xRot());
 		this.reapplyPosition();
 		this.setOldPosAndRot();
-		this.setDeltaMovement(positionMoveRotation2.deltaMovement());
+		this.setDeltaMovement(positionMoveRotation3.deltaMovement());
 		this.blocksInside.clear();
 	}
 
@@ -2933,10 +2945,6 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return SlotAccess.NULL;
 	}
 
-	@Override
-	public void sendSystemMessage(Component component) {
-	}
-
 	public Level getCommandSenderWorld() {
 		return this.level();
 	}
@@ -3121,41 +3129,18 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return 1;
 	}
 
-	public CommandSourceStack createCommandSourceStack() {
+	public CommandSourceStack createCommandSourceStackForNameResolution(ServerLevel serverLevel) {
 		return new CommandSourceStack(
-			this,
+			CommandSource.NULL,
 			this.position(),
 			this.getRotationVector(),
-			this.level() instanceof ServerLevel ? (ServerLevel)this.level() : null,
-			this.getPermissionLevel(),
+			serverLevel,
+			0,
 			this.getName().getString(),
 			this.getDisplayName(),
-			this.level().getServer(),
+			serverLevel.getServer(),
 			this
 		);
-	}
-
-	protected int getPermissionLevel() {
-		return 0;
-	}
-
-	public boolean hasPermissions(int i) {
-		return this.getPermissionLevel() >= i;
-	}
-
-	@Override
-	public boolean acceptsSuccess() {
-		return this.level().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK);
-	}
-
-	@Override
-	public boolean acceptsFailure() {
-		return true;
-	}
-
-	@Override
-	public boolean shouldInformAdmins() {
-		return true;
 	}
 
 	public void lookAt(EntityAnchorArgument.Anchor anchor, Vec3 vec3) {
@@ -3512,7 +3497,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return false;
 	}
 
-	public boolean mayInteract(Level level, BlockPos blockPos) {
+	public boolean mayInteract(ServerLevel serverLevel, BlockPos blockPos) {
 		return true;
 	}
 

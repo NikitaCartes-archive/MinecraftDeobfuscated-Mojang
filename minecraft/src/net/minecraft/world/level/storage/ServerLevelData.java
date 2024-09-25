@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.border.WorldBorder;
@@ -83,4 +84,6 @@ public interface ServerLevelData extends WritableLevelData {
 	void setGameTime(long l);
 
 	void setDayTime(long l);
+
+	GameRules getGameRules();
 }

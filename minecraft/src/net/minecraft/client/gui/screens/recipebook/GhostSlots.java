@@ -35,21 +35,21 @@ public class GhostSlots {
 		this.ingredients.put(slot, new GhostSlots.GhostSlot(list, false));
 	}
 
-	public void render(GuiGraphics guiGraphics, Minecraft minecraft, int i, int j, boolean bl) {
+	public void render(GuiGraphics guiGraphics, Minecraft minecraft, boolean bl) {
 		this.ingredients.forEach((slot, ghostSlot) -> {
-			int k = slot.x + i;
-			int l = slot.y + j;
+			int i = slot.x;
+			int j = slot.y;
 			if (ghostSlot.isResultSlot && bl) {
-				guiGraphics.fill(k - 4, l - 4, k + 20, l + 20, 822018048);
+				guiGraphics.fill(i - 4, j - 4, i + 20, j + 20, 822018048);
 			} else {
-				guiGraphics.fill(k, l, k + 16, l + 16, 822018048);
+				guiGraphics.fill(i, j, i + 16, j + 16, 822018048);
 			}
 
 			ItemStack itemStack = ghostSlot.getItem(this.slotSelectTime.currentIndex());
-			guiGraphics.renderFakeItem(itemStack, k, l);
-			guiGraphics.fill(RenderType.guiGhostRecipeOverlay(), k, l, k + 16, l + 16, 822083583);
+			guiGraphics.renderFakeItem(itemStack, i, j);
+			guiGraphics.fill(RenderType.guiGhostRecipeOverlay(), i, j, i + 16, j + 16, 822083583);
 			if (ghostSlot.isResultSlot) {
-				guiGraphics.renderItemDecorations(minecraft.font, itemStack, k, l);
+				guiGraphics.renderItemDecorations(minecraft.font, itemStack, i, j);
 			}
 		});
 	}

@@ -667,7 +667,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		CompletableFuture<ChunkResult<List<ChunkAccess>>> completableFuture = this.getChunkRangeFuture(chunkHolder, 1, i -> ChunkStatus.FULL);
 		CompletableFuture<ChunkResult<LevelChunk>> completableFuture2 = completableFuture.thenApplyAsync(chunkResult -> chunkResult.map(list -> {
 				LevelChunk levelChunk = (LevelChunk)list.get(list.size() / 2);
-				levelChunk.postProcessGeneration();
+				levelChunk.postProcessGeneration(this.level);
 				this.level.startTickingChunk(levelChunk);
 				CompletableFuture<?> completableFuturex = chunkHolder.getSendSyncFuture();
 				if (completableFuturex.isDone()) {

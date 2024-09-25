@@ -173,6 +173,7 @@ public final class ItemTags {
 	public static final TagKey<Item> CROSSBOW_ENCHANTABLE = bind("enchantable/crossbow");
 	public static final TagKey<Item> VANISHING_ENCHANTABLE = bind("enchantable/vanishing");
 	public static final TagKey<Item> MACE_ENCHANTABLE = bind("enchantable/mace");
+	public static final TagKey<Item> MAP_INVISIBILITY_EQUIPMENT = bind("map_invisibility_equipment");
 
 	private ItemTags() {
 	}

@@ -3,6 +3,7 @@ package net.minecraft.world.entity.boss.enderdragon.phases;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
@@ -31,10 +32,10 @@ public class DragonHoldingPatternPhase extends AbstractDragonPhaseInstance {
 	}
 
 	@Override
-	public void doServerTick() {
+	public void doServerTick(ServerLevel serverLevel) {
 		double d = this.targetLocation == null ? 0.0 : this.targetLocation.distanceToSqr(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
 		if (d < 100.0 || d > 22500.0 || this.dragon.horizontalCollision || this.dragon.verticalCollision) {
-			this.findNewTarget();
+			this.findNewTarget(serverLevel);
 		}
 	}
 
@@ -50,20 +51,16 @@ public class DragonHoldingPatternPhase extends AbstractDragonPhaseInstance {
 		return this.targetLocation;
 	}
 
-	private void findNewTarget() {
+	private void findNewTarget(ServerLevel serverLevel) {
 		if (this.currentPath != null && this.currentPath.isDone()) {
-			BlockPos blockPos = this.dragon
-				.level()
-				.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(EndPodiumFeature.getLocation(this.dragon.getFightOrigin())));
+			BlockPos blockPos = serverLevel.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(this.dragon.getFightOrigin()));
 			int i = this.dragon.getDragonFight() == null ? 0 : this.dragon.getDragonFight().getCrystalsAlive();
 			if (this.dragon.getRandom().nextInt(i + 3) == 0) {
 				this.dragon.getPhaseManager().setPhase(EnderDragonPhase.LANDING_APPROACH);
 				return;
 			}
 
-			Player player = this.dragon
-				.level()
-				.getNearestPlayer(NEW_TARGET_TARGETING, this.dragon, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
+			Player player = serverLevel.getNearestPlayer(NEW_TARGET_TARGETING, this.dragon, (double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ());
 			double d;
 			if (player != null) {
 				d = blockPos.distToCenterSqr(player.position()) / 512.0;

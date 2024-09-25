@@ -13,22 +13,19 @@ public interface HoglinBase {
 
 	int getAttackAnimationRemainingTicks();
 
-	static boolean hurtAndThrowTarget(LivingEntity livingEntity, LivingEntity livingEntity2) {
+	static boolean hurtAndThrowTarget(ServerLevel serverLevel, LivingEntity livingEntity, LivingEntity livingEntity2) {
 		float f = (float)livingEntity.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		float g;
 		if (!livingEntity.isBaby() && (int)f > 0) {
-			g = f / 2.0F + (float)livingEntity.level().random.nextInt((int)f);
+			g = f / 2.0F + (float)serverLevel.random.nextInt((int)f);
 		} else {
 			g = f;
 		}
 
 		DamageSource damageSource = livingEntity.damageSources().mobAttack(livingEntity);
-		boolean bl = livingEntity2.hurt(damageSource, g);
+		boolean bl = livingEntity2.hurtServer(serverLevel, damageSource, g);
 		if (bl) {
-			if (livingEntity.level() instanceof ServerLevel serverLevel) {
-				EnchantmentHelper.doPostAttackEffects(serverLevel, livingEntity2, damageSource);
-			}
-
+			EnchantmentHelper.doPostAttackEffects(serverLevel, livingEntity2, damageSource);
 			if (!livingEntity.isBaby()) {
 				throwTarget(livingEntity, livingEntity2);
 			}

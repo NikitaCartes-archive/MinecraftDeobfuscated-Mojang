@@ -12,6 +12,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
@@ -125,27 +126,39 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	@Override
-	public void kill() {
+	public void kill(ServerLevel serverLevel) {
 		this.removeFramedMap(this.getItem());
-		super.kill();
+		super.kill(serverLevel);
+	}
+
+	private boolean shouldDamageDropItem(DamageSource damageSource) {
+		return !damageSource.is(DamageTypeTags.IS_EXPLOSION) && !this.getItem().isEmpty();
+	}
+
+	private static boolean canHurtWhenFixed(DamageSource damageSource) {
+		return damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) || damageSource.isCreativePlayer();
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.fixed) {
-			return !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damageSource.isCreativePlayer() ? false : super.hurt(damageSource, f);
-		} else if (this.isInvulnerableTo(damageSource)) {
-			return false;
-		} else if (!damageSource.is(DamageTypeTags.IS_EXPLOSION) && !this.getItem().isEmpty()) {
-			if (!this.level().isClientSide) {
-				this.dropItem(damageSource.getEntity(), false);
+	public boolean hurtClient(DamageSource damageSource) {
+		return this.fixed && !canHurtWhenFixed(damageSource) ? false : !this.isInvulnerableToBase(damageSource);
+	}
+
+	@Override
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (!this.fixed) {
+			if (this.isInvulnerableToBase(damageSource)) {
+				return false;
+			} else if (this.shouldDamageDropItem(damageSource)) {
+				this.dropItem(serverLevel, damageSource.getEntity(), false);
 				this.gameEvent(GameEvent.BLOCK_CHANGE, damageSource.getEntity());
 				this.playSound(this.getRemoveItemSound(), 1.0F, 1.0F);
+				return true;
+			} else {
+				return super.hurtServer(serverLevel, damageSource, f);
 			}
-
-			return true;
 		} else {
-			return super.hurt(damageSource, f);
+			return canHurtWhenFixed(damageSource) && super.hurtServer(serverLevel, damageSource, f);
 		}
 	}
 
@@ -161,9 +174,9 @@ public class ItemFrame extends HangingEntity {
 	}
 
 	@Override
-	public void dropItem(@Nullable Entity entity) {
+	public void dropItem(ServerLevel serverLevel, @Nullable Entity entity) {
 		this.playSound(this.getBreakSound(), 1.0F, 1.0F);
-		this.dropItem(entity, true);
+		this.dropItem(serverLevel, entity, true);
 		this.gameEvent(GameEvent.BLOCK_CHANGE, entity);
 	}
 
@@ -180,11 +193,11 @@ public class ItemFrame extends HangingEntity {
 		return SoundEvents.ITEM_FRAME_PLACE;
 	}
 
-	private void dropItem(@Nullable Entity entity, boolean bl) {
+	private void dropItem(ServerLevel serverLevel, @Nullable Entity entity, boolean bl) {
 		if (!this.fixed) {
 			ItemStack itemStack = this.getItem();
 			this.setItem(ItemStack.EMPTY);
-			if (!this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+			if (!serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 				if (entity == null) {
 					this.removeFramedMap(itemStack);
 				}
@@ -195,14 +208,14 @@ public class ItemFrame extends HangingEntity {
 				}
 
 				if (bl) {
-					this.spawnAtLocation(this.getFrameItemStack());
+					this.spawnAtLocation(serverLevel, this.getFrameItemStack());
 				}
 
 				if (!itemStack.isEmpty()) {
 					itemStack = itemStack.copy();
 					this.removeFramedMap(itemStack);
 					if (this.random.nextFloat() < this.dropChance) {
-						this.spawnAtLocation(itemStack);
+						this.spawnAtLocation(serverLevel, itemStack);
 					}
 				}
 			}

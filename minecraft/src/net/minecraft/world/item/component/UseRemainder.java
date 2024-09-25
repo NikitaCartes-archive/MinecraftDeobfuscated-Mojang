@@ -3,8 +3,6 @@ package net.minecraft.world.item.component;
 import com.mojang.serialization.Codec;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 public record UseRemainder(ItemStack convertInto) {
@@ -13,21 +11,19 @@ public record UseRemainder(ItemStack convertInto) {
 		ItemStack.STREAM_CODEC, UseRemainder::convertInto, UseRemainder::new
 	);
 
-	public ItemStack convertIntoRemainder(LivingEntity livingEntity, ItemStack itemStack, int i) {
-		boolean bl = livingEntity.hasInfiniteMaterials();
-		ItemStack itemStack2 = this.convertInto.copy();
+	public ItemStack convertIntoRemainder(ItemStack itemStack, int i, boolean bl, UseRemainder.OnExtraCreatedRemainder onExtraCreatedRemainder) {
 		if (bl) {
 			return itemStack;
 		} else if (itemStack.getCount() >= i) {
 			return itemStack;
-		} else if (itemStack.isEmpty()) {
-			return itemStack2;
 		} else {
-			if (!livingEntity.level().isClientSide() && livingEntity instanceof Player player && !player.getInventory().add(itemStack2)) {
-				player.drop(itemStack2, false);
+			ItemStack itemStack2 = this.convertInto.copy();
+			if (itemStack.isEmpty()) {
+				return itemStack2;
+			} else {
+				onExtraCreatedRemainder.apply(itemStack2);
+				return itemStack;
 			}
-
-			return itemStack;
 		}
 	}
 
@@ -44,5 +40,10 @@ public record UseRemainder(ItemStack convertInto) {
 
 	public int hashCode() {
 		return ItemStack.hashItemAndComponents(this.convertInto);
+	}
+
+	@FunctionalInterface
+	public interface OnExtraCreatedRemainder {
+		void apply(ItemStack itemStack);
 	}
 }

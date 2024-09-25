@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.cauldron.CauldronInteraction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -60,9 +61,9 @@ public class LayeredCauldronBlock extends AbstractCauldronBlock {
 
 	@Override
 	protected void entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity) {
-		if (!level.isClientSide && entity.isOnFire() && this.isEntityInsideContent(blockState, blockPos, entity)) {
+		if (level instanceof ServerLevel serverLevel && entity.isOnFire() && this.isEntityInsideContent(blockState, blockPos, entity)) {
 			entity.clearFire();
-			if (entity.mayInteract(level, blockPos)) {
+			if (entity.mayInteract(serverLevel, blockPos)) {
 				this.handleEntityOnFireInside(blockState, level, blockPos);
 			}
 		}

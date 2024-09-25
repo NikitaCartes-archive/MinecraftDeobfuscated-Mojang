@@ -60,7 +60,7 @@ public class CraftingMenu extends AbstractCraftingMenu {
 			if (optional.isPresent()) {
 				RecipeHolder<CraftingRecipe> recipeHolder2 = (RecipeHolder<CraftingRecipe>)optional.get();
 				CraftingRecipe craftingRecipe = recipeHolder2.value();
-				if (resultContainer.setRecipeUsed(level, serverPlayer, recipeHolder2)) {
+				if (resultContainer.setRecipeUsed(serverPlayer, recipeHolder2)) {
 					ItemStack itemStack2 = craftingRecipe.assemble(craftingInput, level.registryAccess());
 					if (itemStack2.isItemEnabled(level.enabledFeatures())) {
 						itemStack = itemStack2;

@@ -2,6 +2,7 @@ package net.minecraft.world.entity.monster;
 
 import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -135,7 +136,7 @@ public abstract class Monster extends PathfinderMob implements Enemy {
 		return true;
 	}
 
-	public boolean isPreventingPlayerRest(Player player) {
+	public boolean isPreventingPlayerRest(ServerLevel serverLevel, Player player) {
 		return true;
 	}
 

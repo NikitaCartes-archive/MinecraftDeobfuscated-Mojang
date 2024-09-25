@@ -240,7 +240,7 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 	public InteractionResult mobInteract(Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
 		if (!this.isTame() && itemStack.is(ItemTags.PARROT_FOOD)) {
-			itemStack.consume(1, player);
+			this.usePlayerItem(player, interactionHand, itemStack);
 			if (!this.isSilent()) {
 				this.level()
 					.playSound(
@@ -276,7 +276,7 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 				return super.mobInteract(player, interactionHand);
 			}
 		} else {
-			itemStack.consume(1, player);
+			this.usePlayerItem(player, interactionHand, itemStack);
 			this.addEffect(new MobEffectInstance(MobEffects.POISON, 900));
 			if (player.isCreative() || !this.isInvulnerable()) {
 				this.hurt(this.damageSources().playerAttack(player), Float.MAX_VALUE);
@@ -384,15 +384,12 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 	}
 
 	@Override
-	public boolean hurt(DamageSource damageSource, float f) {
-		if (this.isInvulnerableTo(damageSource)) {
+	public boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (this.isInvulnerableTo(serverLevel, damageSource)) {
 			return false;
 		} else {
-			if (!this.level().isClientSide) {
-				this.setOrderedToSit(false);
-			}
-
-			return super.hurt(damageSource, f);
+			this.setOrderedToSit(false);
+			return super.hurtServer(serverLevel, damageSource, f);
 		}
 	}
 

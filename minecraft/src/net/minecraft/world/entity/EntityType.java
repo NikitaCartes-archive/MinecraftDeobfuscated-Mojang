@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
@@ -144,6 +145,7 @@ import net.minecraft.world.entity.projectile.windcharge.BreezeWindCharge;
 import net.minecraft.world.entity.projectile.windcharge.WindCharge;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.ChestBoat;
+import net.minecraft.world.entity.vehicle.ChestRaft;
 import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.entity.vehicle.MinecartChest;
 import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
@@ -151,11 +153,14 @@ import net.minecraft.world.entity.vehicle.MinecartFurnace;
 import net.minecraft.world.entity.vehicle.MinecartHopper;
 import net.minecraft.world.entity.vehicle.MinecartSpawner;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
+import net.minecraft.world.entity.vehicle.Raft;
 import net.minecraft.world.flag.FeatureElement;
 import net.minecraft.world.flag.FeatureFlag;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -176,6 +181,18 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	private final Holder.Reference<EntityType<?>> builtInRegistryHolder = BuiltInRegistries.ENTITY_TYPE.createIntrusiveHolder(this);
 	private static final float MAGIC_HORSE_WIDTH = 1.3964844F;
 	private static final int DISPLAY_TRACKING_RANGE = 10;
+	public static final EntityType<Boat> ACACIA_BOAT = register(
+		"acacia_boat",
+		EntityType.Builder.of(boatFactory(() -> Items.ACACIA_BOAT), MobCategory.MISC).noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10)
+	);
+	public static final EntityType<ChestBoat> ACACIA_CHEST_BOAT = register(
+		"acacia_chest_boat",
+		EntityType.Builder.of(chestBoatFactory(() -> Items.ACACIA_CHEST_BOAT), MobCategory.MISC)
+			.noLootTable()
+			.sized(1.375F, 0.5625F)
+			.eyeHeight(0.5625F)
+			.clientTrackingRange(10)
+	);
 	public static final EntityType<Allay> ALLAY = register(
 		"allay",
 		EntityType.Builder.of(Allay::new, MobCategory.CREATURE).sized(0.35F, 0.6F).eyeHeight(0.36F).ridingOffset(0.04F).clientTrackingRange(8).updateInterval(2)
@@ -202,20 +219,41 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public static final EntityType<Axolotl> AXOLOTL = register(
 		"axolotl", EntityType.Builder.of(Axolotl::new, MobCategory.AXOLOTLS).sized(0.75F, 0.42F).eyeHeight(0.2751F).clientTrackingRange(10)
 	);
+	public static final EntityType<ChestRaft> BAMBOO_CHEST_RAFT = register(
+		"bamboo_chest_raft",
+		EntityType.Builder.of(chestRaftFactory(() -> Items.BAMBOO_CHEST_RAFT), MobCategory.MISC)
+			.noLootTable()
+			.sized(1.375F, 0.5625F)
+			.eyeHeight(0.5625F)
+			.clientTrackingRange(10)
+	);
+	public static final EntityType<Raft> BAMBOO_RAFT = register(
+		"bamboo_raft",
+		EntityType.Builder.of(raftFactory(() -> Items.BAMBOO_RAFT), MobCategory.MISC).noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10)
+	);
 	public static final EntityType<Bat> BAT = register(
 		"bat", EntityType.Builder.of(Bat::new, MobCategory.AMBIENT).sized(0.5F, 0.9F).eyeHeight(0.45F).clientTrackingRange(5)
 	);
 	public static final EntityType<Bee> BEE = register(
 		"bee", EntityType.Builder.of(Bee::new, MobCategory.CREATURE).sized(0.7F, 0.6F).eyeHeight(0.3F).clientTrackingRange(8)
 	);
+	public static final EntityType<Boat> BIRCH_BOAT = register(
+		"birch_boat",
+		EntityType.Builder.of(boatFactory(() -> Items.BIRCH_BOAT), MobCategory.MISC).noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10)
+	);
+	public static final EntityType<ChestBoat> BIRCH_CHEST_BOAT = register(
+		"birch_chest_boat",
+		EntityType.Builder.of(chestBoatFactory(() -> Items.BIRCH_CHEST_BOAT), MobCategory.MISC)
+			.noLootTable()
+			.sized(1.375F, 0.5625F)
+			.eyeHeight(0.5625F)
+			.clientTrackingRange(10)
+	);
 	public static final EntityType<Blaze> BLAZE = register(
 		"blaze", EntityType.Builder.of(Blaze::new, MobCategory.MONSTER).fireImmune().sized(0.6F, 1.8F).clientTrackingRange(8)
 	);
 	public static final EntityType<Display.BlockDisplay> BLOCK_DISPLAY = register(
 		"block_display", EntityType.Builder.of(Display.BlockDisplay::new, MobCategory.MISC).noLootTable().sized(0.0F, 0.0F).clientTrackingRange(10).updateInterval(1)
-	);
-	public static final EntityType<Boat> BOAT = register(
-		"boat", EntityType.Builder.<Boat>of(Boat::new, MobCategory.MISC).noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10)
 	);
 	public static final EntityType<Bogged> BOGGED = register(
 		"bogged", EntityType.Builder.of(Bogged::new, MobCategory.MONSTER).sized(0.6F, 1.99F).eyeHeight(1.74F).ridingOffset(-0.7F).clientTrackingRange(8)
@@ -241,9 +279,17 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public static final EntityType<CaveSpider> CAVE_SPIDER = register(
 		"cave_spider", EntityType.Builder.of(CaveSpider::new, MobCategory.MONSTER).sized(0.7F, 0.5F).eyeHeight(0.45F).clientTrackingRange(8)
 	);
-	public static final EntityType<ChestBoat> CHEST_BOAT = register(
-		"chest_boat",
-		EntityType.Builder.<ChestBoat>of(ChestBoat::new, MobCategory.MISC).noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10)
+	public static final EntityType<Boat> CHERRY_BOAT = register(
+		"cherry_boat",
+		EntityType.Builder.of(boatFactory(() -> Items.CHERRY_BOAT), MobCategory.MISC).noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10)
+	);
+	public static final EntityType<ChestBoat> CHERRY_CHEST_BOAT = register(
+		"cherry_chest_boat",
+		EntityType.Builder.of(chestBoatFactory(() -> Items.CHERRY_CHEST_BOAT), MobCategory.MISC)
+			.noLootTable()
+			.sized(1.375F, 0.5625F)
+			.eyeHeight(0.5625F)
+			.clientTrackingRange(10)
 	);
 	public static final EntityType<MinecartChest> CHEST_MINECART = register(
 		"chest_minecart",
@@ -269,6 +315,22 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<Creeper> CREEPER = register(
 		"creeper", EntityType.Builder.of(Creeper::new, MobCategory.MONSTER).sized(0.6F, 1.7F).clientTrackingRange(8)
+	);
+	public static final EntityType<Boat> DARK_OAK_BOAT = register(
+		"dark_oak_boat",
+		EntityType.Builder.of(boatFactory(() -> Items.DARK_OAK_BOAT), MobCategory.MISC)
+			.noLootTable()
+			.sized(1.375F, 0.5625F)
+			.eyeHeight(0.5625F)
+			.clientTrackingRange(10)
+	);
+	public static final EntityType<ChestBoat> DARK_OAK_CHEST_BOAT = register(
+		"dark_oak_chest_boat",
+		EntityType.Builder.of(chestBoatFactory(() -> Items.DARK_OAK_CHEST_BOAT), MobCategory.MISC)
+			.noLootTable()
+			.sized(1.375F, 0.5625F)
+			.eyeHeight(0.5625F)
+			.clientTrackingRange(10)
 	);
 	public static final EntityType<Dolphin> DOLPHIN = register(
 		"dolphin", EntityType.Builder.of(Dolphin::new, MobCategory.WATER_CREATURE).sized(0.9F, 0.6F).eyeHeight(0.3F)
@@ -301,14 +363,13 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			.passengerAttachments(2.350625F)
 			.clientTrackingRange(10)
 	);
-	public static final EntityType<EndCrystal> END_CRYSTAL = register(
-		"end_crystal",
-		EntityType.Builder.<EndCrystal>of(EndCrystal::new, MobCategory.MISC)
-			.noLootTable()
-			.fireImmune()
-			.sized(2.0F, 2.0F)
-			.clientTrackingRange(16)
-			.updateInterval(Integer.MAX_VALUE)
+	public static final EntityType<EnderMan> ENDERMAN = register(
+		"enderman",
+		EntityType.Builder.of(EnderMan::new, MobCategory.MONSTER).sized(0.6F, 2.9F).eyeHeight(2.55F).passengerAttachments(2.80625F).clientTrackingRange(8)
+	);
+	public static final EntityType<Endermite> ENDERMITE = register(
+		"endermite",
+		EntityType.Builder.of(Endermite::new, MobCategory.MONSTER).sized(0.4F, 0.3F).eyeHeight(0.13F).passengerAttachments(0.2375F).clientTrackingRange(8)
 	);
 	public static final EntityType<EnderDragon> ENDER_DRAGON = register(
 		"ender_dragon",
@@ -318,13 +379,14 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 		"ender_pearl",
 		EntityType.Builder.<ThrownEnderpearl>of(ThrownEnderpearl::new, MobCategory.MISC).noLootTable().sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
 	);
-	public static final EntityType<EnderMan> ENDERMAN = register(
-		"enderman",
-		EntityType.Builder.of(EnderMan::new, MobCategory.MONSTER).sized(0.6F, 2.9F).eyeHeight(2.55F).passengerAttachments(2.80625F).clientTrackingRange(8)
-	);
-	public static final EntityType<Endermite> ENDERMITE = register(
-		"endermite",
-		EntityType.Builder.of(Endermite::new, MobCategory.MONSTER).sized(0.4F, 0.3F).eyeHeight(0.13F).passengerAttachments(0.2375F).clientTrackingRange(8)
+	public static final EntityType<EndCrystal> END_CRYSTAL = register(
+		"end_crystal",
+		EntityType.Builder.<EndCrystal>of(EndCrystal::new, MobCategory.MISC)
+			.noLootTable()
+			.fireImmune()
+			.sized(2.0F, 2.0F)
+			.clientTrackingRange(16)
+			.updateInterval(Integer.MAX_VALUE)
 	);
 	public static final EntityType<Evoker> EVOKER = register(
 		"evoker", EntityType.Builder.of(Evoker::new, MobCategory.MONSTER).sized(0.6F, 1.95F).passengerAttachments(2.0F).ridingOffset(-0.6F).clientTrackingRange(8)
@@ -356,6 +418,10 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			.sized(0.98F, 0.98F)
 			.clientTrackingRange(10)
 			.updateInterval(20)
+	);
+	public static final EntityType<LargeFireball> FIREBALL = register(
+		"fireball",
+		EntityType.Builder.<LargeFireball>of(LargeFireball::new, MobCategory.MISC).noLootTable().sized(1.0F, 1.0F).clientTrackingRange(4).updateInterval(10)
 	);
 	public static final EntityType<FireworkRocketEntity> FIREWORK_ROCKET = register(
 		"firework_rocket",
@@ -464,12 +530,17 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			.clientTrackingRange(10)
 			.updateInterval(Integer.MAX_VALUE)
 	);
-	public static final EntityType<OminousItemSpawner> OMINOUS_ITEM_SPAWNER = register(
-		"ominous_item_spawner", EntityType.Builder.of(OminousItemSpawner::new, MobCategory.MISC).noLootTable().sized(0.25F, 0.25F).clientTrackingRange(8)
+	public static final EntityType<Boat> JUNGLE_BOAT = register(
+		"jungle_boat",
+		EntityType.Builder.of(boatFactory(() -> Items.JUNGLE_BOAT), MobCategory.MISC).noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10)
 	);
-	public static final EntityType<LargeFireball> FIREBALL = register(
-		"fireball",
-		EntityType.Builder.<LargeFireball>of(LargeFireball::new, MobCategory.MISC).noLootTable().sized(1.0F, 1.0F).clientTrackingRange(4).updateInterval(10)
+	public static final EntityType<ChestBoat> JUNGLE_CHEST_BOAT = register(
+		"jungle_chest_boat",
+		EntityType.Builder.of(chestBoatFactory(() -> Items.JUNGLE_CHEST_BOAT), MobCategory.MISC)
+			.noLootTable()
+			.sized(1.375F, 0.5625F)
+			.eyeHeight(0.5625F)
+			.clientTrackingRange(10)
 	);
 	public static final EntityType<LeashFenceKnotEntity> LEASH_KNOT = register(
 		"leash_knot",
@@ -510,6 +581,22 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			.spawnDimensionsScale(4.0F)
 			.clientTrackingRange(8)
 	);
+	public static final EntityType<Boat> MANGROVE_BOAT = register(
+		"mangrove_boat",
+		EntityType.Builder.of(boatFactory(() -> Items.MANGROVE_BOAT), MobCategory.MISC)
+			.noLootTable()
+			.sized(1.375F, 0.5625F)
+			.eyeHeight(0.5625F)
+			.clientTrackingRange(10)
+	);
+	public static final EntityType<ChestBoat> MANGROVE_CHEST_BOAT = register(
+		"mangrove_chest_boat",
+		EntityType.Builder.of(chestBoatFactory(() -> Items.MANGROVE_CHEST_BOAT), MobCategory.MISC)
+			.noLootTable()
+			.sized(1.375F, 0.5625F)
+			.eyeHeight(0.5625F)
+			.clientTrackingRange(10)
+	);
 	public static final EntityType<Marker> MARKER = register(
 		"marker", EntityType.Builder.of(Marker::new, MobCategory.MISC).noLootTable().sized(0.0F, 0.0F).clientTrackingRange(0)
 	);
@@ -523,8 +610,23 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public static final EntityType<Mule> MULE = register(
 		"mule", EntityType.Builder.of(Mule::new, MobCategory.CREATURE).sized(1.3964844F, 1.6F).eyeHeight(1.52F).passengerAttachments(1.2125F).clientTrackingRange(8)
 	);
+	public static final EntityType<Boat> OAK_BOAT = register(
+		"oak_boat",
+		EntityType.Builder.of(boatFactory(() -> Items.OAK_BOAT), MobCategory.MISC).noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10)
+	);
+	public static final EntityType<ChestBoat> OAK_CHEST_BOAT = register(
+		"oak_chest_boat",
+		EntityType.Builder.of(chestBoatFactory(() -> Items.OAK_CHEST_BOAT), MobCategory.MISC)
+			.noLootTable()
+			.sized(1.375F, 0.5625F)
+			.eyeHeight(0.5625F)
+			.clientTrackingRange(10)
+	);
 	public static final EntityType<Ocelot> OCELOT = register(
 		"ocelot", EntityType.Builder.of(Ocelot::new, MobCategory.CREATURE).sized(0.6F, 0.7F).passengerAttachments(0.6375F).clientTrackingRange(10)
+	);
+	public static final EntityType<OminousItemSpawner> OMINOUS_ITEM_SPAWNER = register(
+		"ominous_item_spawner", EntityType.Builder.of(OminousItemSpawner::new, MobCategory.MISC).noLootTable().sized(0.25F, 0.25F).clientTrackingRange(8)
 	);
 	public static final EntityType<Painting> PAINTING = register(
 		"painting",
@@ -636,11 +738,11 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 			.nameTagOffset(2.05F)
 			.clientTrackingRange(10)
 	);
-	public static final EntityType<SnowGolem> SNOW_GOLEM = register(
-		"snow_golem", EntityType.Builder.of(SnowGolem::new, MobCategory.MISC).immuneTo(Blocks.POWDER_SNOW).sized(0.7F, 1.9F).eyeHeight(1.7F).clientTrackingRange(8)
-	);
 	public static final EntityType<Snowball> SNOWBALL = register(
 		"snowball", EntityType.Builder.<Snowball>of(Snowball::new, MobCategory.MISC).noLootTable().sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
+	);
+	public static final EntityType<SnowGolem> SNOW_GOLEM = register(
+		"snow_golem", EntityType.Builder.of(SnowGolem::new, MobCategory.MISC).immuneTo(Blocks.POWDER_SNOW).sized(0.7F, 1.9F).eyeHeight(1.7F).clientTrackingRange(8)
 	);
 	public static final EntityType<MinecartSpawner> SPAWNER_MINECART = register(
 		"spawner_minecart",
@@ -657,6 +759,18 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<Spider> SPIDER = register(
 		"spider", EntityType.Builder.of(Spider::new, MobCategory.MONSTER).sized(1.4F, 0.9F).eyeHeight(0.65F).passengerAttachments(0.765F).clientTrackingRange(8)
+	);
+	public static final EntityType<Boat> SPRUCE_BOAT = register(
+		"spruce_boat",
+		EntityType.Builder.of(boatFactory(() -> Items.SPRUCE_BOAT), MobCategory.MISC).noLootTable().sized(1.375F, 0.5625F).eyeHeight(0.5625F).clientTrackingRange(10)
+	);
+	public static final EntityType<ChestBoat> SPRUCE_CHEST_BOAT = register(
+		"spruce_chest_boat",
+		EntityType.Builder.of(chestBoatFactory(() -> Items.SPRUCE_CHEST_BOAT), MobCategory.MISC)
+			.noLootTable()
+			.sized(1.375F, 0.5625F)
+			.eyeHeight(0.5625F)
+			.clientTrackingRange(10)
 	);
 	public static final EntityType<Squid> SQUID = register(
 		"squid", EntityType.Builder.of(Squid::new, MobCategory.WATER_CREATURE).sized(0.8F, 0.8F).eyeHeight(0.4F).clientTrackingRange(8)
@@ -1202,6 +1316,22 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	@Deprecated
 	public Holder.Reference<EntityType<?>> builtInRegistryHolder() {
 		return this.builtInRegistryHolder;
+	}
+
+	private static EntityType.EntityFactory<Boat> boatFactory(Supplier<Item> supplier) {
+		return (entityType, level) -> new Boat(entityType, level, supplier);
+	}
+
+	private static EntityType.EntityFactory<ChestBoat> chestBoatFactory(Supplier<Item> supplier) {
+		return (entityType, level) -> new ChestBoat(entityType, level, supplier);
+	}
+
+	private static EntityType.EntityFactory<Raft> raftFactory(Supplier<Item> supplier) {
+		return (entityType, level) -> new Raft(entityType, level, supplier);
+	}
+
+	private static EntityType.EntityFactory<ChestRaft> chestRaftFactory(Supplier<Item> supplier) {
+		return (entityType, level) -> new ChestRaft(entityType, level, supplier);
 	}
 
 	public static class Builder<T extends Entity> {

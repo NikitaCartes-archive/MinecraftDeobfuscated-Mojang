@@ -90,8 +90,8 @@ public class Chicken extends Animal {
 		}
 
 		this.flap = this.flap + this.flapping * 2.0F;
-		if (!this.level().isClientSide && this.isAlive() && !this.isBaby() && !this.isChickenJockey() && --this.eggTime <= 0) {
-			if (this.dropFromGiftLootTable(BuiltInLootTables.CHICKEN_LAY, this::spawnAtLocation)) {
+		if (this.level() instanceof ServerLevel serverLevel && this.isAlive() && !this.isBaby() && !this.isChickenJockey() && --this.eggTime <= 0) {
+			if (this.dropFromGiftLootTable(serverLevel, BuiltInLootTables.CHICKEN_LAY, this::spawnAtLocation)) {
 				this.playSound(SoundEvents.CHICKEN_EGG, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 				this.gameEvent(GameEvent.ENTITY_PLACE);
 			}
@@ -141,8 +141,8 @@ public class Chicken extends Animal {
 	}
 
 	@Override
-	protected int getBaseExperienceReward() {
-		return this.isChickenJockey() ? 10 : super.getBaseExperienceReward();
+	protected int getBaseExperienceReward(ServerLevel serverLevel) {
+		return this.isChickenJockey() ? 10 : super.getBaseExperienceReward(serverLevel);
 	}
 
 	@Override

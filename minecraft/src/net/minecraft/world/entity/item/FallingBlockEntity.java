@@ -97,6 +97,15 @@ public class FallingBlockEntity extends Entity {
 		return false;
 	}
 
+	@Override
+	public final boolean hurtServer(ServerLevel serverLevel, DamageSource damageSource, float f) {
+		if (!this.isInvulnerableToBase(damageSource)) {
+			this.markHurt();
+		}
+
+		return false;
+	}
+
 	public void setStartPos(BlockPos blockPos) {
 		this.entityData.set(DATA_START_POS, blockPos);
 	}
@@ -136,7 +145,7 @@ public class FallingBlockEntity extends Entity {
 			this.move(MoverType.SELF, this.getDeltaMovement());
 			this.applyEffectsFromBlocks();
 			this.handlePortal();
-			if (!this.level().isClientSide && (this.isAlive() || this.forceTickAfterTeleportToDuplicate)) {
+			if (this.level() instanceof ServerLevel serverLevel && (this.isAlive() || this.forceTickAfterTeleportToDuplicate)) {
 				BlockPos blockPos = this.blockPosition();
 				boolean bl = this.blockState.getBlock() instanceof ConcretePowderBlock;
 				boolean bl2 = bl && this.level().getFluidState(blockPos).is(FluidTags.WATER);
@@ -150,7 +159,15 @@ public class FallingBlockEntity extends Entity {
 					}
 				}
 
-				if (this.onGround() || bl2) {
+				if (!this.onGround() && !bl2) {
+					if (this.time > 100 && (blockPos.getY() <= this.level().getMinY() || blockPos.getY() > this.level().getMaxY()) || this.time > 600) {
+						if (this.dropItem && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+							this.spawnAtLocation(serverLevel, block);
+						}
+
+						this.discard();
+					}
+				} else {
 					BlockState blockState = this.level().getBlockState(blockPos);
 					this.setDeltaMovement(this.getDeltaMovement().multiply(0.7, -0.5, 0.7));
 					if (!blockState.is(Blocks.MOVING_PISTON)) {
@@ -184,23 +201,23 @@ public class FallingBlockEntity extends Entity {
 
 											try {
 												blockEntity.loadWithComponents(compoundTag, this.level().registryAccess());
-											} catch (Exception var15) {
-												LOGGER.error("Failed to load block entity from falling block", (Throwable)var15);
+											} catch (Exception var16) {
+												LOGGER.error("Failed to load block entity from falling block", (Throwable)var16);
 											}
 
 											blockEntity.setChanged();
 										}
 									}
-								} else if (this.dropItem && this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+								} else if (this.dropItem && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 									this.discard();
 									this.callOnBrokenAfterFall(block, blockPos);
-									this.spawnAtLocation(block);
+									this.spawnAtLocation(serverLevel, block);
 								}
 							} else {
 								this.discard();
-								if (this.dropItem && this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+								if (this.dropItem && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
 									this.callOnBrokenAfterFall(block, blockPos);
-									this.spawnAtLocation(block);
+									this.spawnAtLocation(serverLevel, block);
 								}
 							}
 						} else {
@@ -208,13 +225,6 @@ public class FallingBlockEntity extends Entity {
 							this.callOnBrokenAfterFall(block, blockPos);
 						}
 					}
-				} else if (!this.level().isClientSide
-					&& (this.time > 100 && (blockPos.getY() <= this.level().getMinY() || blockPos.getY() > this.level().getMaxY()) || this.time > 600)) {
-					if (this.dropItem && this.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-						this.spawnAtLocation(block);
-					}
-
-					this.discard();
 				}
 			}
 

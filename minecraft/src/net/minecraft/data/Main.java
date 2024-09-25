@@ -28,7 +28,6 @@ import net.minecraft.data.loot.packs.VanillaLootTableProvider;
 import net.minecraft.data.metadata.PackMetadataGenerator;
 import net.minecraft.data.models.EquipmentModelProvider;
 import net.minecraft.data.models.ModelProvider;
-import net.minecraft.data.recipes.packs.BundleRecipeProvider;
 import net.minecraft.data.recipes.packs.VanillaRecipeProvider;
 import net.minecraft.data.registries.RegistriesDatapackGenerator;
 import net.minecraft.data.registries.TradeRebalanceRegistries;
@@ -38,7 +37,6 @@ import net.minecraft.data.structures.SnbtToNbt;
 import net.minecraft.data.structures.StructureUpdater;
 import net.minecraft.data.tags.BannerPatternTagsProvider;
 import net.minecraft.data.tags.BiomeTagsProvider;
-import net.minecraft.data.tags.BundlesItemTagsProvider;
 import net.minecraft.data.tags.CatVariantTagsProvider;
 import net.minecraft.data.tags.DamageTypeTagsProvider;
 import net.minecraft.data.tags.EntityTypeTagsProvider;
@@ -155,14 +153,6 @@ public class Main {
 		packGenerator3.addProvider(RegistryDumpReport::new);
 		packGenerator3.addProvider(PacketReport::new);
 		packGenerator3.addProvider(DatapackStructureReport::new);
-		packGenerator3 = dataGenerator.getBuiltinDatapack(bl2, "bundle");
-		packGenerator3.addProvider(bindRegistries(BundleRecipeProvider.Runner::new, completableFuture));
-		packGenerator3.addProvider(
-			packOutput -> new BundlesItemTagsProvider(packOutput, completableFuture, tagsProvider2.contentsGetter(), tagsProvider.contentsGetter())
-		);
-		packGenerator3.addProvider(
-			packOutput -> PackMetadataGenerator.forFeaturePack(packOutput, Component.translatable("dataPack.bundle.description"), FeatureFlagSet.of(FeatureFlags.BUNDLE))
-		);
 		CompletableFuture<RegistrySetBuilder.PatchedRegistries> completableFuture2 = TradeRebalanceRegistries.createLookup(completableFuture);
 		CompletableFuture<HolderLookup.Provider> completableFuture3 = completableFuture2.thenApply(RegistrySetBuilder.PatchedRegistries::patches);
 		DataGenerator.PackGenerator packGenerator4 = dataGenerator.getBuiltinDatapack(bl2, "trade_rebalance");
