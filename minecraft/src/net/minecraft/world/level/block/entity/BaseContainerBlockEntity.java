@@ -34,7 +34,7 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 	@Override
 	protected void loadAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.loadAdditional(compoundTag, provider);
-		this.lockKey = LockCode.fromTag(compoundTag);
+		this.lockKey = LockCode.fromTag(compoundTag, provider);
 		if (compoundTag.contains("CustomName", 8)) {
 			this.name = parseCustomNameSafe(compoundTag.getString("CustomName"), provider);
 		}
@@ -43,7 +43,7 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
 	@Override
 	protected void saveAdditional(CompoundTag compoundTag, HolderLookup.Provider provider) {
 		super.saveAdditional(compoundTag, provider);
-		this.lockKey.addToTag(compoundTag);
+		this.lockKey.addToTag(compoundTag, provider);
 		if (this.name != null) {
 			compoundTag.putString("CustomName", Component.Serializer.toJson(this.name, provider));
 		}

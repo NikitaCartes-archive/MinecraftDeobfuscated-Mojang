@@ -2,6 +2,7 @@ package net.minecraft.world.inventory;
 
 import java.util.List;
 import net.minecraft.recipebook.ServerPlaceRecipe;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedItemContents;
@@ -34,14 +35,14 @@ public abstract class AbstractCraftingMenu extends RecipeBookMenu {
 	}
 
 	@Override
-	public RecipeBookMenu.PostPlaceAction handlePlacement(boolean bl, boolean bl2, RecipeHolder<?> recipeHolder, Inventory inventory) {
+	public RecipeBookMenu.PostPlaceAction handlePlacement(boolean bl, boolean bl2, RecipeHolder<?> recipeHolder, ServerLevel serverLevel, Inventory inventory) {
 		RecipeHolder<CraftingRecipe> recipeHolder2 = (RecipeHolder<CraftingRecipe>)recipeHolder;
 		this.beginPlacingRecipe();
 
-		RecipeBookMenu.PostPlaceAction var7;
+		RecipeBookMenu.PostPlaceAction var8;
 		try {
 			List<Slot> list = this.getInputGridSlots();
-			var7 = ServerPlaceRecipe.placeRecipe(new ServerPlaceRecipe.CraftingMenuAccess<CraftingRecipe>() {
+			var8 = ServerPlaceRecipe.placeRecipe(new ServerPlaceRecipe.CraftingMenuAccess<CraftingRecipe>() {
 				@Override
 				public void fillCraftSlotsStackedContents(StackedItemContents stackedItemContents) {
 					AbstractCraftingMenu.this.fillCraftSlotsStackedContents(stackedItemContents);
@@ -59,16 +60,16 @@ public abstract class AbstractCraftingMenu extends RecipeBookMenu {
 				}
 			}, this.width, this.height, list, list, inventory, recipeHolder2, bl, bl2);
 		} finally {
-			this.finishPlacingRecipe((RecipeHolder<CraftingRecipe>)recipeHolder);
+			this.finishPlacingRecipe(serverLevel, (RecipeHolder<CraftingRecipe>)recipeHolder);
 		}
 
-		return var7;
+		return var8;
 	}
 
 	protected void beginPlacingRecipe() {
 	}
 
-	protected void finishPlacingRecipe(RecipeHolder<CraftingRecipe> recipeHolder) {
+	protected void finishPlacingRecipe(ServerLevel serverLevel, RecipeHolder<CraftingRecipe> recipeHolder) {
 	}
 
 	public abstract Slot getResultSlot();

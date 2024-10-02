@@ -32,6 +32,7 @@ import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -90,6 +91,7 @@ import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -1413,7 +1415,7 @@ public abstract class Player extends LivingEntity {
 	public void triggerRecipeCrafted(RecipeHolder<?> recipeHolder, List<ItemStack> list) {
 	}
 
-	public void awardRecipesByKey(List<ResourceLocation> list) {
+	public void awardRecipesByKey(List<ResourceKey<Recipe<?>>> list) {
 	}
 
 	public int resetRecipes(Collection<RecipeHolder<?>> collection) {

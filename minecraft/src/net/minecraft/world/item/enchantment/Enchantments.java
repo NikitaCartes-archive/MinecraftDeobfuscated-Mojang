@@ -41,9 +41,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.effects.AddValue;
 import net.minecraft.world.item.enchantment.effects.AllOf;
 import net.minecraft.world.item.enchantment.effects.ApplyMobEffect;
+import net.minecraft.world.item.enchantment.effects.ChangeItemDamage;
 import net.minecraft.world.item.enchantment.effects.DamageEntity;
 import net.minecraft.world.item.enchantment.effects.DamageImmunity;
-import net.minecraft.world.item.enchantment.effects.DamageItem;
 import net.minecraft.world.item.enchantment.effects.EnchantmentAttributeEffect;
 import net.minecraft.world.item.enchantment.effects.ExplodeEffect;
 import net.minecraft.world.item.enchantment.effects.Ignite;
@@ -301,7 +301,7 @@ public class Enchantments {
 					EnchantmentTarget.ATTACKER,
 					AllOf.entityEffects(
 						new DamageEntity(LevelBasedValue.constant(1.0F), LevelBasedValue.constant(5.0F), holderGetter.getOrThrow(DamageTypes.THORNS)),
-						new DamageItem(LevelBasedValue.constant(2.0F))
+						new ChangeItemDamage(LevelBasedValue.constant(2.0F))
 					),
 					LootItemRandomChanceCondition.randomChance(EnchantmentLevelProvider.forEnchantmentLevel(LevelBasedValue.perLevel(0.15F)))
 				)
@@ -467,7 +467,7 @@ public class Enchantments {
 				)
 				.withEffect(
 					EnchantmentEffectComponents.LOCATION_CHANGED,
-					new DamageItem(LevelBasedValue.constant(1.0F)),
+					new ChangeItemDamage(LevelBasedValue.constant(1.0F)),
 					AllOfCondition.allOf(
 						LootItemRandomChanceCondition.randomChance(EnchantmentLevelProvider.forEnchantmentLevel(LevelBasedValue.constant(0.04F))),
 						LootItemEntityPropertyCondition.hasProperties(

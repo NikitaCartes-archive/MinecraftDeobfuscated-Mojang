@@ -392,6 +392,16 @@ public enum Direction implements StringRepresentable {
 			public double choose(double d, double e, double f) {
 				return d;
 			}
+
+			@Override
+			public Direction getPositive() {
+				return Direction.EAST;
+			}
+
+			@Override
+			public Direction getNegative() {
+				return Direction.WEST;
+			}
 		},
 		Y("y") {
 			@Override
@@ -403,6 +413,16 @@ public enum Direction implements StringRepresentable {
 			public double choose(double d, double e, double f) {
 				return e;
 			}
+
+			@Override
+			public Direction getPositive() {
+				return Direction.UP;
+			}
+
+			@Override
+			public Direction getNegative() {
+				return Direction.DOWN;
+			}
 		},
 		Z("z") {
 			@Override
@@ -413,6 +433,16 @@ public enum Direction implements StringRepresentable {
 			@Override
 			public double choose(double d, double e, double f) {
 				return f;
+			}
+
+			@Override
+			public Direction getPositive() {
+				return Direction.SOUTH;
+			}
+
+			@Override
+			public Direction getNegative() {
+				return Direction.NORTH;
 			}
 		};
 
@@ -439,6 +469,14 @@ public enum Direction implements StringRepresentable {
 
 		public boolean isHorizontal() {
 			return this == X || this == Z;
+		}
+
+		public abstract Direction getPositive();
+
+		public abstract Direction getNegative();
+
+		public Direction[] getDirections() {
+			return new Direction[]{this.getPositive(), this.getNegative()};
 		}
 
 		public String toString() {

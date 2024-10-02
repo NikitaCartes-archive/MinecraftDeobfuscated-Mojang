@@ -75,6 +75,7 @@ import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.breeze.Breeze;
+import net.minecraft.world.entity.monster.creaking.Creaking;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
@@ -166,6 +167,8 @@ public class DefaultAttributes {
 		.put(EntityType.WITHER_SKELETON, AbstractSkeleton.createAttributes().build())
 		.put(EntityType.WOLF, Wolf.createAttributes().build())
 		.put(EntityType.ZOGLIN, Zoglin.createAttributes().build())
+		.put(EntityType.CREAKING, Creaking.createAttributes().build())
+		.put(EntityType.CREAKING_TRANSIENT, Creaking.createAttributes().build())
 		.put(EntityType.ZOMBIE, Zombie.createAttributes().build())
 		.put(EntityType.ZOMBIE_HORSE, ZombieHorse.createAttributes().build())
 		.put(EntityType.ZOMBIE_VILLAGER, Zombie.createAttributes().build())

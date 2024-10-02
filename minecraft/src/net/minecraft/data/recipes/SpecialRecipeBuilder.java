@@ -1,6 +1,8 @@
 package net.minecraft.data.recipes;
 
 import java.util.function.Function;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Recipe;
@@ -17,10 +19,10 @@ public class SpecialRecipeBuilder {
 	}
 
 	public void save(RecipeOutput recipeOutput, String string) {
-		this.save(recipeOutput, ResourceLocation.parse(string));
+		this.save(recipeOutput, ResourceKey.create(Registries.RECIPE, ResourceLocation.parse(string)));
 	}
 
-	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {
-		recipeOutput.accept(resourceLocation, (Recipe<?>)this.factory.apply(CraftingBookCategory.MISC), null);
+	public void save(RecipeOutput recipeOutput, ResourceKey<Recipe<?>> resourceKey) {
+		recipeOutput.accept(resourceKey, (Recipe<?>)this.factory.apply(CraftingBookCategory.MISC), null);
 	}
 }

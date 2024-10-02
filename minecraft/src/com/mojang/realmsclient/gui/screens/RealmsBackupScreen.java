@@ -99,31 +99,32 @@ public class RealmsBackupScreen extends RealmsScreen {
 
 	private void fetchRealmsBackups() {
 		(new Thread("Realms-fetch-backups") {
-			public void run() {
-				RealmsClient realmsClient = RealmsClient.create();
+				public void run() {
+					RealmsClient realmsClient = RealmsClient.create();
 
-				try {
-					List<Backup> list = realmsClient.backupsFor(RealmsBackupScreen.this.serverData.id).backups;
-					RealmsBackupScreen.this.minecraft.execute(() -> {
-						RealmsBackupScreen.this.backups = list;
-						RealmsBackupScreen.this.noBackups = RealmsBackupScreen.this.backups.isEmpty();
-						if (!RealmsBackupScreen.this.noBackups && RealmsBackupScreen.this.downloadButton != null) {
-							RealmsBackupScreen.this.downloadButton.active = true;
-						}
+					try {
+						List<Backup> list = realmsClient.backupsFor(RealmsBackupScreen.this.serverData.id).backups;
+						RealmsBackupScreen.this.minecraft
+							.execute(
+								() -> {
+									RealmsBackupScreen.this.backups = list;
+									RealmsBackupScreen.this.noBackups = RealmsBackupScreen.this.backups.isEmpty();
+									if (!RealmsBackupScreen.this.noBackups && RealmsBackupScreen.this.downloadButton != null) {
+										RealmsBackupScreen.this.downloadButton.active = true;
+									}
 
-						if (RealmsBackupScreen.this.backupList != null) {
-							RealmsBackupScreen.this.backupList.children().clear();
-
-							for (Backup backup : RealmsBackupScreen.this.backups) {
-								RealmsBackupScreen.this.backupList.addEntry(backup);
-							}
-						}
-					});
-				} catch (RealmsServiceException var3) {
-					RealmsBackupScreen.LOGGER.error("Couldn't request backups", (Throwable)var3);
+									if (RealmsBackupScreen.this.backupList != null) {
+										RealmsBackupScreen.this.backupList
+											.replaceEntries(RealmsBackupScreen.this.backups.stream().map(backup -> RealmsBackupScreen.this.new Entry(backup)).toList());
+									}
+								}
+							);
+					} catch (RealmsServiceException var3) {
+						RealmsBackupScreen.LOGGER.error("Couldn't request backups", (Throwable)var3);
+					}
 				}
-			}
-		}).start();
+			})
+			.start();
 	}
 
 	@Override
@@ -168,15 +169,6 @@ public class RealmsBackupScreen extends RealmsScreen {
 				RealmsBackupScreen.this.layout.getHeaderHeight(),
 				36
 			);
-		}
-
-		public void addEntry(Backup backup) {
-			this.addEntry(RealmsBackupScreen.this.new Entry(backup));
-		}
-
-		@Override
-		public int getMaxPosition() {
-			return this.getItemCount() * 36 + this.headerHeight;
 		}
 
 		@Override

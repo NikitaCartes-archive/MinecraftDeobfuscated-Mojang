@@ -117,7 +117,7 @@ public class WardenAi {
 	}
 
 	private static void initCoreActivity(Brain<Warden> brain) {
-		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), SetWardenLookTarget.create(), new LookAtTargetSink(45, 90), new MoveToTargetSink()));
+		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim<>(0.8F), SetWardenLookTarget.create(), new LookAtTargetSink(45, 90), new MoveToTargetSink()));
 	}
 
 	private static void initEmergeActivity(Brain<Warden> brain) {

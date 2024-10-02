@@ -882,9 +882,16 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 						return;
 					}
 
-					VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.lines());
 					Vec3 vec3 = camera.getPosition();
-					this.renderHitOutline(poseStack, vertexConsumer, camera.getEntity(), vec3.x, vec3.y, vec3.z, blockPos, blockState);
+					Boolean boolean_ = this.minecraft.options.highContrastBlockOutline().get();
+					if (boolean_) {
+						VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.secondaryBlockOutline());
+						this.renderHitOutline(poseStack, vertexConsumer, camera.getEntity(), vec3.x, vec3.y, vec3.z, blockPos, blockState, -16777216);
+					}
+
+					VertexConsumer vertexConsumer = bufferSource.getBuffer(RenderType.lines());
+					int i = boolean_ ? -11010079 : ARGB.color(102, -16777216);
+					this.renderHitOutline(poseStack, vertexConsumer, camera.getEntity(), vec3.x, vec3.y, vec3.z, blockPos, blockState, i);
 					bufferSource.endLastBatch();
 				}
 			}
@@ -1131,7 +1138,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 	}
 
 	private void renderHitOutline(
-		PoseStack poseStack, VertexConsumer vertexConsumer, Entity entity, double d, double e, double f, BlockPos blockPos, BlockState blockState
+		PoseStack poseStack, VertexConsumer vertexConsumer, Entity entity, double d, double e, double f, BlockPos blockPos, BlockState blockState, int i
 	) {
 		ShapeRenderer.renderShape(
 			poseStack,
@@ -1140,10 +1147,7 @@ public class LevelRenderer implements ResourceManagerReloadListener, AutoCloseab
 			(double)blockPos.getX() - d,
 			(double)blockPos.getY() - e,
 			(double)blockPos.getZ() - f,
-			0.0F,
-			0.0F,
-			0.0F,
-			0.4F
+			i
 		);
 	}
 

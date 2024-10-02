@@ -5,7 +5,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Mob;
 
-public class Swim extends Behavior<Mob> {
+public class Swim<T extends Mob> extends Behavior<T> {
 	private final float chance;
 
 	public Swim(float f) {
@@ -13,7 +13,7 @@ public class Swim extends Behavior<Mob> {
 		this.chance = f;
 	}
 
-	public static boolean shouldSwim(Mob mob) {
+	public static <T extends Mob> boolean shouldSwim(T mob) {
 		return mob.isInWater() && mob.getFluidHeight(FluidTags.WATER) > mob.getFluidJumpThreshold() || mob.isInLava();
 	}
 

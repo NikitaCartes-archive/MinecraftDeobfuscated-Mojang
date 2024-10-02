@@ -18,11 +18,13 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.commands.execution.TraceCallbacks;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -496,7 +498,7 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 		Component component2 = Component.translatable("chat.type.admin", this.getDisplayName(), component).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
 		if (this.server.getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
 			for (ServerPlayer serverPlayer : this.server.getPlayerList().getPlayers()) {
-				if (serverPlayer != this.source && this.server.getPlayerList().isOp(serverPlayer.getGameProfile())) {
+				if (serverPlayer.commandSource() != this.source && this.server.getPlayerList().isOp(serverPlayer.getGameProfile())) {
 					serverPlayer.sendSystemMessage(component2);
 				}
 			}
@@ -534,11 +536,6 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 	}
 
 	@Override
-	public Stream<ResourceLocation> getRecipeNames() {
-		return this.server.getRecipeManager().getRecipeIds();
-	}
-
-	@Override
 	public CompletableFuture<Suggestions> customSuggestion(CommandContext<?> commandContext) {
 		return Suggestions.empty();
 	}
@@ -550,10 +547,19 @@ public class CommandSourceStack implements ExecutionCommandSource<CommandSourceS
 		SuggestionsBuilder suggestionsBuilder,
 		CommandContext<?> commandContext
 	) {
-		return (CompletableFuture<Suggestions>)this.registryAccess().lookup(resourceKey).map(registry -> {
-			this.suggestRegistryElements(registry, elementSuggestionType, suggestionsBuilder);
-			return suggestionsBuilder.buildFuture();
-		}).orElseGet(Suggestions::empty);
+		if (resourceKey == Registries.RECIPE) {
+			return SharedSuggestionProvider.suggestResource(
+				this.server.getRecipeManager().getRecipes().stream().map(recipeHolder -> recipeHolder.id().location()), suggestionsBuilder
+			);
+		} else if (resourceKey == Registries.ADVANCEMENT) {
+			Collection<AdvancementHolder> collection = this.server.getAdvancements().getAllAdvancements();
+			return SharedSuggestionProvider.suggestResource(collection.stream().map(AdvancementHolder::id), suggestionsBuilder);
+		} else {
+			return (CompletableFuture<Suggestions>)this.registryAccess().lookup(resourceKey).map(registry -> {
+				this.suggestRegistryElements(registry, elementSuggestionType, suggestionsBuilder);
+				return suggestionsBuilder.buildFuture();
+			}).orElseGet(Suggestions::empty);
+		}
 	}
 
 	@Override

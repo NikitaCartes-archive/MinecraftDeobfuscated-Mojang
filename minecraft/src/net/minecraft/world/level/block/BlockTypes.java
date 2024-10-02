@@ -93,6 +93,7 @@ public class BlockTypes {
 		Registry.register(registry, "end_portal_frame", EndPortalFrameBlock.CODEC);
 		Registry.register(registry, "end_rod", EndRodBlock.CODEC);
 		Registry.register(registry, "farm", FarmBlock.CODEC);
+		Registry.register(registry, "bonemealable_feature_placer", BonemealableFeaturePlacerBlock.CODEC);
 		Registry.register(registry, "fence", FenceBlock.CODEC);
 		Registry.register(registry, "fence_gate", FenceGateBlock.CODEC);
 		Registry.register(registry, "fire", FireBlock.CODEC);
@@ -108,6 +109,7 @@ public class BlockTypes {
 		Registry.register(registry, "grass", GrassBlock.CODEC);
 		Registry.register(registry, "grindstone", GrindstoneBlock.CODEC);
 		Registry.register(registry, "half_transparent", HalfTransparentBlock.CODEC);
+		Registry.register(registry, "hanging_moss", HangingMossBlock.CODEC);
 		Registry.register(registry, "hanging_roots", HangingRootsBlock.CODEC);
 		Registry.register(registry, "hay", HayBlock.CODEC);
 		Registry.register(registry, "heavy_core", HeavyCoreBlock.CODEC);
@@ -138,7 +140,7 @@ public class BlockTypes {
 		Registry.register(registry, "mangrove_leaves", MangroveLeavesBlock.CODEC);
 		Registry.register(registry, "mangrove_propagule", MangrovePropaguleBlock.CODEC);
 		Registry.register(registry, "mangrove_roots", MangroveRootsBlock.CODEC);
-		Registry.register(registry, "moss", MossBlock.CODEC);
+		Registry.register(registry, "mossy_carpet", MossyCarpetBlock.CODEC);
 		Registry.register(registry, "moving_piston", MovingPistonBlock.CODEC);
 		Registry.register(registry, "mud", MudBlock.CODEC);
 		Registry.register(registry, "mushroom", MushroomBlock.CODEC);
@@ -197,6 +199,7 @@ public class BlockTypes {
 		Registry.register(registry, "soul_fire", SoulFireBlock.CODEC);
 		Registry.register(registry, "soul_sand", SoulSandBlock.CODEC);
 		Registry.register(registry, "spawner", SpawnerBlock.CODEC);
+		Registry.register(registry, "creaking_heart", CreakingHeartBlock.CODEC);
 		Registry.register(registry, "sponge", SpongeBlock.CODEC);
 		Registry.register(registry, "spore_blossom", SporeBlossomBlock.CODEC);
 		Registry.register(registry, "stained_glass_pane", StainedGlassPaneBlock.CODEC);

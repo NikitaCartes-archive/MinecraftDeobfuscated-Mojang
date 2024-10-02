@@ -21,6 +21,7 @@ public abstract class RealmsScreen extends Screen {
 	protected static final int COLOR_LINK = 3368635;
 	protected static final int COLOR_LINK_HOVER = 7107012;
 	protected static final int SKIN_FACE_SIZE = 32;
+	protected static final int HARDCORE_HEART_SIZE = 8;
 	private final List<RealmsLabel> labels = Lists.<RealmsLabel>newArrayList();
 
 	public RealmsScreen(Component component) {

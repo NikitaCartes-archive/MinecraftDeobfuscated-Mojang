@@ -1,6 +1,6 @@
 package net.minecraft.client.gui.screens.recipebook;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -15,7 +15,9 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
+import net.minecraft.world.item.crafting.display.RecipeDisplayId;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 
 @Environment(EnvType.CLIENT)
 public class RecipeButton extends AbstractWidget {
@@ -27,7 +29,7 @@ public class RecipeButton extends AbstractWidget {
 	private static final int BACKGROUND_SIZE = 25;
 	private static final Component MORE_RECIPES_TOOLTIP = Component.translatable("gui.recipebook.moreRecipes");
 	private RecipeCollection collection;
-	private List<RecipeHolder<?>> recipes = List.of();
+	private List<RecipeButton.ResolvedEntry> selectedEntries = List.of();
 	private final SlotSelectTime slotSelectTime;
 	private float animationTime;
 
@@ -36,16 +38,16 @@ public class RecipeButton extends AbstractWidget {
 		this.slotSelectTime = slotSelectTime;
 	}
 
-	public void init(RecipeCollection recipeCollection, boolean bl, RecipeBookPage recipeBookPage) {
+	public void init(RecipeCollection recipeCollection, boolean bl, RecipeBookPage recipeBookPage, SlotDisplay.ResolutionContext resolutionContext) {
 		this.collection = recipeCollection;
-		this.recipes = recipeCollection.getFittingRecipes(bl ? RecipeCollection.CraftableStatus.CRAFTABLE : RecipeCollection.CraftableStatus.ANY);
-
-		for (RecipeHolder<?> recipeHolder : this.recipes) {
-			if (recipeBookPage.getRecipeBook().willHighlight(recipeHolder)) {
-				recipeBookPage.recipesShown(this.recipes);
-				this.animationTime = 15.0F;
-				break;
-			}
+		List<RecipeDisplayEntry> list = recipeCollection.getSelectedRecipes(bl ? RecipeCollection.CraftableStatus.CRAFTABLE : RecipeCollection.CraftableStatus.ANY);
+		this.selectedEntries = list.stream()
+			.map(recipeDisplayEntry -> new RecipeButton.ResolvedEntry(recipeDisplayEntry.id(), recipeDisplayEntry.resultItems(resolutionContext)))
+			.toList();
+		List<RecipeDisplayId> list2 = list.stream().map(RecipeDisplayEntry::id).filter(recipeBookPage.getRecipeBook()::willHighlight).toList();
+		if (!list2.isEmpty()) {
+			list2.forEach(recipeBookPage::recipeShown);
+			this.animationTime = 15.0F;
 		}
 	}
 
@@ -79,7 +81,7 @@ public class RecipeButton extends AbstractWidget {
 		}
 
 		guiGraphics.blitSprite(RenderType::guiTextured, resourceLocation, this.getX(), this.getY(), this.width, this.height);
-		ItemStack itemStack = this.getResultItem();
+		ItemStack itemStack = this.getDisplayStack();
 		int k = 4;
 		if (this.collection.hasSingleResultItem() && this.hasMultipleRecipes()) {
 			guiGraphics.renderItem(itemStack, this.getX() + k + 1, this.getY() + k + 1, 0, 10);
@@ -93,24 +95,28 @@ public class RecipeButton extends AbstractWidget {
 	}
 
 	private boolean hasMultipleRecipes() {
-		return this.recipes.size() > 1;
+		return this.selectedEntries.size() > 1;
 	}
 
 	public boolean isOnlyOption() {
-		return this.recipes.size() == 1;
+		return this.selectedEntries.size() == 1;
 	}
 
-	public RecipeHolder<?> getRecipe() {
-		int i = this.slotSelectTime.currentIndex() % this.recipes.size();
-		return (RecipeHolder<?>)this.recipes.get(i);
+	public RecipeDisplayId getCurrentRecipe() {
+		int i = this.slotSelectTime.currentIndex() % this.selectedEntries.size();
+		return ((RecipeButton.ResolvedEntry)this.selectedEntries.get(i)).id;
 	}
 
-	public ItemStack getResultItem() {
-		return this.getRecipe().value().getResultItem(this.collection.registryAccess());
+	public ItemStack getDisplayStack() {
+		int i = this.slotSelectTime.currentIndex();
+		int j = this.selectedEntries.size();
+		int k = i / j;
+		int l = i - j * k;
+		return ((RecipeButton.ResolvedEntry)this.selectedEntries.get(l)).selectItem(k);
 	}
 
-	public List<Component> getTooltipText() {
-		List<Component> list = Lists.<Component>newArrayList(Screen.getTooltipFromItem(Minecraft.getInstance(), this.getResultItem()));
+	public List<Component> getTooltipText(ItemStack itemStack) {
+		List<Component> list = new ArrayList(Screen.getTooltipFromItem(Minecraft.getInstance(), itemStack));
 		if (this.hasMultipleRecipes()) {
 			list.add(MORE_RECIPES_TOOLTIP);
 		}
@@ -120,8 +126,7 @@ public class RecipeButton extends AbstractWidget {
 
 	@Override
 	public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-		ItemStack itemStack = this.getResultItem();
-		narrationElementOutput.add(NarratedElementType.TITLE, Component.translatable("narration.recipe", itemStack.getHoverName()));
+		narrationElementOutput.add(NarratedElementType.TITLE, Component.translatable("narration.recipe", this.getDisplayStack().getHoverName()));
 		if (this.hasMultipleRecipes()) {
 			narrationElementOutput.add(
 				NarratedElementType.USAGE, Component.translatable("narration.button.usage.hovered"), Component.translatable("narration.recipe.usage.more")
@@ -139,5 +144,18 @@ public class RecipeButton extends AbstractWidget {
 	@Override
 	protected boolean isValidClickButton(int i) {
 		return i == 0 || i == 1;
+	}
+
+	@Environment(EnvType.CLIENT)
+	static record ResolvedEntry(RecipeDisplayId id, List<ItemStack> displayItems) {
+
+		public ItemStack selectItem(int i) {
+			if (this.displayItems.isEmpty()) {
+				return ItemStack.EMPTY;
+			} else {
+				int j = i % this.displayItems.size();
+				return (ItemStack)this.displayItems.get(j);
+			}
+		}
 	}
 }

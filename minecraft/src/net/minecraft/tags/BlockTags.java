@@ -27,6 +27,7 @@ public final class BlockTags {
 	public static final TagKey<Block> OVERWORLD_NATURAL_LOGS = create("overworld_natural_logs");
 	public static final TagKey<Block> LOGS = create("logs");
 	public static final TagKey<Block> DARK_OAK_LOGS = create("dark_oak_logs");
+	public static final TagKey<Block> PALE_OAK_LOGS = create("pale_oak_logs");
 	public static final TagKey<Block> OAK_LOGS = create("oak_logs");
 	public static final TagKey<Block> BIRCH_LOGS = create("birch_logs");
 	public static final TagKey<Block> ACACIA_LOGS = create("acacia_logs");

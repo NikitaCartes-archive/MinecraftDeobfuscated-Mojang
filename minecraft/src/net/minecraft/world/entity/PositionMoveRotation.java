@@ -1,26 +1,37 @@
 package net.minecraft.world.entity;
 
 import java.util.Set;
-import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 
 public record PositionMoveRotation(Vec3 position, Vec3 deltaMovement, float yRot, float xRot) {
+	public static final StreamCodec<FriendlyByteBuf, PositionMoveRotation> STREAM_CODEC = StreamCodec.composite(
+		Vec3.STREAM_CODEC,
+		PositionMoveRotation::position,
+		Vec3.STREAM_CODEC,
+		PositionMoveRotation::deltaMovement,
+		ByteBufCodecs.FLOAT,
+		PositionMoveRotation::yRot,
+		ByteBufCodecs.FLOAT,
+		PositionMoveRotation::xRot,
+		PositionMoveRotation::new
+	);
+
 	public static PositionMoveRotation of(Entity entity) {
 		return new PositionMoveRotation(entity.position(), entity.getKnownMovement(), entity.getYRot(), entity.getXRot());
 	}
 
-	public static PositionMoveRotation of(ClientboundPlayerPositionPacket clientboundPlayerPositionPacket) {
+	public static PositionMoveRotation ofEntityUsingLerpTarget(Entity entity) {
 		return new PositionMoveRotation(
-			clientboundPlayerPositionPacket.position(),
-			clientboundPlayerPositionPacket.deltaMovement(),
-			clientboundPlayerPositionPacket.yRot(),
-			clientboundPlayerPositionPacket.xRot()
+			new Vec3(entity.lerpTargetX(), entity.lerpTargetY(), entity.lerpTargetZ()), entity.getKnownMovement(), entity.getYRot(), entity.getXRot()
 		);
 	}
 
-	public static PositionMoveRotation of(DimensionTransition dimensionTransition) {
-		return new PositionMoveRotation(dimensionTransition.position(), dimensionTransition.deltaMovement(), dimensionTransition.yRot(), dimensionTransition.xRot());
+	public static PositionMoveRotation of(TeleportTransition teleportTransition) {
+		return new PositionMoveRotation(teleportTransition.position(), teleportTransition.deltaMovement(), teleportTransition.yRot(), teleportTransition.xRot());
 	}
 
 	public static PositionMoveRotation calculateAbsolute(PositionMoveRotation positionMoveRotation, PositionMoveRotation positionMoveRotation2, Set<Relative> set) {

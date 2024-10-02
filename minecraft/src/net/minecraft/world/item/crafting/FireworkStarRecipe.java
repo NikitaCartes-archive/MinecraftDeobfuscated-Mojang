@@ -118,17 +118,7 @@ public class FireworkStarRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public boolean canCraftInDimensions(int i, int j) {
-		return i * j >= 2;
-	}
-
-	@Override
-	public ItemStack getResultItem(HolderLookup.Provider provider) {
-		return new ItemStack(Items.FIREWORK_STAR);
-	}
-
-	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<FireworkStarRecipe> getSerializer() {
 		return RecipeSerializer.FIREWORK_STAR;
 	}
 }

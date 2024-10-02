@@ -158,19 +158,19 @@ public class WardenModel extends EntityModel<WardenRenderState> {
 		this.rightTendril.xRot = -g;
 	}
 
-	public List<ModelPart> getTendrilsLayerModelParts() {
+	public List<ModelPart> getTendrilsLayerModelParts(WardenRenderState wardenRenderState) {
 		return this.tendrilsLayerModelParts;
 	}
 
-	public List<ModelPart> getHeartLayerModelParts() {
+	public List<ModelPart> getHeartLayerModelParts(WardenRenderState wardenRenderState) {
 		return this.heartLayerModelParts;
 	}
 
-	public List<ModelPart> getBioluminescentLayerModelParts() {
+	public List<ModelPart> getBioluminescentLayerModelParts(WardenRenderState wardenRenderState) {
 		return this.bioluminescentLayerModelParts;
 	}
 
-	public List<ModelPart> getPulsatingSpotsLayerModelParts() {
+	public List<ModelPart> getPulsatingSpotsLayerModelParts(WardenRenderState wardenRenderState) {
 		return this.pulsatingSpotsLayerModelParts;
 	}
 }

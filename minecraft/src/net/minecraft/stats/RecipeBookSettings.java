@@ -1,15 +1,17 @@
 package net.minecraft.stats;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
+import java.util.EnumMap;
 import java.util.Map;
-import net.minecraft.Util;
+import java.util.function.UnaryOperator;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.inventory.RecipeBookType;
 
 public final class RecipeBookSettings {
+	public static final StreamCodec<FriendlyByteBuf, RecipeBookSettings> STREAM_CODEC = StreamCodec.ofMember(RecipeBookSettings::write, RecipeBookSettings::read);
 	private static final Map<RecipeBookType, Pair<String, String>> TAG_FIELDS = ImmutableMap.of(
 		RecipeBookType.CRAFTING,
 		Pair.of("isGuiOpen", "isFilteringCraftable"),
@@ -27,90 +29,97 @@ public final class RecipeBookSettings {
 	}
 
 	public RecipeBookSettings() {
-		this(Util.make(Maps.newEnumMap(RecipeBookType.class), enumMap -> {
-			for (RecipeBookType recipeBookType : RecipeBookType.values()) {
-				enumMap.put(recipeBookType, new RecipeBookSettings.TypeSettings(false, false));
+		this(new EnumMap(RecipeBookType.class));
+	}
+
+	private RecipeBookSettings.TypeSettings getSettings(RecipeBookType recipeBookType) {
+		return (RecipeBookSettings.TypeSettings)this.states.getOrDefault(recipeBookType, RecipeBookSettings.TypeSettings.DEFAULT);
+	}
+
+	private void updateSettings(RecipeBookType recipeBookType, UnaryOperator<RecipeBookSettings.TypeSettings> unaryOperator) {
+		this.states.compute(recipeBookType, (recipeBookTypex, typeSettings) -> {
+			if (typeSettings == null) {
+				typeSettings = RecipeBookSettings.TypeSettings.DEFAULT;
 			}
-		}));
+
+			typeSettings = (RecipeBookSettings.TypeSettings)unaryOperator.apply(typeSettings);
+			if (typeSettings.equals(RecipeBookSettings.TypeSettings.DEFAULT)) {
+				typeSettings = null;
+			}
+
+			return typeSettings;
+		});
 	}
 
 	public boolean isOpen(RecipeBookType recipeBookType) {
-		return ((RecipeBookSettings.TypeSettings)this.states.get(recipeBookType)).open;
+		return this.getSettings(recipeBookType).open;
 	}
 
 	public void setOpen(RecipeBookType recipeBookType, boolean bl) {
-		((RecipeBookSettings.TypeSettings)this.states.get(recipeBookType)).open = bl;
+		this.updateSettings(recipeBookType, typeSettings -> typeSettings.setOpen(bl));
 	}
 
 	public boolean isFiltering(RecipeBookType recipeBookType) {
-		return ((RecipeBookSettings.TypeSettings)this.states.get(recipeBookType)).filtering;
+		return this.getSettings(recipeBookType).filtering;
 	}
 
 	public void setFiltering(RecipeBookType recipeBookType, boolean bl) {
-		((RecipeBookSettings.TypeSettings)this.states.get(recipeBookType)).filtering = bl;
+		this.updateSettings(recipeBookType, typeSettings -> typeSettings.setFiltering(bl));
 	}
 
-	public static RecipeBookSettings read(FriendlyByteBuf friendlyByteBuf) {
-		Map<RecipeBookType, RecipeBookSettings.TypeSettings> map = Maps.newEnumMap(RecipeBookType.class);
+	private static RecipeBookSettings read(FriendlyByteBuf friendlyByteBuf) {
+		Map<RecipeBookType, RecipeBookSettings.TypeSettings> map = new EnumMap(RecipeBookType.class);
 
 		for (RecipeBookType recipeBookType : RecipeBookType.values()) {
 			boolean bl = friendlyByteBuf.readBoolean();
 			boolean bl2 = friendlyByteBuf.readBoolean();
-			map.put(recipeBookType, new RecipeBookSettings.TypeSettings(bl, bl2));
+			if (bl || bl2) {
+				map.put(recipeBookType, new RecipeBookSettings.TypeSettings(bl, bl2));
+			}
 		}
 
 		return new RecipeBookSettings(map);
 	}
 
-	public void write(FriendlyByteBuf friendlyByteBuf) {
+	private void write(FriendlyByteBuf friendlyByteBuf) {
 		for (RecipeBookType recipeBookType : RecipeBookType.values()) {
-			RecipeBookSettings.TypeSettings typeSettings = (RecipeBookSettings.TypeSettings)this.states.get(recipeBookType);
-			if (typeSettings == null) {
-				friendlyByteBuf.writeBoolean(false);
-				friendlyByteBuf.writeBoolean(false);
-			} else {
-				friendlyByteBuf.writeBoolean(typeSettings.open);
-				friendlyByteBuf.writeBoolean(typeSettings.filtering);
-			}
+			RecipeBookSettings.TypeSettings typeSettings = (RecipeBookSettings.TypeSettings)this.states
+				.getOrDefault(recipeBookType, RecipeBookSettings.TypeSettings.DEFAULT);
+			friendlyByteBuf.writeBoolean(typeSettings.open);
+			friendlyByteBuf.writeBoolean(typeSettings.filtering);
 		}
 	}
 
 	public static RecipeBookSettings read(CompoundTag compoundTag) {
-		Map<RecipeBookType, RecipeBookSettings.TypeSettings> map = Maps.newEnumMap(RecipeBookType.class);
+		Map<RecipeBookType, RecipeBookSettings.TypeSettings> map = new EnumMap(RecipeBookType.class);
 		TAG_FIELDS.forEach((recipeBookType, pair) -> {
 			boolean bl = compoundTag.getBoolean((String)pair.getFirst());
 			boolean bl2 = compoundTag.getBoolean((String)pair.getSecond());
-			map.put(recipeBookType, new RecipeBookSettings.TypeSettings(bl, bl2));
+			if (bl || bl2) {
+				map.put(recipeBookType, new RecipeBookSettings.TypeSettings(bl, bl2));
+			}
 		});
 		return new RecipeBookSettings(map);
 	}
 
 	public void write(CompoundTag compoundTag) {
-		TAG_FIELDS.forEach((recipeBookType, pair) -> {
-			RecipeBookSettings.TypeSettings typeSettings = (RecipeBookSettings.TypeSettings)this.states.get(recipeBookType);
-			compoundTag.putBoolean((String)pair.getFirst(), typeSettings.open);
-			compoundTag.putBoolean((String)pair.getSecond(), typeSettings.filtering);
-		});
+		TAG_FIELDS.forEach(
+			(recipeBookType, pair) -> {
+				RecipeBookSettings.TypeSettings typeSettings = (RecipeBookSettings.TypeSettings)this.states
+					.getOrDefault(recipeBookType, RecipeBookSettings.TypeSettings.DEFAULT);
+				compoundTag.putBoolean((String)pair.getFirst(), typeSettings.open);
+				compoundTag.putBoolean((String)pair.getSecond(), typeSettings.filtering);
+			}
+		);
 	}
 
 	public RecipeBookSettings copy() {
-		Map<RecipeBookType, RecipeBookSettings.TypeSettings> map = Maps.newEnumMap(RecipeBookType.class);
-
-		for (RecipeBookType recipeBookType : RecipeBookType.values()) {
-			RecipeBookSettings.TypeSettings typeSettings = (RecipeBookSettings.TypeSettings)this.states.get(recipeBookType);
-			map.put(recipeBookType, typeSettings.copy());
-		}
-
-		return new RecipeBookSettings(map);
+		return new RecipeBookSettings(new EnumMap(this.states));
 	}
 
 	public void replaceFrom(RecipeBookSettings recipeBookSettings) {
 		this.states.clear();
-
-		for (RecipeBookType recipeBookType : RecipeBookType.values()) {
-			RecipeBookSettings.TypeSettings typeSettings = (RecipeBookSettings.TypeSettings)recipeBookSettings.states.get(recipeBookType);
-			this.states.put(recipeBookType, typeSettings.copy());
-		}
+		this.states.putAll(recipeBookSettings.states);
 	}
 
 	public boolean equals(Object object) {
@@ -121,36 +130,19 @@ public final class RecipeBookSettings {
 		return this.states.hashCode();
 	}
 
-	static final class TypeSettings {
-		boolean open;
-		boolean filtering;
-
-		public TypeSettings(boolean bl, boolean bl2) {
-			this.open = bl;
-			this.filtering = bl2;
-		}
-
-		public RecipeBookSettings.TypeSettings copy() {
-			return new RecipeBookSettings.TypeSettings(this.open, this.filtering);
-		}
-
-		public boolean equals(Object object) {
-			if (this == object) {
-				return true;
-			} else {
-				return !(object instanceof RecipeBookSettings.TypeSettings typeSettings)
-					? false
-					: this.open == typeSettings.open && this.filtering == typeSettings.filtering;
-			}
-		}
-
-		public int hashCode() {
-			int i = this.open ? 1 : 0;
-			return 31 * i + (this.filtering ? 1 : 0);
-		}
+	static record TypeSettings(boolean open, boolean filtering) {
+		public static final RecipeBookSettings.TypeSettings DEFAULT = new RecipeBookSettings.TypeSettings(false, false);
 
 		public String toString() {
 			return "[open=" + this.open + ", filtering=" + this.filtering + "]";
+		}
+
+		public RecipeBookSettings.TypeSettings setOpen(boolean bl) {
+			return new RecipeBookSettings.TypeSettings(bl, this.filtering);
+		}
+
+		public RecipeBookSettings.TypeSettings setFiltering(boolean bl) {
+			return new RecipeBookSettings.TypeSettings(this.open, bl);
 		}
 	}
 }

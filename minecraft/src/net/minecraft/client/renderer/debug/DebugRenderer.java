@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShapeRenderer;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
@@ -250,13 +251,13 @@ public class DebugRenderer {
 		List<AABB> list = voxelShape.toAabbs();
 		if (!list.isEmpty()) {
 			int k = bl ? list.size() : list.size() * 8;
-			ShapeRenderer.renderShape(poseStack, vertexConsumer, Shapes.create((AABB)list.get(0)), d, e, f, g, h, i, j);
+			ShapeRenderer.renderShape(poseStack, vertexConsumer, Shapes.create((AABB)list.get(0)), d, e, f, ARGB.colorFromFloat(j, g, h, i));
 
 			for (int l = 1; l < list.size(); l++) {
 				AABB aABB = (AABB)list.get(l);
 				float m = (float)l / (float)k;
 				Vec3 vec3 = shiftHue(g, h, i, m);
-				ShapeRenderer.renderShape(poseStack, vertexConsumer, Shapes.create(aABB), d, e, f, (float)vec3.x, (float)vec3.y, (float)vec3.z, j);
+				ShapeRenderer.renderShape(poseStack, vertexConsumer, Shapes.create(aABB), d, e, f, ARGB.colorFromFloat(j, (float)vec3.x, (float)vec3.y, (float)vec3.z));
 			}
 		}
 	}

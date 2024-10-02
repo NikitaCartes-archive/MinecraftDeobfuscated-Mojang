@@ -3,7 +3,6 @@ package net.minecraft.world.inventory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import net.minecraft.world.item.ItemStack;
 
 public class ItemCombinerMenuSlotDefinition {
@@ -21,10 +20,6 @@ public class ItemCombinerMenuSlotDefinition {
 
 	public static ItemCombinerMenuSlotDefinition.Builder create() {
 		return new ItemCombinerMenuSlotDefinition.Builder();
-	}
-
-	public boolean hasSlot(int i) {
-		return this.slots.size() >= i;
 	}
 
 	public ItemCombinerMenuSlotDefinition.SlotDefinition getSlot(int i) {
@@ -47,16 +42,12 @@ public class ItemCombinerMenuSlotDefinition {
 		return this.getNumOfInputSlots();
 	}
 
-	public List<Integer> getInputSlotIndexes() {
-		return (List<Integer>)this.slots.stream().map(ItemCombinerMenuSlotDefinition.SlotDefinition::slotIndex).collect(Collectors.toList());
-	}
-
 	public static class Builder {
-		private final List<ItemCombinerMenuSlotDefinition.SlotDefinition> slots = new ArrayList();
+		private final List<ItemCombinerMenuSlotDefinition.SlotDefinition> inputSlots = new ArrayList();
 		private ItemCombinerMenuSlotDefinition.SlotDefinition resultSlot = ItemCombinerMenuSlotDefinition.SlotDefinition.EMPTY;
 
 		public ItemCombinerMenuSlotDefinition.Builder withSlot(int i, int j, int k, Predicate<ItemStack> predicate) {
-			this.slots.add(new ItemCombinerMenuSlotDefinition.SlotDefinition(i, j, k, predicate));
+			this.inputSlots.add(new ItemCombinerMenuSlotDefinition.SlotDefinition(i, j, k, predicate));
 			return this;
 		}
 
@@ -66,7 +57,20 @@ public class ItemCombinerMenuSlotDefinition {
 		}
 
 		public ItemCombinerMenuSlotDefinition build() {
-			return new ItemCombinerMenuSlotDefinition(this.slots, this.resultSlot);
+			int i = this.inputSlots.size();
+
+			for (int j = 0; j < i; j++) {
+				ItemCombinerMenuSlotDefinition.SlotDefinition slotDefinition = (ItemCombinerMenuSlotDefinition.SlotDefinition)this.inputSlots.get(j);
+				if (slotDefinition.slotIndex != j) {
+					throw new IllegalArgumentException("Expected input slots to have continous indexes");
+				}
+			}
+
+			if (this.resultSlot.slotIndex != i) {
+				throw new IllegalArgumentException("Expected result slot index to follow last input slot");
+			} else {
+				return new ItemCombinerMenuSlotDefinition(this.inputSlots, this.resultSlot);
+			}
 		}
 	}
 

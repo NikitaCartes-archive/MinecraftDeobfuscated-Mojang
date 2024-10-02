@@ -8,30 +8,20 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.entity.PositionMoveRotation;
 import net.minecraft.world.entity.Relative;
-import net.minecraft.world.phys.Vec3;
 
-public record ClientboundPlayerPositionPacket(int id, Vec3 position, Vec3 deltaMovement, float yRot, float xRot, Set<Relative> relativeArguments)
-	implements Packet<ClientGamePacketListener> {
+public record ClientboundPlayerPositionPacket(int id, PositionMoveRotation change, Set<Relative> relatives) implements Packet<ClientGamePacketListener> {
 	public static final StreamCodec<FriendlyByteBuf, ClientboundPlayerPositionPacket> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.VAR_INT,
 		ClientboundPlayerPositionPacket::id,
-		Vec3.STREAM_CODEC,
-		ClientboundPlayerPositionPacket::position,
-		Vec3.STREAM_CODEC,
-		ClientboundPlayerPositionPacket::deltaMovement,
-		ByteBufCodecs.FLOAT,
-		ClientboundPlayerPositionPacket::yRot,
-		ByteBufCodecs.FLOAT,
-		ClientboundPlayerPositionPacket::xRot,
+		PositionMoveRotation.STREAM_CODEC,
+		ClientboundPlayerPositionPacket::change,
 		Relative.SET_STREAM_CODEC,
-		ClientboundPlayerPositionPacket::relativeArguments,
+		ClientboundPlayerPositionPacket::relatives,
 		ClientboundPlayerPositionPacket::new
 	);
 
 	public static ClientboundPlayerPositionPacket of(int i, PositionMoveRotation positionMoveRotation, Set<Relative> set) {
-		return new ClientboundPlayerPositionPacket(
-			i, positionMoveRotation.position(), positionMoveRotation.deltaMovement(), positionMoveRotation.yRot(), positionMoveRotation.xRot(), set
-		);
+		return new ClientboundPlayerPositionPacket(i, positionMoveRotation, set);
 	}
 
 	@Override

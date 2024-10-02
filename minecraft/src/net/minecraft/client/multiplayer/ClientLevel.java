@@ -65,7 +65,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.component.FireworkExplosion;
-import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeAccess;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.ExplosionDamageCalculator;
@@ -228,6 +228,7 @@ public class ClientLevel extends Level {
 
 	public void tick(BooleanSupplier booleanSupplier) {
 		this.getWorldBorder().tick();
+		this.updateSkyBrightness();
 		if (this.tickRateManager().runsNormally()) {
 			this.tickTime();
 		}
@@ -540,8 +541,8 @@ public class ClientLevel extends Level {
 	}
 
 	@Override
-	public RecipeManager getRecipeManager() {
-		return this.connection.getRecipeManager();
+	public RecipeAccess recipeAccess() {
+		return this.connection.recipes();
 	}
 
 	@Override

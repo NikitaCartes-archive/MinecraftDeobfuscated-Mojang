@@ -42,7 +42,7 @@ public class ItemRenderer implements ResourceManagerReloadListener {
 	public static final ResourceLocation ENCHANTED_GLINT_ITEM = ResourceLocation.withDefaultNamespace("textures/misc/enchanted_glint_item.png");
 	public static final int GUI_SLOT_CENTER_X = 8;
 	public static final int GUI_SLOT_CENTER_Y = 8;
-	public static final int ITEM_COUNT_BLIT_OFFSET = 200;
+	public static final int ITEM_DECORATION_BLIT_OFFSET = 200;
 	public static final float COMPASS_FOIL_UI_SCALE = 0.5F;
 	public static final float COMPASS_FOIL_FIRST_PERSON_SCALE = 0.75F;
 	public static final float COMPASS_FOIL_TEXTURE_SCALE = 0.0078125F;

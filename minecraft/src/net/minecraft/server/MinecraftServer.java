@@ -327,7 +327,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 			this.serverThread = thread;
 			this.executor = Util.backgroundExecutor();
 			this.potionBrewing = PotionBrewing.bootstrap(this.worldData.enabledFeatures());
-			this.resources.managers.getRecipeManager().logImpossibleRecipes();
+			this.resources.managers.getRecipeManager().finalizeRecipeLoading(this.worldData.enabledFeatures());
 			this.fuelValues = FuelValues.vanillaBurnTimes(this.registries.compositeAccess(), this.worldData.enabledFeatures());
 			this.tickFrame = TracyClient.createDiscontinuousFrame("Server Tick");
 		}
@@ -1534,7 +1534,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
 				WorldDataConfiguration worldDataConfiguration = new WorldDataConfiguration(getSelectedPacks(this.packRepository, true), this.worldData.enabledFeatures());
 				this.worldData.setDataConfiguration(worldDataConfiguration);
 				this.resources.managers.updateStaticRegistryTags();
-				this.resources.managers.getRecipeManager().logImpossibleRecipes();
+				this.resources.managers.getRecipeManager().finalizeRecipeLoading(this.worldData.enabledFeatures());
 				this.getPlayerList().saveAll();
 				this.getPlayerList().reloadResources();
 				this.functionManager.replaceLibrary(this.resources.managers.getFunctionLibrary());

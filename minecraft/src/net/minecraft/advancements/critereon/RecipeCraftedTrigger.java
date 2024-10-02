@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
 
 public class RecipeCraftedTrigger extends SimpleCriterionTrigger<RecipeCraftedTrigger.TriggerInstance> {
 	@Override
@@ -18,36 +20,36 @@ public class RecipeCraftedTrigger extends SimpleCriterionTrigger<RecipeCraftedTr
 		return RecipeCraftedTrigger.TriggerInstance.CODEC;
 	}
 
-	public void trigger(ServerPlayer serverPlayer, ResourceLocation resourceLocation, List<ItemStack> list) {
-		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(resourceLocation, list));
+	public void trigger(ServerPlayer serverPlayer, ResourceKey<Recipe<?>> resourceKey, List<ItemStack> list) {
+		this.trigger(serverPlayer, triggerInstance -> triggerInstance.matches(resourceKey, list));
 	}
 
-	public static record TriggerInstance(Optional<ContextAwarePredicate> player, ResourceLocation recipeId, List<ItemPredicate> ingredients)
+	public static record TriggerInstance(Optional<ContextAwarePredicate> player, ResourceKey<Recipe<?>> recipeId, List<ItemPredicate> ingredients)
 		implements SimpleCriterionTrigger.SimpleInstance {
 		public static final Codec<RecipeCraftedTrigger.TriggerInstance> CODEC = RecordCodecBuilder.create(
 			instance -> instance.group(
 						EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(RecipeCraftedTrigger.TriggerInstance::player),
-						ResourceLocation.CODEC.fieldOf("recipe_id").forGetter(RecipeCraftedTrigger.TriggerInstance::recipeId),
+						ResourceKey.codec(Registries.RECIPE).fieldOf("recipe_id").forGetter(RecipeCraftedTrigger.TriggerInstance::recipeId),
 						ItemPredicate.CODEC.listOf().optionalFieldOf("ingredients", List.of()).forGetter(RecipeCraftedTrigger.TriggerInstance::ingredients)
 					)
 					.apply(instance, RecipeCraftedTrigger.TriggerInstance::new)
 		);
 
-		public static Criterion<RecipeCraftedTrigger.TriggerInstance> craftedItem(ResourceLocation resourceLocation, List<ItemPredicate.Builder> list) {
+		public static Criterion<RecipeCraftedTrigger.TriggerInstance> craftedItem(ResourceKey<Recipe<?>> resourceKey, List<ItemPredicate.Builder> list) {
 			return CriteriaTriggers.RECIPE_CRAFTED
-				.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceLocation, list.stream().map(ItemPredicate.Builder::build).toList()));
+				.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceKey, list.stream().map(ItemPredicate.Builder::build).toList()));
 		}
 
-		public static Criterion<RecipeCraftedTrigger.TriggerInstance> craftedItem(ResourceLocation resourceLocation) {
-			return CriteriaTriggers.RECIPE_CRAFTED.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceLocation, List.of()));
+		public static Criterion<RecipeCraftedTrigger.TriggerInstance> craftedItem(ResourceKey<Recipe<?>> resourceKey) {
+			return CriteriaTriggers.RECIPE_CRAFTED.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceKey, List.of()));
 		}
 
-		public static Criterion<RecipeCraftedTrigger.TriggerInstance> crafterCraftedItem(ResourceLocation resourceLocation) {
-			return CriteriaTriggers.CRAFTER_RECIPE_CRAFTED.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceLocation, List.of()));
+		public static Criterion<RecipeCraftedTrigger.TriggerInstance> crafterCraftedItem(ResourceKey<Recipe<?>> resourceKey) {
+			return CriteriaTriggers.CRAFTER_RECIPE_CRAFTED.createCriterion(new RecipeCraftedTrigger.TriggerInstance(Optional.empty(), resourceKey, List.of()));
 		}
 
-		boolean matches(ResourceLocation resourceLocation, List<ItemStack> list) {
-			if (!resourceLocation.equals(this.recipeId)) {
+		boolean matches(ResourceKey<Recipe<?>> resourceKey, List<ItemStack> list) {
+			if (resourceKey != this.recipeId) {
 				return false;
 			} else {
 				List<ItemStack> list2 = new ArrayList(list);

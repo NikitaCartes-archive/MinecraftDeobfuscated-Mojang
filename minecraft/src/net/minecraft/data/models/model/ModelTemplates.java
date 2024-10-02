@@ -88,6 +88,7 @@ public class ModelTemplates {
 	public static final ModelTemplate RAIL_RAISED_NE = create("template_rail_raised_ne", "_raised_ne", TextureSlot.RAIL);
 	public static final ModelTemplate RAIL_RAISED_SW = create("template_rail_raised_sw", "_raised_sw", TextureSlot.RAIL);
 	public static final ModelTemplate CARPET = create("carpet", TextureSlot.WOOL);
+	public static final ModelTemplate MOSSY_CARPET_SIDE = create("mossy_carpet_side", TextureSlot.SIDE);
 	public static final ModelTemplate FLOWERBED_1 = create("flowerbed_1", "_1", TextureSlot.FLOWERBED, TextureSlot.STEM);
 	public static final ModelTemplate FLOWERBED_2 = create("flowerbed_2", "_2", TextureSlot.FLOWERBED, TextureSlot.STEM);
 	public static final ModelTemplate FLOWERBED_3 = create("flowerbed_3", "_3", TextureSlot.FLOWERBED, TextureSlot.STEM);

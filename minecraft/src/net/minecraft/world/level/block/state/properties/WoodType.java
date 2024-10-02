@@ -29,6 +29,7 @@ public record WoodType(
 	);
 	public static final WoodType JUNGLE = register(new WoodType("jungle", BlockSetType.JUNGLE));
 	public static final WoodType DARK_OAK = register(new WoodType("dark_oak", BlockSetType.DARK_OAK));
+	public static final WoodType PALE_OAK = register(new WoodType("pale_oak", BlockSetType.PALE_OAK));
 	public static final WoodType CRIMSON = register(
 		new WoodType(
 			"crimson",

@@ -1248,8 +1248,7 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
 			.findClosestBiome3d(blockPos, i, j, k, predicate, this.getChunkSource().randomState().sampler(), this);
 	}
 
-	@Override
-	public RecipeManager getRecipeManager() {
+	public RecipeManager recipeAccess() {
 		return this.server.getRecipeManager();
 	}
 

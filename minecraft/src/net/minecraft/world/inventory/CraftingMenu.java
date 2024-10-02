@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -13,7 +14,6 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
 public class CraftingMenu extends AbstractCraftingMenu {
@@ -46,39 +46,43 @@ public class CraftingMenu extends AbstractCraftingMenu {
 
 	protected static void slotChangedCraftingGrid(
 		AbstractContainerMenu abstractContainerMenu,
-		Level level,
+		ServerLevel serverLevel,
 		Player player,
 		CraftingContainer craftingContainer,
 		ResultContainer resultContainer,
 		@Nullable RecipeHolder<CraftingRecipe> recipeHolder
 	) {
-		if (!level.isClientSide) {
-			CraftingInput craftingInput = craftingContainer.asCraftInput();
-			ServerPlayer serverPlayer = (ServerPlayer)player;
-			ItemStack itemStack = ItemStack.EMPTY;
-			Optional<RecipeHolder<CraftingRecipe>> optional = level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingInput, level, recipeHolder);
-			if (optional.isPresent()) {
-				RecipeHolder<CraftingRecipe> recipeHolder2 = (RecipeHolder<CraftingRecipe>)optional.get();
-				CraftingRecipe craftingRecipe = recipeHolder2.value();
-				if (resultContainer.setRecipeUsed(serverPlayer, recipeHolder2)) {
-					ItemStack itemStack2 = craftingRecipe.assemble(craftingInput, level.registryAccess());
-					if (itemStack2.isItemEnabled(level.enabledFeatures())) {
-						itemStack = itemStack2;
-					}
+		CraftingInput craftingInput = craftingContainer.asCraftInput();
+		ServerPlayer serverPlayer = (ServerPlayer)player;
+		ItemStack itemStack = ItemStack.EMPTY;
+		Optional<RecipeHolder<CraftingRecipe>> optional = serverLevel.getServer()
+			.getRecipeManager()
+			.getRecipeFor(RecipeType.CRAFTING, craftingInput, serverLevel, recipeHolder);
+		if (optional.isPresent()) {
+			RecipeHolder<CraftingRecipe> recipeHolder2 = (RecipeHolder<CraftingRecipe>)optional.get();
+			CraftingRecipe craftingRecipe = recipeHolder2.value();
+			if (resultContainer.setRecipeUsed(serverPlayer, recipeHolder2)) {
+				ItemStack itemStack2 = craftingRecipe.assemble(craftingInput, serverLevel.registryAccess());
+				if (itemStack2.isItemEnabled(serverLevel.enabledFeatures())) {
+					itemStack = itemStack2;
 				}
 			}
-
-			resultContainer.setItem(0, itemStack);
-			abstractContainerMenu.setRemoteSlot(0, itemStack);
-			serverPlayer.connection
-				.send(new ClientboundContainerSetSlotPacket(abstractContainerMenu.containerId, abstractContainerMenu.incrementStateId(), 0, itemStack));
 		}
+
+		resultContainer.setItem(0, itemStack);
+		abstractContainerMenu.setRemoteSlot(0, itemStack);
+		serverPlayer.connection
+			.send(new ClientboundContainerSetSlotPacket(abstractContainerMenu.containerId, abstractContainerMenu.incrementStateId(), 0, itemStack));
 	}
 
 	@Override
 	public void slotsChanged(Container container) {
 		if (!this.placingRecipe) {
-			this.access.execute((level, blockPos) -> slotChangedCraftingGrid(this, level, this.player, this.craftSlots, this.resultSlots, null));
+			this.access.execute((level, blockPos) -> {
+				if (level instanceof ServerLevel serverLevel) {
+					slotChangedCraftingGrid(this, serverLevel, this.player, this.craftSlots, this.resultSlots, null);
+				}
+			});
 		}
 	}
 
@@ -88,9 +92,9 @@ public class CraftingMenu extends AbstractCraftingMenu {
 	}
 
 	@Override
-	public void finishPlacingRecipe(RecipeHolder<CraftingRecipe> recipeHolder) {
+	public void finishPlacingRecipe(ServerLevel serverLevel, RecipeHolder<CraftingRecipe> recipeHolder) {
 		this.placingRecipe = false;
-		this.access.execute((level, blockPos) -> slotChangedCraftingGrid(this, level, this.player, this.craftSlots, this.resultSlots, recipeHolder));
+		slotChangedCraftingGrid(this, serverLevel, this.player, this.craftSlots, this.resultSlots, recipeHolder);
 	}
 
 	@Override

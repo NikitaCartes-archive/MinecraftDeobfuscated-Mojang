@@ -13,14 +13,12 @@ import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class ShapeRenderer {
-	public static void renderShape(
-		PoseStack poseStack, VertexConsumer vertexConsumer, VoxelShape voxelShape, double d, double e, double f, float g, float h, float i, float j
-	) {
+	public static void renderShape(PoseStack poseStack, VertexConsumer vertexConsumer, VoxelShape voxelShape, double d, double e, double f, int i) {
 		PoseStack.Pose pose = poseStack.last();
-		voxelShape.forAllEdges((k, l, m, n, o, p) -> {
-			Vector3f vector3f = new Vector3f((float)(n - k), (float)(o - l), (float)(p - m)).normalize();
-			vertexConsumer.addVertex(pose, (float)(k + d), (float)(l + e), (float)(m + f)).setColor(g, h, i, j).setNormal(pose, vector3f);
-			vertexConsumer.addVertex(pose, (float)(n + d), (float)(o + e), (float)(p + f)).setColor(g, h, i, j).setNormal(pose, vector3f);
+		voxelShape.forAllEdges((g, h, j, k, l, m) -> {
+			Vector3f vector3f = new Vector3f((float)(k - g), (float)(l - h), (float)(m - j)).normalize();
+			vertexConsumer.addVertex(pose, (float)(g + d), (float)(h + e), (float)(j + f)).setColor(i).setNormal(pose, vector3f);
+			vertexConsumer.addVertex(pose, (float)(k + d), (float)(l + e), (float)(m + f)).setColor(i).setNormal(pose, vector3f);
 		});
 	}
 

@@ -98,7 +98,7 @@ public class ArmadilloAi {
 			Activity.CORE,
 			0,
 			ImmutableList.of(
-				new Swim(0.8F),
+				new Swim<>(0.8F),
 				new ArmadilloAi.ArmadilloPanic(2.0F),
 				new LookAtTargetSink(45, 90),
 				new MoveToTargetSink() {

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -139,6 +140,7 @@ import net.minecraft.network.protocol.game.ClientboundDebugSamplePacket;
 import net.minecraft.network.protocol.game.ClientboundDeleteChatPacket;
 import net.minecraft.network.protocol.game.ClientboundDisguisedChatPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
+import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
 import net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
@@ -170,8 +172,11 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerRotationPacket;
 import net.minecraft.network.protocol.game.ClientboundProjectilePowerPacket;
-import net.minecraft.network.protocol.game.ClientboundRecipePacket;
+import net.minecraft.network.protocol.game.ClientboundRecipeBookAddPacket;
+import net.minecraft.network.protocol.game.ClientboundRecipeBookRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundRecipeBookSettingsPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundResetScorePacket;
@@ -266,6 +271,7 @@ import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.Leashable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -291,7 +297,9 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionBrewing;
-import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeAccess;
+import net.minecraft.world.item.crafting.SelectableRecipe;
+import net.minecraft.world.item.crafting.display.RecipeDisplayId;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
@@ -325,6 +333,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	private static final Component INVALID_PACKET = Component.translatable("multiplayer.disconnect.invalid_packet");
 	private static final Component RECONFIGURE_SCREEN_MESSAGE = Component.translatable("connect.reconfiguring");
 	private static final int PENDING_OFFSET_THRESHOLD = 64;
+	public static final int TELEPORT_INTERPOLATION_THRESHOLD = 64;
 	private final GameProfile localGameProfile;
 	private ClientLevel level;
 	private ClientLevel.ClientLevelData levelData;
@@ -337,13 +346,14 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	private int serverSimulationDistance = 3;
 	private final RandomSource random = RandomSource.createThreadSafe();
 	private CommandDispatcher<SharedSuggestionProvider> commands = new CommandDispatcher<>();
-	private final RecipeManager recipeManager;
+	private ClientRecipeContainer recipes = new ClientRecipeContainer(Map.of(), SelectableRecipe.SingleInputSet.empty());
 	private final UUID id = UUID.randomUUID();
 	private Set<ResourceKey<Level>> levels;
 	private final RegistryAccess.Frozen registryAccess;
 	private final FeatureFlagSet enabledFeatures;
 	private final PotionBrewing potionBrewing;
 	private FuelValues fuelValues;
+	private OptionalInt removedPlayerVehicleId = OptionalInt.empty();
 	@Nullable
 	private LocalChatSession chatSession;
 	private SignedMessageChain.Encoder signedMessageEncoder = SignedMessageChain.Encoder.UNSIGNED;
@@ -372,7 +382,6 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		this.advancements = new ClientAdvancements(minecraft, this.telemetryManager);
 		this.suggestionsProvider = new ClientSuggestionProvider(this, minecraft);
 		this.pingDebugMonitor = new PingDebugMonitor(this, minecraft.getDebugOverlay().getPingLogger());
-		this.recipeManager = new RecipeManager(this.registryAccess);
 		this.debugSampleSubscriber = new DebugSampleSubscriber(this, minecraft.getDebugOverlay());
 		if (commonListenerCookie.chatState() != null) {
 			minecraft.gui.getChat().restoreState(commonListenerCookie.chatState());
@@ -397,8 +406,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		this.levelLoadStatusManager = null;
 	}
 
-	public RecipeManager getRecipeManager() {
-		return this.recipeManager;
+	public RecipeAccess recipes() {
+		return this.recipes;
 	}
 
 	@Override
@@ -476,6 +485,10 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleAddEntity(ClientboundAddEntityPacket clientboundAddEntityPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundAddEntityPacket, this, this.minecraft);
+		if (this.removedPlayerVehicleId.isPresent() && this.removedPlayerVehicleId.getAsInt() == clientboundAddEntityPacket.getId()) {
+			this.removedPlayerVehicleId = OptionalInt.empty();
+		}
+
 		Entity entity = this.createEntityFromPacket(clientboundAddEntityPacket);
 		if (entity != null) {
 			entity.recreateFromPacket(clientboundAddEntityPacket);
@@ -551,24 +564,67 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	}
 
 	@Override
-	public void handleTeleportEntity(ClientboundTeleportEntityPacket clientboundTeleportEntityPacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundTeleportEntityPacket, this, this.minecraft);
-		Entity entity = this.level.getEntity(clientboundTeleportEntityPacket.getId());
+	public void handleEntityPositionSync(ClientboundEntityPositionSyncPacket clientboundEntityPositionSyncPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundEntityPositionSyncPacket, this, this.minecraft);
+		Entity entity = this.level.getEntity(clientboundEntityPositionSyncPacket.id());
 		if (entity != null) {
-			double d = clientboundTeleportEntityPacket.getX();
-			double e = clientboundTeleportEntityPacket.getY();
-			double f = clientboundTeleportEntityPacket.getZ();
-			entity.syncPacketPositionCodec(d, e, f);
+			Vec3 vec3 = clientboundEntityPositionSyncPacket.values().position();
+			entity.getPositionCodec().setBase(vec3);
 			if (!entity.isControlledByLocalInstance()) {
-				float g = clientboundTeleportEntityPacket.getyRot();
-				float h = clientboundTeleportEntityPacket.getxRot();
-				if (this.level.isTickingEntity(entity)) {
-					entity.lerpTo(d, e, f, g, h, 3);
+				float f = clientboundEntityPositionSyncPacket.values().yRot();
+				float g = clientboundEntityPositionSyncPacket.values().xRot();
+				boolean bl = entity.position().distanceToSqr(vec3) > 4096.0;
+				if (this.level.isTickingEntity(entity) && !bl) {
+					entity.lerpTo(vec3.x, vec3.y, vec3.z, f, g, 3);
 				} else {
-					entity.moveTo(d, e, f, g, h);
+					entity.moveTo(vec3.x, vec3.y, vec3.z, f, g);
+					if (entity.hasIndirectPassenger(this.minecraft.player)) {
+						entity.positionRider(this.minecraft.player);
+						this.minecraft.player.setOldPosAndRot();
+					}
 				}
 
-				entity.setOnGround(clientboundTeleportEntityPacket.isOnGround());
+				entity.setOnGround(clientboundEntityPositionSyncPacket.onGround());
+			}
+		}
+	}
+
+	@Override
+	public void handleTeleportEntity(ClientboundTeleportEntityPacket clientboundTeleportEntityPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundTeleportEntityPacket, this, this.minecraft);
+		Entity entity = this.level.getEntity(clientboundTeleportEntityPacket.id());
+		if (entity == null) {
+			if (this.removedPlayerVehicleId.isPresent() && this.removedPlayerVehicleId.getAsInt() == clientboundTeleportEntityPacket.id()) {
+				LOGGER.debug(
+					"Trying to teleport entity with id {}, that was formerly player vehicle, applying teleport to player instead", clientboundTeleportEntityPacket.id()
+				);
+				setValuesFromPositionPacket(clientboundTeleportEntityPacket.change(), clientboundTeleportEntityPacket.relatives(), this.minecraft.player, false);
+				this.connection
+					.send(
+						new ServerboundMovePlayerPacket.PosRot(
+							this.minecraft.player.getX(),
+							this.minecraft.player.getY(),
+							this.minecraft.player.getZ(),
+							this.minecraft.player.getYRot(),
+							this.minecraft.player.getXRot(),
+							false,
+							false
+						)
+					);
+			}
+		} else {
+			boolean bl = clientboundTeleportEntityPacket.relatives().contains(Relative.X)
+				|| clientboundTeleportEntityPacket.relatives().contains(Relative.Y)
+				|| clientboundTeleportEntityPacket.relatives().contains(Relative.Z);
+			boolean bl2 = this.level.isTickingEntity(entity) || !entity.isControlledByLocalInstance() || bl;
+			boolean bl3 = setValuesFromPositionPacket(clientboundTeleportEntityPacket.change(), clientboundTeleportEntityPacket.relatives(), entity, bl2);
+			entity.setOnGround(clientboundTeleportEntityPacket.onGround());
+			if (!bl3 && entity.hasIndirectPassenger(this.minecraft.player)) {
+				entity.positionRider(this.minecraft.player);
+				this.minecraft.player.setOldPosAndRot();
+				if (entity.isControlledByOrIsLocalPlayer()) {
+					this.connection.send(new ServerboundMoveVehiclePacket(entity));
+				}
 			}
 		}
 	}
@@ -605,7 +661,13 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		PacketUtils.ensureRunningOnSameThread(clientboundMoveEntityPacket, this, this.minecraft);
 		Entity entity = clientboundMoveEntityPacket.getEntity(this.level);
 		if (entity != null) {
-			if (!entity.isControlledByLocalInstance()) {
+			if (entity.isControlledByLocalInstance()) {
+				VecDeltaCodec vecDeltaCodec = entity.getPositionCodec();
+				Vec3 vec3 = vecDeltaCodec.decode(
+					(long)clientboundMoveEntityPacket.getXa(), (long)clientboundMoveEntityPacket.getYa(), (long)clientboundMoveEntityPacket.getZa()
+				);
+				vecDeltaCodec.setBase(vec3);
+			} else {
 				if (clientboundMoveEntityPacket.hasPosition()) {
 					VecDeltaCodec vecDeltaCodec = entity.getPositionCodec();
 					Vec3 vec3 = vecDeltaCodec.decode(
@@ -649,29 +711,66 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleRemoveEntities(ClientboundRemoveEntitiesPacket clientboundRemoveEntitiesPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundRemoveEntitiesPacket, this, this.minecraft);
-		clientboundRemoveEntitiesPacket.getEntityIds().forEach(i -> this.level.removeEntity(i, Entity.RemovalReason.DISCARDED));
+		clientboundRemoveEntitiesPacket.getEntityIds().forEach(i -> {
+			Entity entity = this.level.getEntity(i);
+			if (entity != null) {
+				if (entity.hasIndirectPassenger(this.minecraft.player)) {
+					LOGGER.debug("Remove entity {}:{} that has player as passenger", entity.getType(), i);
+					this.removedPlayerVehicleId = OptionalInt.of(i);
+				}
+
+				this.level.removeEntity(i, Entity.RemovalReason.DISCARDED);
+			}
+		});
 	}
 
 	@Override
 	public void handleMovePlayer(ClientboundPlayerPositionPacket clientboundPlayerPositionPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundPlayerPositionPacket, this, this.minecraft);
 		Player player = this.minecraft.player;
-		PositionMoveRotation positionMoveRotation = PositionMoveRotation.of(player);
-		PositionMoveRotation positionMoveRotation2 = PositionMoveRotation.of(clientboundPlayerPositionPacket);
-		PositionMoveRotation positionMoveRotation3 = PositionMoveRotation.calculateAbsolute(
-			positionMoveRotation, positionMoveRotation2, clientboundPlayerPositionPacket.relativeArguments()
-		);
-		player.setPos(positionMoveRotation3.position());
-		player.setDeltaMovement(positionMoveRotation3.deltaMovement());
-		player.setYRot(positionMoveRotation3.yRot());
-		player.setXRot(positionMoveRotation3.xRot());
-		PositionMoveRotation positionMoveRotation4 = new PositionMoveRotation(player.oldPosition(), player.getDeltaMovement(), player.yRotO, player.xRotO);
-		PositionMoveRotation positionMoveRotation5 = PositionMoveRotation.calculateAbsolute(
-			positionMoveRotation4, positionMoveRotation2, clientboundPlayerPositionPacket.relativeArguments()
-		);
-		player.setOldPosAndRot(positionMoveRotation5.position(), positionMoveRotation5.yRot(), positionMoveRotation5.xRot());
-		this.connection.send(new ServerboundAcceptTeleportationPacket(clientboundPlayerPositionPacket.id()));
+		if (!player.isPassenger()) {
+			setValuesFromPositionPacket(clientboundPlayerPositionPacket.change(), clientboundPlayerPositionPacket.relatives(), player, false);
+		}
+
 		this.connection.send(new ServerboundMovePlayerPacket.PosRot(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot(), false, false));
+		this.connection.send(new ServerboundAcceptTeleportationPacket(clientboundPlayerPositionPacket.id()));
+	}
+
+	private static boolean setValuesFromPositionPacket(PositionMoveRotation positionMoveRotation, Set<Relative> set, Entity entity, boolean bl) {
+		PositionMoveRotation positionMoveRotation2 = PositionMoveRotation.ofEntityUsingLerpTarget(entity);
+		PositionMoveRotation positionMoveRotation3 = PositionMoveRotation.calculateAbsolute(positionMoveRotation2, positionMoveRotation, set);
+		boolean bl2 = positionMoveRotation2.position().distanceToSqr(positionMoveRotation3.position()) > 4096.0;
+		if (bl && !bl2) {
+			entity.lerpTo(
+				positionMoveRotation3.position().x(),
+				positionMoveRotation3.position().y(),
+				positionMoveRotation3.position().z(),
+				positionMoveRotation3.yRot(),
+				positionMoveRotation3.xRot(),
+				3
+			);
+			entity.setDeltaMovement(positionMoveRotation3.deltaMovement());
+			return true;
+		} else {
+			entity.setPos(positionMoveRotation3.position());
+			entity.setDeltaMovement(positionMoveRotation3.deltaMovement());
+			entity.setYRot(positionMoveRotation3.yRot());
+			entity.setXRot(positionMoveRotation3.xRot());
+			PositionMoveRotation positionMoveRotation4 = new PositionMoveRotation(entity.oldPosition(), Vec3.ZERO, entity.yRotO, entity.xRotO);
+			PositionMoveRotation positionMoveRotation5 = PositionMoveRotation.calculateAbsolute(positionMoveRotation4, positionMoveRotation, set);
+			entity.setOldPosAndRot(positionMoveRotation5.position(), positionMoveRotation5.yRot(), positionMoveRotation5.xRot());
+			return false;
+		}
+	}
+
+	@Override
+	public void handleRotatePlayer(ClientboundPlayerRotationPacket clientboundPlayerRotationPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundPlayerRotationPacket, this, this.minecraft);
+		Player player = this.minecraft.player;
+		player.setYRot(clientboundPlayerRotationPacket.yRot());
+		player.setXRot(clientboundPlayerRotationPacket.xRot());
+		player.setOldRot();
+		this.connection.send(new ServerboundMovePlayerPacket.Rot(player.getYRot(), player.getXRot(), false, false));
 	}
 
 	@Override
@@ -985,16 +1084,19 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 				Entity entity2 = this.level.getEntity(i);
 				if (entity2 != null) {
 					entity2.startRiding(entity, true);
-					if (entity2 == this.minecraft.player && !bl) {
-						if (entity instanceof AbstractBoat) {
-							this.minecraft.player.yRotO = entity.getYRot();
-							this.minecraft.player.setYRot(entity.getYRot());
-							this.minecraft.player.setYHeadRot(entity.getYRot());
-						}
+					if (entity2 == this.minecraft.player) {
+						this.removedPlayerVehicleId = OptionalInt.empty();
+						if (!bl) {
+							if (entity instanceof AbstractBoat) {
+								this.minecraft.player.yRotO = entity.getYRot();
+								this.minecraft.player.setYRot(entity.getYRot());
+								this.minecraft.player.setYHeadRot(entity.getYRot());
+							}
 
-						Component component = Component.translatable("mount.onboard", this.minecraft.options.keyShift.getTranslatedKeyMessage());
-						this.minecraft.gui.setOverlayMessage(component, false);
-						this.minecraft.getNarrator().sayNow(component);
+							Component component = Component.translatable("mount.onboard", this.minecraft.options.keyShift.getTranslatedKeyMessage());
+							this.minecraft.gui.setOverlayMessage(component, false);
+							this.minecraft.getNarrator().sayNow(component);
+						}
 					}
 				}
 			}
@@ -1495,10 +1597,7 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	@Override
 	public void handleUpdateRecipes(ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundUpdateRecipesPacket, this, this.minecraft);
-		this.recipeManager.replaceRecipes(clientboundUpdateRecipesPacket.getRecipes());
-		ClientRecipeBook clientRecipeBook = this.minecraft.player.getRecipeBook();
-		clientRecipeBook.setupCollections(this.recipeManager.getOrderedRecipes(), this.minecraft.level.registryAccess());
-		this.searchTrees.updateRecipes(clientRecipeBook, this.registryAccess);
+		this.recipes = new ClientRecipeContainer(clientboundUpdateRecipesPacket.itemSets(), clientboundUpdateRecipesPacket.stonecutterRecipes());
 	}
 
 	@Override
@@ -1534,39 +1633,47 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	}
 
 	@Override
-	public void handleAddOrRemoveRecipes(ClientboundRecipePacket clientboundRecipePacket) {
-		PacketUtils.ensureRunningOnSameThread(clientboundRecipePacket, this, this.minecraft);
+	public void handleRecipeBookAdd(ClientboundRecipeBookAddPacket clientboundRecipeBookAddPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundRecipeBookAddPacket, this, this.minecraft);
 		ClientRecipeBook clientRecipeBook = this.minecraft.player.getRecipeBook();
-		clientRecipeBook.setBookSettings(clientboundRecipePacket.getBookSettings());
-		ClientboundRecipePacket.State state = clientboundRecipePacket.getState();
-		switch (state) {
-			case REMOVE:
-				for (ResourceLocation resourceLocation : clientboundRecipePacket.getRecipes()) {
-					this.recipeManager.byKey(resourceLocation).ifPresent(clientRecipeBook::remove);
-				}
-				break;
-			case INIT:
-				for (ResourceLocation resourceLocation : clientboundRecipePacket.getRecipes()) {
-					this.recipeManager.byKey(resourceLocation).ifPresent(clientRecipeBook::add);
-				}
 
-				for (ResourceLocation resourceLocation : clientboundRecipePacket.getHighlights()) {
-					this.recipeManager.byKey(resourceLocation).ifPresent(clientRecipeBook::addHighlight);
-				}
-				break;
-			case ADD:
-				for (ResourceLocation resourceLocation : clientboundRecipePacket.getRecipes()) {
-					this.recipeManager.byKey(resourceLocation).ifPresent(recipeHolder -> {
-						clientRecipeBook.add(recipeHolder);
-						clientRecipeBook.addHighlight(recipeHolder);
-						if (recipeHolder.value().showNotification()) {
-							RecipeToast.addOrUpdate(this.minecraft.getToastManager(), recipeHolder);
-						}
-					});
-				}
+		for (ClientboundRecipeBookAddPacket.Entry entry : clientboundRecipeBookAddPacket.entries()) {
+			clientRecipeBook.add(entry.contents());
+			if (entry.highlight()) {
+				clientRecipeBook.addHighlight(entry.contents().id());
+			}
+
+			if (entry.notification()) {
+				RecipeToast.addOrUpdate(this.minecraft.getToastManager(), entry.contents().display());
+			}
 		}
 
-		clientRecipeBook.getCollections().forEach(recipeCollection -> recipeCollection.updateKnownRecipes(clientRecipeBook));
+		this.refreshRecipeBook(clientRecipeBook);
+	}
+
+	@Override
+	public void handleRecipeBookRemove(ClientboundRecipeBookRemovePacket clientboundRecipeBookRemovePacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundRecipeBookRemovePacket, this, this.minecraft);
+		ClientRecipeBook clientRecipeBook = this.minecraft.player.getRecipeBook();
+
+		for (RecipeDisplayId recipeDisplayId : clientboundRecipeBookRemovePacket.recipes()) {
+			clientRecipeBook.remove(recipeDisplayId);
+		}
+
+		this.refreshRecipeBook(clientRecipeBook);
+	}
+
+	@Override
+	public void handleRecipeBookSettings(ClientboundRecipeBookSettingsPacket clientboundRecipeBookSettingsPacket) {
+		PacketUtils.ensureRunningOnSameThread(clientboundRecipeBookSettingsPacket, this, this.minecraft);
+		ClientRecipeBook clientRecipeBook = this.minecraft.player.getRecipeBook();
+		clientRecipeBook.setBookSettings(clientboundRecipeBookSettingsPacket.bookSettings());
+		this.refreshRecipeBook(clientRecipeBook);
+	}
+
+	private void refreshRecipeBook(ClientRecipeBook clientRecipeBook) {
+		clientRecipeBook.rebuildCollections();
+		this.searchTrees.updateRecipes(clientRecipeBook, this.level);
 		if (this.minecraft.screen instanceof RecipeUpdateListener) {
 			((RecipeUpdateListener)this.minecraft.screen).recipesUpdated();
 		}
@@ -1932,13 +2039,13 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 		PacketUtils.ensureRunningOnSameThread(clientboundMoveVehiclePacket, this, this.minecraft);
 		Entity entity = this.minecraft.player.getRootVehicle();
 		if (entity != this.minecraft.player && entity.isControlledByLocalInstance()) {
-			entity.absMoveTo(
-				clientboundMoveVehiclePacket.getX(),
-				clientboundMoveVehiclePacket.getY(),
-				clientboundMoveVehiclePacket.getZ(),
-				clientboundMoveVehiclePacket.getYRot(),
-				clientboundMoveVehiclePacket.getXRot()
-			);
+			Vec3 vec3 = new Vec3(clientboundMoveVehiclePacket.getX(), clientboundMoveVehiclePacket.getY(), clientboundMoveVehiclePacket.getZ());
+			Vec3 vec32 = new Vec3(entity.lerpTargetX(), entity.lerpTargetY(), entity.lerpTargetZ());
+			if (vec3.distanceTo(vec32) > 1.0E-5F) {
+				entity.cancelLerp();
+				entity.absMoveTo(vec3.x(), vec3.y(), vec3.z(), clientboundMoveVehiclePacket.getYRot(), clientboundMoveVehiclePacket.getXRot());
+			}
+
 			this.connection.send(new ServerboundMoveVehiclePacket(entity));
 		}
 	}
@@ -2238,12 +2345,10 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	public void handlePlaceRecipe(ClientboundPlaceGhostRecipePacket clientboundPlaceGhostRecipePacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundPlaceGhostRecipePacket, this, this.minecraft);
 		AbstractContainerMenu abstractContainerMenu = this.minecraft.player.containerMenu;
-		if (abstractContainerMenu.containerId == clientboundPlaceGhostRecipePacket.getContainerId()) {
-			this.recipeManager.byKey(clientboundPlaceGhostRecipePacket.getRecipe()).ifPresent(recipeHolder -> {
-				if (this.minecraft.screen instanceof RecipeUpdateListener recipeUpdateListener) {
-					recipeUpdateListener.getRecipeBookComponent().setupGhostRecipe(recipeHolder);
-				}
-			});
+		if (abstractContainerMenu.containerId == clientboundPlaceGhostRecipePacket.containerId()) {
+			if (this.minecraft.screen instanceof RecipeUpdateListener recipeUpdateListener) {
+				recipeUpdateListener.fillGhostRecipe(clientboundPlaceGhostRecipePacket.recipeDisplay());
+			}
 		}
 	}
 

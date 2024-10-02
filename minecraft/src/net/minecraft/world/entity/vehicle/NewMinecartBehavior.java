@@ -284,6 +284,7 @@ public class NewMinecartBehavior extends MinecartBehavior {
 
 			if (d > 1.0E-5F || trackIteration.firstIteration) {
 				this.minecart.applyEffectsFromBlocks();
+				this.minecart.applyEffectsFromBlocks();
 			}
 		}
 	}

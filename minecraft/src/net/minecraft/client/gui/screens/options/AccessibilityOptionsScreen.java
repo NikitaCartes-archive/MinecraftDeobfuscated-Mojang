@@ -46,7 +46,8 @@ public class AccessibilityOptionsScreen extends OptionsSubScreen {
 			options.panoramaSpeed(),
 			options.hideSplashTexts(),
 			options.narratorHotkey(),
-			options.rotateWithMinecart()
+			options.rotateWithMinecart(),
+			options.highContrastBlockOutline()
 		};
 	}
 

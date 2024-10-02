@@ -17,9 +17,9 @@ public class ServerboundMoveVehiclePacket implements Packet<ServerGamePacketList
 	private final float xRot;
 
 	public ServerboundMoveVehiclePacket(Entity entity) {
-		this.x = entity.getX();
-		this.y = entity.getY();
-		this.z = entity.getZ();
+		this.x = entity.lerpTargetX();
+		this.y = entity.lerpTargetY();
+		this.z = entity.lerpTargetZ();
 		this.yRot = entity.getYRot();
 		this.xRot = entity.getXRot();
 	}

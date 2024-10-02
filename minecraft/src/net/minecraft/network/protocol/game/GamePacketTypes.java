@@ -67,7 +67,10 @@ public class GamePacketTypes {
 	public static final PacketType<ClientboundPlayerInfoUpdatePacket> CLIENTBOUND_PLAYER_INFO_UPDATE = createClientbound("player_info_update");
 	public static final PacketType<ClientboundPlayerLookAtPacket> CLIENTBOUND_PLAYER_LOOK_AT = createClientbound("player_look_at");
 	public static final PacketType<ClientboundPlayerPositionPacket> CLIENTBOUND_PLAYER_POSITION = createClientbound("player_position");
-	public static final PacketType<ClientboundRecipePacket> CLIENTBOUND_RECIPE = createClientbound("recipe");
+	public static final PacketType<ClientboundPlayerRotationPacket> CLIENTBOUND_PLAYER_ROTATION = createClientbound("player_rotation");
+	public static final PacketType<ClientboundRecipeBookAddPacket> CLIENTBOUND_RECIPE_BOOK_ADD = createClientbound("recipe_book_add");
+	public static final PacketType<ClientboundRecipeBookRemovePacket> CLIENTBOUND_RECIPE_BOOK_REMOVE = createClientbound("recipe_book_remove");
+	public static final PacketType<ClientboundRecipeBookSettingsPacket> CLIENTBOUND_RECIPE_BOOK_SETTINGS = createClientbound("recipe_book_settings");
 	public static final PacketType<ClientboundRemoveEntitiesPacket> CLIENTBOUND_REMOVE_ENTITIES = createClientbound("remove_entities");
 	public static final PacketType<ClientboundRemoveMobEffectPacket> CLIENTBOUND_REMOVE_MOB_EFFECT = createClientbound("remove_mob_effect");
 	public static final PacketType<ClientboundRespawnPacket> CLIENTBOUND_RESPAWN = createClientbound("respawn");
@@ -115,6 +118,7 @@ public class GamePacketTypes {
 	public static final PacketType<ClientboundTagQueryPacket> CLIENTBOUND_TAG_QUERY = createClientbound("tag_query");
 	public static final PacketType<ClientboundTakeItemEntityPacket> CLIENTBOUND_TAKE_ITEM_ENTITY = createClientbound("take_item_entity");
 	public static final PacketType<ClientboundTeleportEntityPacket> CLIENTBOUND_TELEPORT_ENTITY = createClientbound("teleport_entity");
+	public static final PacketType<ClientboundEntityPositionSyncPacket> CLIENTBOUND_ENTITY_POSITION_SYNC = createClientbound("entity_position_sync");
 	public static final PacketType<ClientboundUpdateAdvancementsPacket> CLIENTBOUND_UPDATE_ADVANCEMENTS = createClientbound("update_advancements");
 	public static final PacketType<ClientboundUpdateAttributesPacket> CLIENTBOUND_UPDATE_ATTRIBUTES = createClientbound("update_attributes");
 	public static final PacketType<ClientboundUpdateMobEffectPacket> CLIENTBOUND_UPDATE_MOB_EFFECT = createClientbound("update_mob_effect");

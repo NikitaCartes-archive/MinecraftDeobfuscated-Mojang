@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
@@ -25,7 +26,7 @@ public class KnowledgeBookItem extends Item {
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand interactionHand) {
 		ItemStack itemStack = player.getItemInHand(interactionHand);
-		List<ResourceLocation> list = itemStack.getOrDefault(DataComponents.RECIPES, List.of());
+		List<ResourceKey<Recipe<?>>> list = itemStack.getOrDefault(DataComponents.RECIPES, List.of());
 		itemStack.consume(1, player);
 		if (list.isEmpty()) {
 			return InteractionResult.FAIL;
@@ -34,10 +35,10 @@ public class KnowledgeBookItem extends Item {
 				RecipeManager recipeManager = level.getServer().getRecipeManager();
 				List<RecipeHolder<?>> list2 = new ArrayList(list.size());
 
-				for (ResourceLocation resourceLocation : list) {
-					Optional<RecipeHolder<?>> optional = recipeManager.byKey(resourceLocation);
+				for (ResourceKey<Recipe<?>> resourceKey : list) {
+					Optional<RecipeHolder<?>> optional = recipeManager.byKey(resourceKey);
 					if (!optional.isPresent()) {
-						LOGGER.error("Invalid recipe: {}", resourceLocation);
+						LOGGER.error("Invalid recipe: {}", resourceKey);
 						return InteractionResult.FAIL;
 					}
 

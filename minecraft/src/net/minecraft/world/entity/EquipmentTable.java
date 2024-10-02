@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -16,7 +15,7 @@ public record EquipmentTable(ResourceKey<LootTable> lootTable, Map<EquipmentSlot
 	public static final Codec<Map<EquipmentSlot, Float>> DROP_CHANCES_CODEC = Codec.either(Codec.FLOAT, Codec.unboundedMap(EquipmentSlot.CODEC, Codec.FLOAT))
 		.xmap(either -> either.map(EquipmentTable::createForAllSlots, Function.identity()), map -> {
 			boolean bl = map.values().stream().distinct().count() == 1L;
-			boolean bl2 = map.keySet().containsAll(Arrays.asList(EquipmentSlot.VALUES));
+			boolean bl2 = map.keySet().containsAll(EquipmentSlot.VALUES);
 			return bl && bl2 ? Either.left((Float)map.values().stream().findFirst().orElse(0.0F)) : Either.right(map);
 		});
 	public static final Codec<EquipmentTable> CODEC = RecordCodecBuilder.create(

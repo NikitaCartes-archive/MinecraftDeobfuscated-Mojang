@@ -13,11 +13,12 @@ import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.ItemLike;
@@ -98,11 +99,11 @@ public class ShapedRecipeBuilder implements RecipeBuilder {
 	}
 
 	@Override
-	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {
-		ShapedRecipePattern shapedRecipePattern = this.ensureValid(resourceLocation);
+	public void save(RecipeOutput recipeOutput, ResourceKey<Recipe<?>> resourceKey) {
+		ShapedRecipePattern shapedRecipePattern = this.ensureValid(resourceKey);
 		Advancement.Builder builder = recipeOutput.advancement()
-			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation))
-			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
+			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceKey))
+			.rewards(AdvancementRewards.Builder.recipe(resourceKey))
 			.requirements(AdvancementRequirements.Strategy.OR);
 		this.criteria.forEach(builder::addCriterion);
 		ShapedRecipe shapedRecipe = new ShapedRecipe(
@@ -112,12 +113,12 @@ public class ShapedRecipeBuilder implements RecipeBuilder {
 			new ItemStack(this.result, this.count),
 			this.showNotification
 		);
-		recipeOutput.accept(resourceLocation, shapedRecipe, builder.build(resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")));
+		recipeOutput.accept(resourceKey, shapedRecipe, builder.build(resourceKey.location().withPrefix("recipes/" + this.category.getFolderName() + "/")));
 	}
 
-	private ShapedRecipePattern ensureValid(ResourceLocation resourceLocation) {
+	private ShapedRecipePattern ensureValid(ResourceKey<Recipe<?>> resourceKey) {
 		if (this.criteria.isEmpty()) {
-			throw new IllegalStateException("No way of obtaining recipe " + resourceLocation);
+			throw new IllegalStateException("No way of obtaining recipe " + resourceKey.location());
 		} else {
 			return ShapedRecipePattern.of(this.key, this.rows);
 		}

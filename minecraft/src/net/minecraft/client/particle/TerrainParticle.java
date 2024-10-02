@@ -83,6 +83,20 @@ public class TerrainParticle extends TextureSheetParticle {
 	}
 
 	@Environment(EnvType.CLIENT)
+	public static class CrumblingProvider implements ParticleProvider<BlockParticleOption> {
+		@Nullable
+		public Particle createParticle(BlockParticleOption blockParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {
+			Particle particle = TerrainParticle.createTerrainParticle(blockParticleOption, clientLevel, d, e, f, g, h, i);
+			if (particle != null) {
+				particle.setParticleSpeed(0.0, 0.0, 0.0);
+				particle.setLifetime(clientLevel.random.nextInt(10) + 1);
+			}
+
+			return particle;
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
 	public static class DustPillarProvider implements ParticleProvider<BlockParticleOption> {
 		@Nullable
 		public Particle createParticle(BlockParticleOption blockParticleOption, ClientLevel clientLevel, double d, double e, double f, double g, double h, double i) {

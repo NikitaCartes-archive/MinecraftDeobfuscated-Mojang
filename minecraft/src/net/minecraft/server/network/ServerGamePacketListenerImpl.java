@@ -166,6 +166,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.WritableBookContent;
 import net.minecraft.world.item.component.WrittenBookContent;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameType;
@@ -494,7 +496,10 @@ public class ServerGamePacketListenerImpl
 	@Override
 	public void handleRecipeBookSeenRecipePacket(ServerboundRecipeBookSeenRecipePacket serverboundRecipeBookSeenRecipePacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundRecipeBookSeenRecipePacket, this, this.player.serverLevel());
-		this.server.getRecipeManager().byKey(serverboundRecipeBookSeenRecipePacket.getRecipe()).ifPresent(this.player.getRecipeBook()::removeHighlight);
+		RecipeManager.ServerDisplayInfo serverDisplayInfo = this.server.getRecipeManager().getRecipeFromDisplay(serverboundRecipeBookSeenRecipePacket.recipe());
+		if (serverDisplayInfo != null) {
+			this.player.getRecipeBook().removeHighlight(serverDisplayInfo.parent().id());
+		}
 	}
 
 	@Override
@@ -1641,28 +1646,28 @@ public class ServerGamePacketListenerImpl
 	public void handlePlaceRecipe(ServerboundPlaceRecipePacket serverboundPlaceRecipePacket) {
 		PacketUtils.ensureRunningOnSameThread(serverboundPlaceRecipePacket, this, this.player.serverLevel());
 		this.player.resetLastActionTime();
-		if (!this.player.isSpectator() && this.player.containerMenu.containerId == serverboundPlaceRecipePacket.getContainerId()) {
+		if (!this.player.isSpectator() && this.player.containerMenu.containerId == serverboundPlaceRecipePacket.containerId()) {
 			if (!this.player.containerMenu.stillValid(this.player)) {
 				LOGGER.debug("Player {} interacted with invalid menu {}", this.player, this.player.containerMenu);
-			} else if (this.player.getRecipeBook().contains(serverboundPlaceRecipePacket.getRecipe())) {
-				if (this.player.containerMenu instanceof RecipeBookMenu recipeBookMenu) {
-					this.server
-						.getRecipeManager()
-						.byKey(serverboundPlaceRecipePacket.getRecipe())
-						.ifPresent(
-							recipeHolder -> {
-								if (recipeHolder.value().placementInfo().isImpossibleToPlace()) {
-									LOGGER.debug("Player {} tried to place impossible recipe {}", this.player, recipeHolder.id());
-								} else {
-									RecipeBookMenu.PostPlaceAction postPlaceAction = recipeBookMenu.handlePlacement(
-										serverboundPlaceRecipePacket.isUseMaxItems(), this.player.isCreative(), recipeHolder, this.player.getInventory()
-									);
-									if (postPlaceAction == RecipeBookMenu.PostPlaceAction.PLACE_GHOST_RECIPE) {
-										this.player.connection.send(new ClientboundPlaceGhostRecipePacket(this.player.containerMenu.containerId, recipeHolder));
-									}
-								}
+			} else {
+				RecipeManager.ServerDisplayInfo serverDisplayInfo = this.server.getRecipeManager().getRecipeFromDisplay(serverboundPlaceRecipePacket.recipe());
+				if (serverDisplayInfo != null) {
+					RecipeHolder<?> recipeHolder = serverDisplayInfo.parent();
+					if (this.player.getRecipeBook().contains(recipeHolder.id())) {
+						if (this.player.containerMenu instanceof RecipeBookMenu recipeBookMenu) {
+							if (recipeHolder.value().placementInfo().isImpossibleToPlace()) {
+								LOGGER.debug("Player {} tried to place impossible recipe {}", this.player, recipeHolder.id().location());
+								return;
 							}
-						);
+
+							RecipeBookMenu.PostPlaceAction postPlaceAction = recipeBookMenu.handlePlacement(
+								serverboundPlaceRecipePacket.useMaxItems(), this.player.isCreative(), recipeHolder, this.player.serverLevel(), this.player.getInventory()
+							);
+							if (postPlaceAction == RecipeBookMenu.PostPlaceAction.PLACE_GHOST_RECIPE) {
+								this.player.connection.send(new ClientboundPlaceGhostRecipePacket(this.player.containerMenu.containerId, serverDisplayInfo.display().display()));
+							}
+						}
+					}
 				}
 			}
 		}

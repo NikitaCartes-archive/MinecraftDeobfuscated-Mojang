@@ -1,37 +1,22 @@
 package net.minecraft.network.protocol.game;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.display.RecipeDisplayId;
 
-public class ServerboundPlaceRecipePacket implements Packet<ServerGamePacketListener> {
-	public static final StreamCodec<FriendlyByteBuf, ServerboundPlaceRecipePacket> STREAM_CODEC = Packet.codec(
-		ServerboundPlaceRecipePacket::write, ServerboundPlaceRecipePacket::new
+public record ServerboundPlaceRecipePacket(int containerId, RecipeDisplayId recipe, boolean useMaxItems) implements Packet<ServerGamePacketListener> {
+	public static final StreamCodec<FriendlyByteBuf, ServerboundPlaceRecipePacket> STREAM_CODEC = StreamCodec.composite(
+		ByteBufCodecs.CONTAINER_ID,
+		ServerboundPlaceRecipePacket::containerId,
+		RecipeDisplayId.STREAM_CODEC,
+		ServerboundPlaceRecipePacket::recipe,
+		ByteBufCodecs.BOOL,
+		ServerboundPlaceRecipePacket::useMaxItems,
+		ServerboundPlaceRecipePacket::new
 	);
-	private final int containerId;
-	private final ResourceLocation recipe;
-	private final boolean useMaxItems;
-
-	public ServerboundPlaceRecipePacket(int i, RecipeHolder<?> recipeHolder, boolean bl) {
-		this.containerId = i;
-		this.recipe = recipeHolder.id();
-		this.useMaxItems = bl;
-	}
-
-	private ServerboundPlaceRecipePacket(FriendlyByteBuf friendlyByteBuf) {
-		this.containerId = friendlyByteBuf.readContainerId();
-		this.recipe = friendlyByteBuf.readResourceLocation();
-		this.useMaxItems = friendlyByteBuf.readBoolean();
-	}
-
-	private void write(FriendlyByteBuf friendlyByteBuf) {
-		friendlyByteBuf.writeContainerId(this.containerId);
-		friendlyByteBuf.writeResourceLocation(this.recipe);
-		friendlyByteBuf.writeBoolean(this.useMaxItems);
-	}
 
 	@Override
 	public PacketType<ServerboundPlaceRecipePacket> type() {
@@ -40,17 +25,5 @@ public class ServerboundPlaceRecipePacket implements Packet<ServerGamePacketList
 
 	public void handle(ServerGamePacketListener serverGamePacketListener) {
 		serverGamePacketListener.handlePlaceRecipe(this);
-	}
-
-	public int getContainerId() {
-		return this.containerId;
-	}
-
-	public ResourceLocation getRecipe() {
-		return this.recipe;
-	}
-
-	public boolean isUseMaxItems() {
-		return this.useMaxItems;
 	}
 }

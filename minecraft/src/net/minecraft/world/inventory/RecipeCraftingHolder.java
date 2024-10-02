@@ -29,7 +29,7 @@ public interface RecipeCraftingHolder {
 	default boolean setRecipeUsed(ServerPlayer serverPlayer, RecipeHolder<?> recipeHolder) {
 		if (!recipeHolder.value().isSpecial()
 			&& serverPlayer.serverLevel().getGameRules().getBoolean(GameRules.RULE_LIMITED_CRAFTING)
-			&& !serverPlayer.getRecipeBook().contains(recipeHolder)) {
+			&& !serverPlayer.getRecipeBook().contains(recipeHolder.id())) {
 			return false;
 		} else {
 			this.setRecipeUsed(recipeHolder);

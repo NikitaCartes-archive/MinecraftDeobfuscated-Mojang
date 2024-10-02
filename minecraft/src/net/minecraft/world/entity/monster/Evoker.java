@@ -27,6 +27,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.monster.creaking.Creaking;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.EvokerFangs;
@@ -55,6 +56,7 @@ public class Evoker extends SpellcasterIllager {
 		this.goalSelector.addGoal(0, new FloatGoal(this));
 		this.goalSelector.addGoal(1, new Evoker.EvokerCastingSpellGoal());
 		this.goalSelector.addGoal(2, new AvoidEntityGoal(this, Player.class, 8.0F, 0.6, 1.0));
+		this.goalSelector.addGoal(3, new AvoidEntityGoal(this, Creaking.class, 8.0F, 1.0, 1.2));
 		this.goalSelector.addGoal(4, new Evoker.EvokerSummonSpellGoal());
 		this.goalSelector.addGoal(5, new Evoker.EvokerAttackSpellGoal());
 		this.goalSelector.addGoal(6, new Evoker.EvokerWololoSpellGoal());

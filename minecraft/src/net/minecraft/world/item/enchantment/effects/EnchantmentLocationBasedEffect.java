@@ -19,8 +19,8 @@ public interface EnchantmentLocationBasedEffect {
 		Registry.register(registry, "all_of", AllOf.LocationBasedEffects.CODEC);
 		Registry.register(registry, "apply_mob_effect", ApplyMobEffect.CODEC);
 		Registry.register(registry, "attribute", EnchantmentAttributeEffect.CODEC);
+		Registry.register(registry, "change_item_damage", ChangeItemDamage.CODEC);
 		Registry.register(registry, "damage_entity", DamageEntity.CODEC);
-		Registry.register(registry, "damage_item", DamageItem.CODEC);
 		Registry.register(registry, "explode", ExplodeEffect.CODEC);
 		Registry.register(registry, "ignite", Ignite.CODEC);
 		Registry.register(registry, "play_sound", PlaySoundEffect.CODEC);

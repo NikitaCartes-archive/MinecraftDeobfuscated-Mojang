@@ -8,12 +8,10 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import net.minecraft.Optionull;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -38,6 +36,10 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 public class SinglePoolElement extends StructurePoolElement {
+	private static final Comparator<StructureTemplate.JigsawBlockInfo> HIGHEST_SELECTION_PRIORITY_FIRST = Comparator.comparingInt(
+			StructureTemplate.JigsawBlockInfo::selectionPriority
+		)
+		.reversed();
 	private static final Codec<Either<ResourceLocation, StructureTemplate>> TEMPLATE_CODEC = Codec.of(
 		SinglePoolElement::encodeTemplate, ResourceLocation.CODEC.map(Either::left)
 	);
@@ -112,24 +114,18 @@ public class SinglePoolElement extends StructurePoolElement {
 	}
 
 	@Override
-	public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
+	public List<StructureTemplate.JigsawBlockInfo> getShuffledJigsawBlocks(
 		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, RandomSource randomSource
 	) {
-		StructureTemplate structureTemplate = this.getTemplate(structureTemplateManager);
-		ObjectArrayList<StructureTemplate.StructureBlockInfo> objectArrayList = structureTemplate.filterBlocks(
-			blockPos, new StructurePlaceSettings().setRotation(rotation), Blocks.JIGSAW, true
-		);
-		Util.shuffle(objectArrayList, randomSource);
-		sortBySelectionPriority(objectArrayList);
-		return objectArrayList;
+		List<StructureTemplate.JigsawBlockInfo> list = this.getTemplate(structureTemplateManager).getJigsaws(blockPos, rotation);
+		Util.shuffle(list, randomSource);
+		sortBySelectionPriority(list);
+		return list;
 	}
 
 	@VisibleForTesting
-	static void sortBySelectionPriority(List<StructureTemplate.StructureBlockInfo> list) {
-		list.sort(
-			Comparator.comparingInt(structureBlockInfo -> Optionull.mapOrDefault(structureBlockInfo.nbt(), compoundTag -> compoundTag.getInt("selection_priority"), 0))
-				.reversed()
-		);
+	static void sortBySelectionPriority(List<StructureTemplate.JigsawBlockInfo> list) {
+		list.sort(HIGHEST_SELECTION_PRIORITY_FIRST);
 	}
 
 	@Override

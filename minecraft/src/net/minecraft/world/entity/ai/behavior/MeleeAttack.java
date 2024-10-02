@@ -1,5 +1,6 @@
 package net.minecraft.world.entity.ai.behavior;
 
+import java.util.function.Predicate;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -10,7 +11,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ProjectileWeaponItem;
 
 public class MeleeAttack {
-	public static OneShot<Mob> create(int i) {
+	public static <T extends Mob> OneShot<T> create(int i) {
+		return create(mob -> true, i);
+	}
+
+	public static <T extends Mob> OneShot<T> create(Predicate<T> predicate, int i) {
 		return BehaviorBuilder.create(
 			instance -> instance.group(
 						instance.registered(MemoryModuleType.LOOK_TARGET),
@@ -22,7 +27,8 @@ public class MeleeAttack {
 						instance,
 						(memoryAccessor, memoryAccessor2, memoryAccessor3, memoryAccessor4) -> (serverLevel, mob, l) -> {
 								LivingEntity livingEntity = instance.get(memoryAccessor2);
-								if (!isHoldingUsableProjectileWeapon(mob)
+								if (predicate.test(mob)
+									&& !isHoldingUsableProjectileWeapon(mob)
 									&& mob.isWithinMeleeAttackRange(livingEntity)
 									&& instance.<NearestVisibleLivingEntities>get(memoryAccessor4).contains(livingEntity)) {
 									memoryAccessor.set(new EntityTracker(livingEntity, true));

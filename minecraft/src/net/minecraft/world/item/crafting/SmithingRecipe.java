@@ -1,34 +1,31 @@
 package net.minecraft.world.item.crafting;
 
-import net.minecraft.world.item.ItemStack;
+import java.util.Optional;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 
 public interface SmithingRecipe extends Recipe<SmithingRecipeInput> {
 	@Override
-	default RecipeType<?> getType() {
+	default RecipeType<SmithingRecipe> getType() {
 		return RecipeType.SMITHING;
 	}
 
 	@Override
-	default boolean canCraftInDimensions(int i, int j) {
-		return i >= 3 && j >= 1;
-	}
-
-	@Override
-	default ItemStack getCategoryIconItem() {
-		return new ItemStack(Blocks.SMITHING_TABLE);
-	}
+	RecipeSerializer<? extends SmithingRecipe> getSerializer();
 
 	default boolean matches(SmithingRecipeInput smithingRecipeInput, Level level) {
-		return this.isTemplateIngredient(smithingRecipeInput.template())
-			&& this.isBaseIngredient(smithingRecipeInput.base())
-			&& this.isAdditionIngredient(smithingRecipeInput.addition());
+		return Ingredient.testOptionalIngredient(this.templateIngredient(), smithingRecipeInput.template())
+			&& Ingredient.testOptionalIngredient(this.baseIngredient(), smithingRecipeInput.base())
+			&& Ingredient.testOptionalIngredient(this.additionIngredient(), smithingRecipeInput.addition());
 	}
 
-	boolean isTemplateIngredient(ItemStack itemStack);
+	Optional<Ingredient> templateIngredient();
 
-	boolean isBaseIngredient(ItemStack itemStack);
+	Optional<Ingredient> baseIngredient();
 
-	boolean isAdditionIngredient(ItemStack itemStack);
+	Optional<Ingredient> additionIngredient();
+
+	@Override
+	default BasicRecipeBookCategory recipeBookCategory() {
+		return BasicRecipeBookCategory.SMITHING;
+	}
 }

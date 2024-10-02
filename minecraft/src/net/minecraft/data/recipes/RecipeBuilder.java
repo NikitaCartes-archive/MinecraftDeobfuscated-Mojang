@@ -3,9 +3,12 @@ package net.minecraft.data.recipes;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.ItemLike;
 
 public interface RecipeBuilder {
@@ -17,10 +20,10 @@ public interface RecipeBuilder {
 
 	Item getResult();
 
-	void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation);
+	void save(RecipeOutput recipeOutput, ResourceKey<Recipe<?>> resourceKey);
 
 	default void save(RecipeOutput recipeOutput) {
-		this.save(recipeOutput, getDefaultRecipeId(this.getResult()));
+		this.save(recipeOutput, ResourceKey.create(Registries.RECIPE, getDefaultRecipeId(this.getResult())));
 	}
 
 	default void save(RecipeOutput recipeOutput, String string) {
@@ -29,7 +32,7 @@ public interface RecipeBuilder {
 		if (resourceLocation2.equals(resourceLocation)) {
 			throw new IllegalStateException("Recipe " + string + " should remove its 'save' argument as it is equal to default one");
 		} else {
-			this.save(recipeOutput, resourceLocation2);
+			this.save(recipeOutput, ResourceKey.create(Registries.RECIPE, resourceLocation2));
 		}
 	}
 

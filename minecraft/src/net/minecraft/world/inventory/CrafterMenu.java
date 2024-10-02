@@ -1,5 +1,6 @@
 package net.minecraft.world.inventory;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -7,7 +8,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CrafterBlock;
 
 public class CrafterMenu extends AbstractContainerMenu implements ContainerListener {
@@ -106,10 +106,10 @@ public class CrafterMenu extends AbstractContainerMenu implements ContainerListe
 
 	private void refreshRecipeResult() {
 		if (this.player instanceof ServerPlayer serverPlayer) {
-			Level level = serverPlayer.level();
+			ServerLevel serverLevel = serverPlayer.serverLevel();
 			CraftingInput craftingInput = this.container.asCraftInput();
-			ItemStack itemStack = (ItemStack)CrafterBlock.getPotentialResults(level, craftingInput)
-				.map(recipeHolder -> ((CraftingRecipe)recipeHolder.value()).assemble(craftingInput, level.registryAccess()))
+			ItemStack itemStack = (ItemStack)CrafterBlock.getPotentialResults(serverLevel, craftingInput)
+				.map(recipeHolder -> ((CraftingRecipe)recipeHolder.value()).assemble(craftingInput, serverLevel.registryAccess()))
 				.orElse(ItemStack.EMPTY);
 			this.resultContainer.setItem(0, itemStack);
 		}

@@ -9,6 +9,10 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.item.crafting.display.SmithingRecipeDisplay;
 
 public class SmithingTransformRecipe implements SmithingRecipe {
 	final Optional<Ingredient> template;
@@ -32,27 +36,22 @@ public class SmithingTransformRecipe implements SmithingRecipe {
 	}
 
 	@Override
-	public ItemStack getResultItem(HolderLookup.Provider provider) {
-		return this.result;
+	public Optional<Ingredient> templateIngredient() {
+		return this.template;
 	}
 
 	@Override
-	public boolean isTemplateIngredient(ItemStack itemStack) {
-		return Ingredient.testOptionalIngredient(this.template, itemStack);
+	public Optional<Ingredient> baseIngredient() {
+		return this.base;
 	}
 
 	@Override
-	public boolean isBaseIngredient(ItemStack itemStack) {
-		return Ingredient.testOptionalIngredient(this.base, itemStack);
+	public Optional<Ingredient> additionIngredient() {
+		return this.addition;
 	}
 
 	@Override
-	public boolean isAdditionIngredient(ItemStack itemStack) {
-		return Ingredient.testOptionalIngredient(this.addition, itemStack);
-	}
-
-	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<SmithingTransformRecipe> getSerializer() {
 		return RecipeSerializer.SMITHING_TRANSFORM;
 	}
 
@@ -63,6 +62,11 @@ public class SmithingTransformRecipe implements SmithingRecipe {
 		}
 
 		return this.placementInfo;
+	}
+
+	@Override
+	public List<RecipeDisplay> display() {
+		return List.of(new SmithingRecipeDisplay(new SlotDisplay.ItemStackSlotDisplay(this.result), new SlotDisplay.ItemSlotDisplay(Items.SMITHING_TABLE)));
 	}
 
 	public static class Serializer implements RecipeSerializer<SmithingTransformRecipe> {

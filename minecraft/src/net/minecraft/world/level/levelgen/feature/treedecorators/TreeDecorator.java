@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -59,6 +60,10 @@ public abstract class TreeDecorator {
 
 		public boolean isAir(BlockPos blockPos) {
 			return this.level.isStateAtPosition(blockPos, BlockBehaviour.BlockStateBase::isAir);
+		}
+
+		public boolean checkBlock(BlockPos blockPos, Predicate<BlockState> predicate) {
+			return this.level.isStateAtPosition(blockPos, predicate);
 		}
 
 		public LevelSimulatedReader level() {

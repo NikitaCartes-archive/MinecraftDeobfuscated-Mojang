@@ -74,6 +74,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.3F, Items.OAK_LEAVES);
 		add(0.3F, Items.SPRUCE_LEAVES);
 		add(0.3F, Items.DARK_OAK_LEAVES);
+		add(0.3F, Items.PALE_OAK_LEAVES);
 		add(0.3F, Items.ACACIA_LEAVES);
 		add(0.3F, Items.CHERRY_LEAVES);
 		add(0.3F, Items.BIRCH_LEAVES);
@@ -86,6 +87,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.3F, Items.ACACIA_SAPLING);
 		add(0.3F, Items.CHERRY_SAPLING);
 		add(0.3F, Items.DARK_OAK_SAPLING);
+		add(0.3F, Items.PALE_OAK_SAPLING);
 		add(0.3F, Items.MANGROVE_PROPAGULE);
 		add(0.3F, Items.BEETROOT_SEEDS);
 		add(0.3F, Items.DRIED_KELP);
@@ -98,6 +100,8 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.3F, Items.GLOW_BERRIES);
 		add(0.3F, Items.WHEAT_SEEDS);
 		add(0.3F, Items.MOSS_CARPET);
+		add(0.3F, Items.PALE_MOSS_CARPET);
+		add(0.3F, Items.PALE_HANGING_MOSS);
 		add(0.3F, Items.PINK_PETALS);
 		add(0.3F, Items.SMALL_DRIPLEAF);
 		add(0.3F, Items.HANGING_ROOTS);
@@ -157,6 +161,7 @@ public class ComposterBlock extends Block implements WorldlyContainerHolder {
 		add(0.65F, Items.SPORE_BLOSSOM);
 		add(0.65F, Items.AZALEA);
 		add(0.65F, Items.MOSS_BLOCK);
+		add(0.65F, Items.PALE_MOSS_BLOCK);
 		add(0.65F, Items.BIG_DRIPLEAF);
 		add(0.85F, Items.HAY_BLOCK);
 		add(0.85F, Items.BROWN_MUSHROOM_BLOCK);

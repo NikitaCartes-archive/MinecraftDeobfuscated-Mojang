@@ -297,6 +297,11 @@ public abstract class Display extends Entity {
 	}
 
 	@Override
+	public void cancelLerp() {
+		this.posRotInterpolationTarget = null;
+	}
+
+	@Override
 	public void lerpTo(double d, double e, double f, float g, float h, int i) {
 		int j = this.getPosRotInterpolationDuration();
 		this.posRotInterpolationTarget = new Display.PosRotInterpolationTarget(j, d, e, f, (double)g, (double)h);

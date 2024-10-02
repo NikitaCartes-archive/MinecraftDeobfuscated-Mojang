@@ -67,6 +67,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerCombatEndPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatEnterPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerLookAtPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerRotationPacket;
 import net.minecraft.network.protocol.game.ClientboundRemoveMobEffectPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.network.protocol.game.ClientboundServerDataPacket;
@@ -148,6 +149,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.item.ServerItemCooldowns;
 import net.minecraft.world.item.WrittenBookItem;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.trading.MerchantOffers;
@@ -165,7 +167,7 @@ import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.LevelData;
@@ -218,7 +220,7 @@ public class ServerPlayer extends Player {
 	private Entity camera;
 	private boolean isChangingDimension;
 	public boolean seenCredits;
-	private final ServerRecipeBook recipeBook = new ServerRecipeBook();
+	private final ServerRecipeBook recipeBook;
 	@Nullable
 	private Vec3 levitationStartPos;
 	private int levitationStartTime;
@@ -326,6 +328,7 @@ public class ServerPlayer extends Player {
 		super(serverLevel, serverLevel.getSharedSpawnPos(), serverLevel.getSharedSpawnAngle(), gameProfile);
 		this.textFilter = minecraftServer.createTextFilterForPlayer(this);
 		this.gameMode = minecraftServer.createGameModeForPlayer(this);
+		this.recipeBook = new ServerRecipeBook((resourceKey, consumer) -> minecraftServer.getRecipeManager().listDisplaysForRecipe(resourceKey, consumer));
 		this.server = minecraftServer;
 		this.stats = minecraftServer.getPlayerList().getPlayerStats(this);
 		this.advancements = minecraftServer.getPlayerList().getPlayerAdvancements(this);
@@ -419,7 +422,7 @@ public class ServerPlayer extends Player {
 
 		this.seenCredits = compoundTag.getBoolean("seenCredits");
 		if (compoundTag.contains("recipeBook", 10)) {
-			this.recipeBook.fromNbt(compoundTag.getCompound("recipeBook"), this.server.getRecipeManager());
+			this.recipeBook.fromNbt(compoundTag.getCompound("recipeBook"), resourceKey -> this.server.getRecipeManager().byKey(resourceKey).isPresent());
 		}
 
 		if (this.isSleeping()) {
@@ -507,32 +510,34 @@ public class ServerPlayer extends Player {
 			Entity entity = EntityType.loadEntityRecursive(
 				compoundTag.getCompound("Entity"), serverLevel, EntitySpawnReason.LOAD, entityx -> !serverLevel.addWithUUID(entityx) ? null : entityx
 			);
-			if (entity != null) {
-				UUID uUID;
-				if (compoundTag.hasUUID("Attach")) {
-					uUID = compoundTag.getUUID("Attach");
-				} else {
-					uUID = null;
-				}
+			if (entity == null) {
+				return;
+			}
 
-				if (entity.getUUID().equals(uUID)) {
-					this.startRiding(entity, true);
-				} else {
-					for (Entity entity2 : entity.getIndirectPassengers()) {
-						if (entity2.getUUID().equals(uUID)) {
-							this.startRiding(entity2, true);
-							break;
-						}
+			UUID uUID;
+			if (compoundTag.hasUUID("Attach")) {
+				uUID = compoundTag.getUUID("Attach");
+			} else {
+				uUID = null;
+			}
+
+			if (entity.getUUID().equals(uUID)) {
+				this.startRiding(entity, true);
+			} else {
+				for (Entity entity2 : entity.getIndirectPassengers()) {
+					if (entity2.getUUID().equals(uUID)) {
+						this.startRiding(entity2, true);
+						break;
 					}
 				}
+			}
 
-				if (!this.isPassenger()) {
-					LOGGER.warn("Couldn't reattach entity to player");
-					entity.discard();
+			if (!this.isPassenger()) {
+				LOGGER.warn("Couldn't reattach entity to player");
+				entity.discard();
 
-					for (Entity entity2x : entity.getIndirectPassengers()) {
-						entity2x.discard();
-					}
+				for (Entity entity2x : entity.getIndirectPassengers()) {
+					entity2x.discard();
 				}
 			}
 		}
@@ -974,7 +979,7 @@ public class ServerPlayer extends Player {
 		return this.server.isPvpAllowed();
 	}
 
-	public DimensionTransition findRespawnPositionAndUseSpawnBlock(boolean bl, DimensionTransition.PostDimensionTransition postDimensionTransition) {
+	public TeleportTransition findRespawnPositionAndUseSpawnBlock(boolean bl, TeleportTransition.PostTeleportTransition postTeleportTransition) {
 		BlockPos blockPos = this.getRespawnPosition();
 		float f = this.getRespawnAngle();
 		boolean bl2 = this.isRespawnForced();
@@ -983,12 +988,12 @@ public class ServerPlayer extends Player {
 			Optional<ServerPlayer.RespawnPosAngle> optional = findRespawnAndUseSpawnBlock(serverLevel, blockPos, f, bl2, bl);
 			if (optional.isPresent()) {
 				ServerPlayer.RespawnPosAngle respawnPosAngle = (ServerPlayer.RespawnPosAngle)optional.get();
-				return new DimensionTransition(serverLevel, respawnPosAngle.position(), Vec3.ZERO, respawnPosAngle.yaw(), 0.0F, postDimensionTransition);
+				return new TeleportTransition(serverLevel, respawnPosAngle.position(), Vec3.ZERO, respawnPosAngle.yaw(), 0.0F, postTeleportTransition);
 			} else {
-				return DimensionTransition.missingRespawnBlock(this.server.overworld(), this, postDimensionTransition);
+				return TeleportTransition.missingRespawnBlock(this.server.overworld(), this, postTeleportTransition);
 			}
 		} else {
-			return new DimensionTransition(this.server.overworld(), this, postDimensionTransition);
+			return new TeleportTransition(this.server.overworld(), this, postTeleportTransition);
 		}
 	}
 
@@ -1032,22 +1037,25 @@ public class ServerPlayer extends Player {
 	}
 
 	@Nullable
-	public Player changeDimension(DimensionTransition dimensionTransition) {
+	public ServerPlayer teleport(TeleportTransition teleportTransition) {
 		if (this.isRemoved()) {
 			return null;
 		} else {
-			if (dimensionTransition.missingRespawnBlock()) {
+			if (teleportTransition.missingRespawnBlock()) {
 				this.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
 			}
 
-			ServerLevel serverLevel = dimensionTransition.newLevel();
+			ServerLevel serverLevel = teleportTransition.newLevel();
 			ServerLevel serverLevel2 = this.serverLevel();
 			ResourceKey<Level> resourceKey = serverLevel2.dimension();
-			this.stopRiding();
+			if (!teleportTransition.asPassenger()) {
+				this.stopRiding();
+			}
+
 			if (serverLevel.dimension() == resourceKey) {
-				this.connection.teleport(PositionMoveRotation.of(dimensionTransition), dimensionTransition.relatives());
+				this.connection.teleport(PositionMoveRotation.of(teleportTransition), teleportTransition.relatives());
 				this.connection.resetPosition();
-				dimensionTransition.postDimensionTransition().onTransition(this);
+				teleportTransition.postTeleportTransition().onTransition(this);
 				return this;
 			} else {
 				this.isChangingDimension = true;
@@ -1067,7 +1075,7 @@ public class ServerPlayer extends Player {
 				profilerFiller.pop();
 				profilerFiller.push("placing");
 				this.setServerLevel(serverLevel);
-				this.connection.teleport(PositionMoveRotation.of(dimensionTransition), dimensionTransition.relatives());
+				this.connection.teleport(PositionMoveRotation.of(teleportTransition), teleportTransition.relatives());
 				this.connection.resetPosition();
 				serverLevel.addDuringTeleport(this);
 				profilerFiller.pop();
@@ -1077,13 +1085,18 @@ public class ServerPlayer extends Player {
 				playerList.sendLevelInfo(this, serverLevel);
 				playerList.sendAllPlayerInfo(this);
 				playerList.sendActivePlayerEffects(this);
-				dimensionTransition.postDimensionTransition().onTransition(this);
+				teleportTransition.postTeleportTransition().onTransition(this);
 				this.lastSentExp = -1;
 				this.lastSentHealth = -1.0F;
 				this.lastSentFood = -1;
 				return this;
 			}
 		}
+	}
+
+	@Override
+	public void forceSetRotation(float f, float g) {
+		this.connection.send(new ClientboundPlayerRotationPacket(f, g));
 	}
 
 	private void triggerDimensionChangeTriggers(ServerLevel serverLevel) {
@@ -1431,9 +1444,9 @@ public class ServerPlayer extends Player {
 	}
 
 	@Override
-	public void awardRecipesByKey(List<ResourceLocation> list) {
+	public void awardRecipesByKey(List<ResourceKey<Recipe<?>>> list) {
 		List<RecipeHolder<?>> list2 = (List<RecipeHolder<?>>)list.stream()
-			.flatMap(resourceLocation -> this.server.getRecipeManager().byKey(resourceLocation).stream())
+			.flatMap(resourceKey -> this.server.getRecipeManager().byKey(resourceKey).stream())
 			.collect(Collectors.toList());
 		this.awardRecipes(list2);
 	}

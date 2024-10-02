@@ -22,10 +22,6 @@ public class SuggestionProviders {
 	public static final SuggestionProvider<SharedSuggestionProvider> ASK_SERVER = register(
 		DEFAULT_NAME, (commandContext, suggestionsBuilder) -> commandContext.getSource().customSuggestion(commandContext)
 	);
-	public static final SuggestionProvider<CommandSourceStack> ALL_RECIPES = register(
-		ResourceLocation.withDefaultNamespace("all_recipes"),
-		(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(commandContext.getSource().getRecipeNames(), suggestionsBuilder)
-	);
 	public static final SuggestionProvider<CommandSourceStack> AVAILABLE_SOUNDS = register(
 		ResourceLocation.withDefaultNamespace("available_sounds"),
 		(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(commandContext.getSource().getAvailableSounds(), suggestionsBuilder)

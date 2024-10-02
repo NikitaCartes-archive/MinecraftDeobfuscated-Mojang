@@ -2,18 +2,19 @@ package net.minecraft.recipebook;
 
 import java.util.Iterator;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 
 public interface PlaceRecipeHelper {
-	static <T> void placeRecipe(int i, int j, RecipeHolder<?> recipeHolder, Iterable<T> iterable, PlaceRecipeHelper.Output<T> output) {
-		int k = i;
-		int l = j;
-		if (recipeHolder.value() instanceof ShapedRecipe shapedRecipe) {
-			k = shapedRecipe.getWidth();
-			l = shapedRecipe.getHeight();
+	static <T> void placeRecipe(int i, int j, Recipe<?> recipe, Iterable<T> iterable, PlaceRecipeHelper.Output<T> output) {
+		if (recipe instanceof ShapedRecipe shapedRecipe) {
+			placeRecipe(i, j, shapedRecipe.getWidth(), shapedRecipe.getHeight(), iterable, output);
+		} else {
+			placeRecipe(i, j, i, j, iterable, output);
 		}
+	}
 
+	static <T> void placeRecipe(int i, int j, int k, int l, Iterable<T> iterable, PlaceRecipeHelper.Output<T> output) {
 		Iterator<T> iterator = iterable.iterator();
 		int m = 0;
 

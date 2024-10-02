@@ -81,8 +81,8 @@ public class GoatAi {
 			Activity.CORE,
 			0,
 			ImmutableList.of(
-				new Swim(0.8F),
-				new AnimalPanic<>(2.0F),
+				new Swim<>(0.8F),
+				new AnimalPanic(2.0F),
 				new LookAtTargetSink(45, 90),
 				new MoveToTargetSink(),
 				new CountDownCooldownTicks(MemoryModuleType.TEMPTATION_COOLDOWN_TICKS),

@@ -1,5 +1,6 @@
 package net.minecraft.world.level;
 
+import java.util.Arrays;
 import java.util.function.IntFunction;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
@@ -105,5 +106,9 @@ public enum GameType implements StringRepresentable {
 	@Nullable
 	public static GameType byNullableId(int i) {
 		return i == -1 ? null : byId(i);
+	}
+
+	public static boolean isValidId(int i) {
+		return Arrays.stream(values()).anyMatch(gameType -> gameType.id == i);
 	}
 }

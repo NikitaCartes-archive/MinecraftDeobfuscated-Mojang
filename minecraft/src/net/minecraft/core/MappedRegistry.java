@@ -430,6 +430,11 @@ public class MappedRegistry<T> implements WritableRegistry<T> {
 				}
 
 				@Override
+				public int size() {
+					return map.size();
+				}
+
+				@Override
 				public HolderLookup.RegistryLookup<T> lookup() {
 					return registryLookup;
 				}

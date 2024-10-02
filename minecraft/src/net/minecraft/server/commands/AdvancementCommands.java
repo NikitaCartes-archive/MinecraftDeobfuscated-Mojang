@@ -6,7 +6,6 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -19,7 +18,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.ResourceKeyArgument;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -28,10 +28,6 @@ public class AdvancementCommands {
 	private static final Dynamic2CommandExceptionType ERROR_CRITERION_NOT_FOUND = new Dynamic2CommandExceptionType(
 		(object, object2) -> Component.translatableEscape("commands.advancement.criterionNotFound", object, object2)
 	);
-	private static final SuggestionProvider<CommandSourceStack> SUGGEST_ADVANCEMENTS = (commandContext, suggestionsBuilder) -> {
-		Collection<AdvancementHolder> collection = commandContext.getSource().getServer().getAdvancements().getAllAdvancements();
-		return SharedSuggestionProvider.suggestResource(collection.stream().map(AdvancementHolder::id), suggestionsBuilder);
-	};
 
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
@@ -44,21 +40,20 @@ public class AdvancementCommands {
 								.then(
 									Commands.literal("only")
 										.then(
-											Commands.argument("advancement", ResourceLocationArgument.id())
-												.suggests(SUGGEST_ADVANCEMENTS)
+											Commands.argument("advancement", ResourceKeyArgument.key(Registries.ADVANCEMENT))
 												.executes(
 													commandContext -> perform(
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.GRANT,
-															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.ONLY)
+															getAdvancements(commandContext, ResourceKeyArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.ONLY)
 														)
 												)
 												.then(
 													Commands.argument("criterion", StringArgumentType.greedyString())
 														.suggests(
 															(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(
-																	ResourceLocationArgument.getAdvancement(commandContext, "advancement").value().criteria().keySet(), suggestionsBuilder
+																	ResourceKeyArgument.getAdvancement(commandContext, "advancement").value().criteria().keySet(), suggestionsBuilder
 																)
 														)
 														.executes(
@@ -66,7 +61,7 @@ public class AdvancementCommands {
 																	commandContext.getSource(),
 																	EntityArgument.getPlayers(commandContext, "targets"),
 																	AdvancementCommands.Action.GRANT,
-																	ResourceLocationArgument.getAdvancement(commandContext, "advancement"),
+																	ResourceKeyArgument.getAdvancement(commandContext, "advancement"),
 																	StringArgumentType.getString(commandContext, "criterion")
 																)
 														)
@@ -76,14 +71,13 @@ public class AdvancementCommands {
 								.then(
 									Commands.literal("from")
 										.then(
-											Commands.argument("advancement", ResourceLocationArgument.id())
-												.suggests(SUGGEST_ADVANCEMENTS)
+											Commands.argument("advancement", ResourceKeyArgument.key(Registries.ADVANCEMENT))
 												.executes(
 													commandContext -> perform(
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.GRANT,
-															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.FROM)
+															getAdvancements(commandContext, ResourceKeyArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.FROM)
 														)
 												)
 										)
@@ -91,14 +85,13 @@ public class AdvancementCommands {
 								.then(
 									Commands.literal("until")
 										.then(
-											Commands.argument("advancement", ResourceLocationArgument.id())
-												.suggests(SUGGEST_ADVANCEMENTS)
+											Commands.argument("advancement", ResourceKeyArgument.key(Registries.ADVANCEMENT))
 												.executes(
 													commandContext -> perform(
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.GRANT,
-															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.UNTIL)
+															getAdvancements(commandContext, ResourceKeyArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.UNTIL)
 														)
 												)
 										)
@@ -106,14 +99,13 @@ public class AdvancementCommands {
 								.then(
 									Commands.literal("through")
 										.then(
-											Commands.argument("advancement", ResourceLocationArgument.id())
-												.suggests(SUGGEST_ADVANCEMENTS)
+											Commands.argument("advancement", ResourceKeyArgument.key(Registries.ADVANCEMENT))
 												.executes(
 													commandContext -> perform(
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.GRANT,
-															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.THROUGH)
+															getAdvancements(commandContext, ResourceKeyArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.THROUGH)
 														)
 												)
 										)
@@ -138,21 +130,20 @@ public class AdvancementCommands {
 								.then(
 									Commands.literal("only")
 										.then(
-											Commands.argument("advancement", ResourceLocationArgument.id())
-												.suggests(SUGGEST_ADVANCEMENTS)
+											Commands.argument("advancement", ResourceKeyArgument.key(Registries.ADVANCEMENT))
 												.executes(
 													commandContext -> perform(
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.REVOKE,
-															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.ONLY)
+															getAdvancements(commandContext, ResourceKeyArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.ONLY)
 														)
 												)
 												.then(
 													Commands.argument("criterion", StringArgumentType.greedyString())
 														.suggests(
 															(commandContext, suggestionsBuilder) -> SharedSuggestionProvider.suggest(
-																	ResourceLocationArgument.getAdvancement(commandContext, "advancement").value().criteria().keySet(), suggestionsBuilder
+																	ResourceKeyArgument.getAdvancement(commandContext, "advancement").value().criteria().keySet(), suggestionsBuilder
 																)
 														)
 														.executes(
@@ -160,7 +151,7 @@ public class AdvancementCommands {
 																	commandContext.getSource(),
 																	EntityArgument.getPlayers(commandContext, "targets"),
 																	AdvancementCommands.Action.REVOKE,
-																	ResourceLocationArgument.getAdvancement(commandContext, "advancement"),
+																	ResourceKeyArgument.getAdvancement(commandContext, "advancement"),
 																	StringArgumentType.getString(commandContext, "criterion")
 																)
 														)
@@ -170,14 +161,13 @@ public class AdvancementCommands {
 								.then(
 									Commands.literal("from")
 										.then(
-											Commands.argument("advancement", ResourceLocationArgument.id())
-												.suggests(SUGGEST_ADVANCEMENTS)
+											Commands.argument("advancement", ResourceKeyArgument.key(Registries.ADVANCEMENT))
 												.executes(
 													commandContext -> perform(
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.REVOKE,
-															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.FROM)
+															getAdvancements(commandContext, ResourceKeyArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.FROM)
 														)
 												)
 										)
@@ -185,14 +175,13 @@ public class AdvancementCommands {
 								.then(
 									Commands.literal("until")
 										.then(
-											Commands.argument("advancement", ResourceLocationArgument.id())
-												.suggests(SUGGEST_ADVANCEMENTS)
+											Commands.argument("advancement", ResourceKeyArgument.key(Registries.ADVANCEMENT))
 												.executes(
 													commandContext -> perform(
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.REVOKE,
-															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.UNTIL)
+															getAdvancements(commandContext, ResourceKeyArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.UNTIL)
 														)
 												)
 										)
@@ -200,14 +189,13 @@ public class AdvancementCommands {
 								.then(
 									Commands.literal("through")
 										.then(
-											Commands.argument("advancement", ResourceLocationArgument.id())
-												.suggests(SUGGEST_ADVANCEMENTS)
+											Commands.argument("advancement", ResourceKeyArgument.key(Registries.ADVANCEMENT))
 												.executes(
 													commandContext -> perform(
 															commandContext.getSource(),
 															EntityArgument.getPlayers(commandContext, "targets"),
 															AdvancementCommands.Action.REVOKE,
-															getAdvancements(commandContext, ResourceLocationArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.THROUGH)
+															getAdvancements(commandContext, ResourceKeyArgument.getAdvancement(commandContext, "advancement"), AdvancementCommands.Mode.THROUGH)
 														)
 												)
 										)

@@ -97,6 +97,7 @@ import net.minecraft.server.commands.RecipeCommand;
 import net.minecraft.server.commands.ReloadCommand;
 import net.minecraft.server.commands.ReturnCommand;
 import net.minecraft.server.commands.RideCommand;
+import net.minecraft.server.commands.RotateCommand;
 import net.minecraft.server.commands.SaveAllCommand;
 import net.minecraft.server.commands.SaveOffCommand;
 import net.minecraft.server.commands.SaveOnCommand;
@@ -189,6 +190,7 @@ public class Commands {
 		RecipeCommand.register(this.dispatcher);
 		ReturnCommand.register(this.dispatcher);
 		RideCommand.register(this.dispatcher);
+		RotateCommand.register(this.dispatcher);
 		SayCommand.register(this.dispatcher);
 		ScheduleCommand.register(this.dispatcher);
 		ScoreboardCommand.register(this.dispatcher, commandBuildContext);

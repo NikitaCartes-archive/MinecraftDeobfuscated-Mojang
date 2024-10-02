@@ -660,31 +660,9 @@ public class GuiGraphics {
 	public void renderItemDecorations(Font font, ItemStack itemStack, int i, int j, @Nullable String string) {
 		if (!itemStack.isEmpty()) {
 			this.pose.pushPose();
-			if (itemStack.getCount() != 1 || string != null) {
-				String string2 = string == null ? String.valueOf(itemStack.getCount()) : string;
-				this.pose.translate(0.0F, 0.0F, 200.0F);
-				this.drawString(font, string2, i + 19 - 2 - font.width(string2), j + 6 + 3, 16777215, true);
-			}
-
-			if (itemStack.isBarVisible()) {
-				int k = itemStack.getBarWidth();
-				int l = itemStack.getBarColor();
-				int m = i + 2;
-				int n = j + 13;
-				this.fill(RenderType.guiOverlay(), m, n, m + 13, n + 2, -16777216);
-				this.fill(RenderType.guiOverlay(), m, n, m + k, n + 1, ARGB.opaque(l));
-			}
-
-			LocalPlayer localPlayer = this.minecraft.player;
-			float f = localPlayer == null
-				? 0.0F
-				: localPlayer.getCooldowns().getCooldownPercent(itemStack, this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true));
-			if (f > 0.0F) {
-				int m = j + Mth.floor(16.0F * (1.0F - f));
-				int n = m + Mth.ceil(16.0F * f);
-				this.fill(RenderType.guiOverlay(), i, m, i + 16, n, Integer.MAX_VALUE);
-			}
-
+			this.renderItemBar(itemStack, i, j);
+			this.renderItemCount(font, itemStack, i, j, string);
+			this.renderItemCooldown(itemStack, i, j);
 			this.pose.popPose();
 		}
 	}
@@ -792,6 +770,35 @@ public class GuiGraphics {
 			}
 
 			this.pose.popPose();
+		}
+	}
+
+	private void renderItemBar(ItemStack itemStack, int i, int j) {
+		if (itemStack.isBarVisible()) {
+			int k = i + 2;
+			int l = j + 13;
+			this.fill(RenderType.gui(), k, l, k + 13, l + 2, 200, -16777216);
+			this.fill(RenderType.gui(), k, l, k + itemStack.getBarWidth(), l + 1, 200, ARGB.opaque(itemStack.getBarColor()));
+		}
+	}
+
+	private void renderItemCount(Font font, ItemStack itemStack, int i, int j, @Nullable String string) {
+		if (itemStack.getCount() != 1 || string != null) {
+			String string2 = string == null ? String.valueOf(itemStack.getCount()) : string;
+			this.pose.translate(0.0F, 0.0F, 200.0F);
+			this.drawString(font, string2, i + 19 - 2 - font.width(string2), j + 6 + 3, -1, true);
+		}
+	}
+
+	private void renderItemCooldown(ItemStack itemStack, int i, int j) {
+		LocalPlayer localPlayer = this.minecraft.player;
+		float f = localPlayer == null
+			? 0.0F
+			: localPlayer.getCooldowns().getCooldownPercent(itemStack, this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true));
+		if (f > 0.0F) {
+			int k = j + Mth.floor(16.0F * (1.0F - f));
+			int l = k + Mth.ceil(16.0F * f);
+			this.fill(RenderType.gui(), i, k, i + 16, l, 200, Integer.MAX_VALUE);
 		}
 	}
 

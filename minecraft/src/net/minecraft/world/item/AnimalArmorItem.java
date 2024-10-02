@@ -14,8 +14,8 @@ public class AnimalArmorItem extends Item {
 		this.bodyType = bodyType;
 	}
 
-	public AnimalArmorItem(ArmorMaterial armorMaterial, AnimalArmorItem.BodyType bodyType, SoundEvent soundEvent, Item.Properties properties) {
-		super(armorMaterial.animalProperties(properties, soundEvent, bodyType.allowedEntities));
+	public AnimalArmorItem(ArmorMaterial armorMaterial, AnimalArmorItem.BodyType bodyType, SoundEvent soundEvent, boolean bl, Item.Properties properties) {
+		super(armorMaterial.animalProperties(properties, soundEvent, bl, bodyType.allowedEntities));
 		this.bodyType = bodyType;
 	}
 

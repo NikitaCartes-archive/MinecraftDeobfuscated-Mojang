@@ -8,10 +8,13 @@ import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.SmithingTransformRecipe;
 
 public class SmithingTransformRecipeBuilder {
@@ -42,25 +45,25 @@ public class SmithingTransformRecipeBuilder {
 	}
 
 	public void save(RecipeOutput recipeOutput, String string) {
-		this.save(recipeOutput, ResourceLocation.parse(string));
+		this.save(recipeOutput, ResourceKey.create(Registries.RECIPE, ResourceLocation.parse(string)));
 	}
 
-	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {
-		this.ensureValid(resourceLocation);
+	public void save(RecipeOutput recipeOutput, ResourceKey<Recipe<?>> resourceKey) {
+		this.ensureValid(resourceKey);
 		Advancement.Builder builder = recipeOutput.advancement()
-			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation))
-			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
+			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceKey))
+			.rewards(AdvancementRewards.Builder.recipe(resourceKey))
 			.requirements(AdvancementRequirements.Strategy.OR);
 		this.criteria.forEach(builder::addCriterion);
 		SmithingTransformRecipe smithingTransformRecipe = new SmithingTransformRecipe(
 			Optional.of(this.template), Optional.of(this.base), Optional.of(this.addition), new ItemStack(this.result)
 		);
-		recipeOutput.accept(resourceLocation, smithingTransformRecipe, builder.build(resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")));
+		recipeOutput.accept(resourceKey, smithingTransformRecipe, builder.build(resourceKey.location().withPrefix("recipes/" + this.category.getFolderName() + "/")));
 	}
 
-	private void ensureValid(ResourceLocation resourceLocation) {
+	private void ensureValid(ResourceKey<Recipe<?>> resourceKey) {
 		if (this.criteria.isEmpty()) {
-			throw new IllegalStateException("No way of obtaining recipe " + resourceLocation);
+			throw new IllegalStateException("No way of obtaining recipe " + resourceKey.location());
 		}
 	}
 }

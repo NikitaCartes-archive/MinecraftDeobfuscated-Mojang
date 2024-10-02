@@ -1,6 +1,5 @@
 package net.minecraft.client.gui.screens.inventory;
 
-import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -13,8 +12,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.StonecutterMenu;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.SelectableRecipe;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 
 @Environment(EnvType.CLIENT)
 public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> {
@@ -72,21 +72,23 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 			int k = this.leftPos + 52;
 			int l = this.topPos + 14;
 			int m = this.startIndex + 12;
-			List<RecipeHolder<StonecutterRecipe>> list = this.menu.getRecipes();
+			SelectableRecipe.SingleInputSet<StonecutterRecipe> singleInputSet = this.menu.getVisibleRecipes();
 
-			for (int n = this.startIndex; n < m && n < this.menu.getNumRecipes(); n++) {
+			for (int n = this.startIndex; n < m && n < singleInputSet.size(); n++) {
 				int o = n - this.startIndex;
 				int p = k + o % 4 * 16;
 				int q = l + o / 4 * 18 + 2;
 				if (i >= p && i < p + 16 && j >= q && j < q + 18) {
-					guiGraphics.renderTooltip(this.font, ((StonecutterRecipe)((RecipeHolder)list.get(n)).value()).getResultItem(this.minecraft.level.registryAccess()), i, j);
+					SlotDisplay.ResolutionContext resolutionContext = SlotDisplay.ResolutionContext.forLevel(this.minecraft.level);
+					SlotDisplay slotDisplay = ((SelectableRecipe.SingleInputEntry)singleInputSet.entries().get(n)).recipe().optionDisplay();
+					guiGraphics.renderTooltip(this.font, slotDisplay.resolveForFirstStack(resolutionContext), i, j);
 				}
 			}
 		}
 	}
 
 	private void renderButtons(GuiGraphics guiGraphics, int i, int j, int k, int l, int m) {
-		for (int n = this.startIndex; n < m && n < this.menu.getNumRecipes(); n++) {
+		for (int n = this.startIndex; n < m && n < this.menu.getNumberOfVisibleRecipes(); n++) {
 			int o = n - this.startIndex;
 			int p = k + o % 4 * 16;
 			int q = o / 4;
@@ -105,14 +107,16 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 	}
 
 	private void renderRecipes(GuiGraphics guiGraphics, int i, int j, int k) {
-		List<RecipeHolder<StonecutterRecipe>> list = this.menu.getRecipes();
+		SelectableRecipe.SingleInputSet<StonecutterRecipe> singleInputSet = this.menu.getVisibleRecipes();
+		SlotDisplay.ResolutionContext resolutionContext = SlotDisplay.ResolutionContext.forLevel(this.minecraft.level);
 
-		for (int l = this.startIndex; l < k && l < this.menu.getNumRecipes(); l++) {
+		for (int l = this.startIndex; l < k && l < singleInputSet.size(); l++) {
 			int m = l - this.startIndex;
 			int n = i + m % 4 * 16;
 			int o = m / 4;
 			int p = j + o * 18 + 2;
-			guiGraphics.renderItem(((StonecutterRecipe)((RecipeHolder)list.get(l)).value()).getResultItem(this.minecraft.level.registryAccess()), n, p);
+			SlotDisplay slotDisplay = ((SelectableRecipe.SingleInputEntry)singleInputSet.entries().get(l)).recipe().optionDisplay();
+			guiGraphics.renderItem(slotDisplay.resolveForFirstStack(resolutionContext), n, p);
 		}
 	}
 
@@ -176,11 +180,11 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 	}
 
 	private boolean isScrollBarActive() {
-		return this.displayRecipes && this.menu.getNumRecipes() > 12;
+		return this.displayRecipes && this.menu.getNumberOfVisibleRecipes() > 12;
 	}
 
 	protected int getOffscreenRows() {
-		return (this.menu.getNumRecipes() + 4 - 1) / 4 - 3;
+		return (this.menu.getNumberOfVisibleRecipes() + 4 - 1) / 4 - 3;
 	}
 
 	private void containerChanged() {

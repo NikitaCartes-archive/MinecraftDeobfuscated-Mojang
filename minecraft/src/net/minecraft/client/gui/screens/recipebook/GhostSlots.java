@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 
 @Environment(EnvType.CLIENT)
 public class GhostSlots {
@@ -27,12 +28,19 @@ public class GhostSlots {
 		this.ingredients.clear();
 	}
 
-	public void addResult(ItemStack itemStack, Slot slot) {
-		this.ingredients.put(slot, new GhostSlots.GhostSlot(List.of(itemStack), true));
+	private void setSlot(Slot slot, SlotDisplay.ResolutionContext resolutionContext, SlotDisplay slotDisplay, boolean bl) {
+		List<ItemStack> list = slotDisplay.resolveForStacks(resolutionContext);
+		if (!list.isEmpty()) {
+			this.ingredients.put(slot, new GhostSlots.GhostSlot(list, bl));
+		}
 	}
 
-	public void addIngredient(List<ItemStack> list, Slot slot) {
-		this.ingredients.put(slot, new GhostSlots.GhostSlot(list, false));
+	protected void setInput(Slot slot, SlotDisplay.ResolutionContext resolutionContext, SlotDisplay slotDisplay) {
+		this.setSlot(slot, resolutionContext, slotDisplay, false);
+	}
+
+	protected void setResult(Slot slot, SlotDisplay.ResolutionContext resolutionContext, SlotDisplay slotDisplay) {
+		this.setSlot(slot, resolutionContext, slotDisplay, true);
 	}
 
 	public void render(GuiGraphics guiGraphics, Minecraft minecraft, boolean bl) {

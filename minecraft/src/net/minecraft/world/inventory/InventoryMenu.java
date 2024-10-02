@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
@@ -80,7 +81,9 @@ public class InventoryMenu extends AbstractCraftingMenu {
 
 	@Override
 	public void slotsChanged(Container container) {
-		CraftingMenu.slotChangedCraftingGrid(this, this.owner.level(), this.owner, this.craftSlots, this.resultSlots, null);
+		if (this.owner.level() instanceof ServerLevel serverLevel) {
+			CraftingMenu.slotChangedCraftingGrid(this, serverLevel, this.owner, this.craftSlots, this.resultSlots, null);
+		}
 	}
 
 	@Override

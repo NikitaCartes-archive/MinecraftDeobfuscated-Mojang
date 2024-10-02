@@ -114,7 +114,7 @@ public class FenceBlock extends CrossCollisionBlock {
 			scheduledTickAccess.scheduleTick(blockPos, Fluids.WATER, Fluids.WATER.getTickDelay(levelReader));
 		}
 
-		return direction.getAxis().getPlane() == Direction.Plane.HORIZONTAL
+		return direction.getAxis().isHorizontal()
 			? blockState.setValue(
 				(Property)PROPERTY_BY_DIRECTION.get(direction),
 				Boolean.valueOf(this.connectsTo(blockState2, blockState2.isFaceSturdy(levelReader, blockPos2, direction.getOpposite()), direction.getOpposite()))

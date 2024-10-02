@@ -119,6 +119,10 @@ public class RealmsWorldSlotButton extends Button {
 				guiGraphics.blitSprite(RenderType::guiTextured, CHECKMARK_SPRITE, k + 67, l + 4, 9, 8);
 			}
 
+			if (this.state.hardcore) {
+				guiGraphics.blitSprite(RenderType::guiTextured, RealmsMainScreen.HARDCORE_MODE_SPRITE, k + 3, l + 4, 9, 8);
+			}
+
 			Font font = Minecraft.getInstance().font;
 			String string = this.state.slotName;
 			if (font.width(string) > 64) {
@@ -151,6 +155,7 @@ public class RealmsWorldSlotButton extends Button {
 		public final boolean empty;
 		public final boolean minigame;
 		public final RealmsWorldSlotButton.Action action;
+		public final boolean hardcore;
 
 		public State(RealmsServer realmsServer, int i) {
 			this.minigame = i == 4;
@@ -162,6 +167,7 @@ public class RealmsWorldSlotButton extends Button {
 				this.empty = realmsServer.minigameId == -1;
 				this.slotVersion = "";
 				this.compatibility = RealmsServer.Compatibility.UNVERIFIABLE;
+				this.hardcore = false;
 			} else {
 				RealmsWorldOptions realmsWorldOptions = (RealmsWorldOptions)realmsServer.slots.get(i);
 				this.isCurrentlyActiveSlot = realmsServer.activeSlot == i && !realmsServer.isMinigameActive();
@@ -171,6 +177,7 @@ public class RealmsWorldSlotButton extends Button {
 				this.empty = realmsWorldOptions.empty;
 				this.slotVersion = realmsWorldOptions.version;
 				this.compatibility = realmsWorldOptions.compatibility;
+				this.hardcore = realmsWorldOptions.hardcore;
 			}
 
 			this.action = RealmsWorldSlotButton.getAction(realmsServer, this.isCurrentlyActiveSlot, this.minigame);

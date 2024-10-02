@@ -695,6 +695,15 @@ public class SoundType {
 	public static final SoundType VAULT = new SoundType(
 		1.0F, 1.0F, SoundEvents.VAULT_BREAK, SoundEvents.VAULT_STEP, SoundEvents.VAULT_PLACE, SoundEvents.VAULT_HIT, SoundEvents.VAULT_FALL
 	);
+	public static final SoundType CREAKING_HEART = new SoundType(
+		1.0F,
+		1.0F,
+		SoundEvents.CREAKING_HEART_BREAK,
+		SoundEvents.CREAKING_HEART_STEP,
+		SoundEvents.CREAKING_HEART_PLACE,
+		SoundEvents.CREAKING_HEART_HIT,
+		SoundEvents.CREAKING_HEART_FALL
+	);
 	public static final SoundType HEAVY_CORE = new SoundType(
 		1.0F, 1.0F, SoundEvents.HEAVY_CORE_BREAK, SoundEvents.HEAVY_CORE_STEP, SoundEvents.HEAVY_CORE_PLACE, SoundEvents.HEAVY_CORE_HIT, SoundEvents.HEAVY_CORE_FALL
 	);

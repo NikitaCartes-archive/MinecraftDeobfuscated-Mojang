@@ -29,6 +29,7 @@ import net.minecraft.client.model.ChestModel;
 import net.minecraft.client.model.ChickenModel;
 import net.minecraft.client.model.CodModel;
 import net.minecraft.client.model.CowModel;
+import net.minecraft.client.model.CreakingModel;
 import net.minecraft.client.model.CreeperModel;
 import net.minecraft.client.model.DolphinModel;
 import net.minecraft.client.model.DonkeyModel;
@@ -221,6 +222,7 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.CONDUIT_CAGE, ConduitRenderer.createCageLayer());
 		builder.put(ModelLayers.COW, layerDefinition12);
 		builder.put(ModelLayers.COW_BABY, layerDefinition13);
+		builder.put(ModelLayers.CREAKING, CreakingModel.createBodyLayer());
 		builder.put(ModelLayers.CREEPER, CreeperModel.createBodyLayer(CubeDeformation.NONE));
 		builder.put(ModelLayers.CREEPER_ARMOR, CreeperModel.createBodyLayer(new CubeDeformation(2.0F)));
 		builder.put(ModelLayers.CREEPER_HEAD, layerDefinition6);
@@ -435,6 +437,8 @@ public class LayerDefinitions {
 		builder.put(ModelLayers.CHERRY_CHEST_BOAT, layerDefinition53);
 		builder.put(ModelLayers.DARK_OAK_BOAT, layerDefinition52);
 		builder.put(ModelLayers.DARK_OAK_CHEST_BOAT, layerDefinition53);
+		builder.put(ModelLayers.PALE_OAK_BOAT, layerDefinition52);
+		builder.put(ModelLayers.PALE_OAK_CHEST_BOAT, layerDefinition53);
 		builder.put(ModelLayers.MANGROVE_BOAT, layerDefinition52);
 		builder.put(ModelLayers.MANGROVE_CHEST_BOAT, layerDefinition53);
 		LayerDefinition layerDefinition54 = SignRenderer.createSignLayer(true);

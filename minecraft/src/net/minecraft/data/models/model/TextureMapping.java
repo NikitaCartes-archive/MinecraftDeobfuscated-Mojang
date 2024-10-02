@@ -83,6 +83,10 @@ public class TextureMapping {
 		return singleSlot(TextureSlot.CROSS, getBlockTexture(block));
 	}
 
+	public static TextureMapping side(Block block) {
+		return singleSlot(TextureSlot.SIDE, getBlockTexture(block));
+	}
+
 	public static TextureMapping cross(ResourceLocation resourceLocation) {
 		return singleSlot(TextureSlot.CROSS, resourceLocation);
 	}

@@ -82,7 +82,7 @@ public class CamelAi {
 			Activity.CORE,
 			0,
 			ImmutableList.of(
-				new Swim(0.8F),
+				new Swim<>(0.8F),
 				new CamelAi.CamelPanic(4.0F),
 				new LookAtTargetSink(45, 90),
 				new MoveToTargetSink(),

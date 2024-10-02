@@ -7,58 +7,56 @@ import net.minecraft.core.Holder;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 
 public class PlacementInfo {
-	public static final PlacementInfo NOT_PLACEABLE = new PlacementInfo(List.of(), List.of());
-	private final List<StackedContents.IngredientInfo<Holder<Item>>> stackedIngredients;
+	public static final PlacementInfo NOT_PLACEABLE = new PlacementInfo(List.of(), List.of(), List.of());
+	private final List<Ingredient> ingredients;
+	private final List<StackedContents.IngredientInfo<Holder<Item>>> unpackedIngredients;
 	private final List<Optional<PlacementInfo.SlotInfo>> slotInfo;
 
-	private PlacementInfo(List<StackedContents.IngredientInfo<Holder<Item>>> list, List<Optional<PlacementInfo.SlotInfo>> list2) {
-		this.stackedIngredients = list;
-		this.slotInfo = list2;
+	private PlacementInfo(List<Ingredient> list, List<StackedContents.IngredientInfo<Holder<Item>>> list2, List<Optional<PlacementInfo.SlotInfo>> list3) {
+		this.ingredients = list;
+		this.unpackedIngredients = list2;
+		this.slotInfo = list3;
 	}
 
-	private static StackedContents.IngredientInfo<Holder<Item>> createStackedContents(List<ItemStack> list) {
-		return StackedItemContents.convertIngredientContents(list.stream().map(ItemStack::getItemHolder));
-	}
-
-	private static List<ItemStack> createPossibleItems(Ingredient ingredient) {
-		return ingredient.items().stream().map(ItemStack::new).toList();
+	public static StackedContents.IngredientInfo<Holder<Item>> ingredientToContents(Ingredient ingredient) {
+		return StackedItemContents.convertIngredientContents(ingredient.items().stream());
 	}
 
 	public static PlacementInfo create(Ingredient ingredient) {
-		List<ItemStack> list = createPossibleItems(ingredient);
-		if (list.isEmpty()) {
+		if (ingredient.items().isEmpty()) {
 			return NOT_PLACEABLE;
 		} else {
-			StackedContents.IngredientInfo<Holder<Item>> ingredientInfo = createStackedContents(list);
-			PlacementInfo.SlotInfo slotInfo = new PlacementInfo.SlotInfo(list, 0);
-			return new PlacementInfo(List.of(ingredientInfo), List.of(Optional.of(slotInfo)));
+			StackedContents.IngredientInfo<Holder<Item>> ingredientInfo = ingredientToContents(ingredient);
+			PlacementInfo.SlotInfo slotInfo = new PlacementInfo.SlotInfo(0);
+			return new PlacementInfo(List.of(ingredient), List.of(ingredientInfo), List.of(Optional.of(slotInfo)));
 		}
 	}
 
 	public static PlacementInfo createFromOptionals(List<Optional<Ingredient>> list) {
 		int i = list.size();
-		List<StackedContents.IngredientInfo<Holder<Item>>> list2 = new ArrayList(i);
-		List<Optional<PlacementInfo.SlotInfo>> list3 = new ArrayList(i);
+		List<Ingredient> list2 = new ArrayList(i);
+		List<StackedContents.IngredientInfo<Holder<Item>>> list3 = new ArrayList(i);
+		List<Optional<PlacementInfo.SlotInfo>> list4 = new ArrayList(i);
 		int j = 0;
 
 		for (Optional<Ingredient> optional : list) {
 			if (optional.isPresent()) {
-				List<ItemStack> list4 = createPossibleItems((Ingredient)optional.get());
-				if (list4.isEmpty()) {
+				Ingredient ingredient = (Ingredient)optional.get();
+				if (ingredient.items().isEmpty()) {
 					return NOT_PLACEABLE;
 				}
 
-				list2.add(createStackedContents(list4));
-				list3.add(Optional.of(new PlacementInfo.SlotInfo(list4, j++)));
+				list2.add(ingredient);
+				list3.add(ingredientToContents(ingredient));
+				list4.add(Optional.of(new PlacementInfo.SlotInfo(j++)));
 			} else {
-				list3.add(Optional.empty());
+				list4.add(Optional.empty());
 			}
 		}
 
-		return new PlacementInfo(list2, list3);
+		return new PlacementInfo(list2, list3, list4);
 	}
 
 	public static PlacementInfo create(List<Ingredient> list) {
@@ -68,38 +66,33 @@ public class PlacementInfo {
 
 		for (int j = 0; j < i; j++) {
 			Ingredient ingredient = (Ingredient)list.get(j);
-			List<ItemStack> list4 = createPossibleItems(ingredient);
-			if (list4.isEmpty()) {
+			if (ingredient.items().isEmpty()) {
 				return NOT_PLACEABLE;
 			}
 
-			list2.add(createStackedContents(list4));
-			list3.add(Optional.of(new PlacementInfo.SlotInfo(list4, j)));
+			list2.add(ingredientToContents(ingredient));
+			list3.add(Optional.of(new PlacementInfo.SlotInfo(j)));
 		}
 
-		return new PlacementInfo(list2, list3);
+		return new PlacementInfo(list, list2, list3);
 	}
 
 	public List<Optional<PlacementInfo.SlotInfo>> slotInfo() {
 		return this.slotInfo;
 	}
 
-	public List<StackedContents.IngredientInfo<Holder<Item>>> stackedRecipeContents() {
-		return this.stackedIngredients;
+	public List<Ingredient> ingredients() {
+		return this.ingredients;
+	}
+
+	public List<StackedContents.IngredientInfo<Holder<Item>>> unpackedIngredients() {
+		return this.unpackedIngredients;
 	}
 
 	public boolean isImpossibleToPlace() {
 		return this.slotInfo.isEmpty();
 	}
 
-	public static record SlotInfo(List<ItemStack> possibleItems, int placerOutputPosition) {
-		public SlotInfo(List<ItemStack> possibleItems, int placerOutputPosition) {
-			if (possibleItems.isEmpty()) {
-				throw new IllegalArgumentException("Possible items list must be not empty");
-			} else {
-				this.possibleItems = possibleItems;
-				this.placerOutputPosition = placerOutputPosition;
-			}
-		}
+	public static record SlotInfo(int placerOutputPosition) {
 	}
 }

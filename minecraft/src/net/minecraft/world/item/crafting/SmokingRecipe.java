@@ -1,20 +1,31 @@
 package net.minecraft.world.item.crafting;
 
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.Items;
 
 public class SmokingRecipe extends AbstractCookingRecipe {
 	public SmokingRecipe(String string, CookingBookCategory cookingBookCategory, Ingredient ingredient, ItemStack itemStack, float f, int i) {
-		super(RecipeType.SMOKING, string, cookingBookCategory, ingredient, itemStack, f, i);
+		super(string, cookingBookCategory, ingredient, itemStack, f, i);
 	}
 
 	@Override
-	public ItemStack getCategoryIconItem() {
-		return new ItemStack(Blocks.SMOKER);
+	protected Item furnaceIcon() {
+		return Items.SMOKER;
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeType<SmokingRecipe> getType() {
+		return RecipeType.SMOKING;
+	}
+
+	@Override
+	public RecipeSerializer<SmokingRecipe> getSerializer() {
 		return RecipeSerializer.SMOKING_RECIPE;
+	}
+
+	@Override
+	public BasicRecipeBookCategory recipeBookCategory() {
+		return BasicRecipeBookCategory.SMOKER_FOOD;
 	}
 }

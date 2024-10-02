@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -15,8 +16,9 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.stats.RecipeBook;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.display.RecipeDisplayId;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 
 @Environment(EnvType.CLIENT)
 public class RecipeBookPage {
@@ -32,20 +34,21 @@ public class RecipeBookPage {
 	private RecipeButton hoveredButton;
 	private final OverlayRecipeComponent overlay;
 	private Minecraft minecraft;
-	private final List<RecipeShownListener> showListeners = Lists.<RecipeShownListener>newArrayList();
+	private final RecipeBookComponent<?> parent;
 	private List<RecipeCollection> recipeCollections = ImmutableList.of();
 	private StateSwitchingButton forwardButton;
 	private StateSwitchingButton backButton;
 	private int totalPages;
 	private int currentPage;
-	private RecipeBook recipeBook;
+	private ClientRecipeBook recipeBook;
 	@Nullable
-	private RecipeHolder<?> lastClickedRecipe;
+	private RecipeDisplayId lastClickedRecipe;
 	@Nullable
 	private RecipeCollection lastClickedRecipeCollection;
 	private boolean isFiltering;
 
-	public RecipeBookPage(SlotSelectTime slotSelectTime, boolean bl) {
+	public RecipeBookPage(RecipeBookComponent<?> recipeBookComponent, SlotSelectTime slotSelectTime, boolean bl) {
+		this.parent = recipeBookComponent;
 		this.overlay = new OverlayRecipeComponent(slotSelectTime, bl);
 
 		for (int i = 0; i < 20; i++) {
@@ -67,11 +70,6 @@ public class RecipeBookPage {
 		this.backButton.initTextureValues(PAGE_BACKWARD_SPRITES);
 	}
 
-	public void addListener(RecipeBookComponent recipeBookComponent) {
-		this.showListeners.remove(recipeBookComponent);
-		this.showListeners.add(recipeBookComponent);
-	}
-
 	public void updateCollections(List<RecipeCollection> list, boolean bl, boolean bl2) {
 		this.recipeCollections = list;
 		this.isFiltering = bl2;
@@ -85,12 +83,13 @@ public class RecipeBookPage {
 
 	private void updateButtonsForPage() {
 		int i = 20 * this.currentPage;
+		SlotDisplay.ResolutionContext resolutionContext = SlotDisplay.ResolutionContext.forLevel(this.minecraft.level);
 
 		for (int j = 0; j < this.buttons.size(); j++) {
 			RecipeButton recipeButton = (RecipeButton)this.buttons.get(j);
 			if (i + j < this.recipeCollections.size()) {
 				RecipeCollection recipeCollection = (RecipeCollection)this.recipeCollections.get(i + j);
-				recipeButton.init(recipeCollection, this.isFiltering, this);
+				recipeButton.init(recipeCollection, this.isFiltering, this, resolutionContext);
 				recipeButton.visible = true;
 			} else {
 				recipeButton.visible = false;
@@ -128,13 +127,14 @@ public class RecipeBookPage {
 
 	public void renderTooltip(GuiGraphics guiGraphics, int i, int j) {
 		if (this.minecraft.screen != null && this.hoveredButton != null && !this.overlay.isVisible()) {
-			ResourceLocation resourceLocation = this.hoveredButton.getResultItem().get(DataComponents.TOOLTIP_STYLE);
-			guiGraphics.renderComponentTooltip(this.minecraft.font, this.hoveredButton.getTooltipText(), i, j, resourceLocation);
+			ItemStack itemStack = this.hoveredButton.getDisplayStack();
+			ResourceLocation resourceLocation = itemStack.get(DataComponents.TOOLTIP_STYLE);
+			guiGraphics.renderComponentTooltip(this.minecraft.font, this.hoveredButton.getTooltipText(itemStack), i, j, resourceLocation);
 		}
 	}
 
 	@Nullable
-	public RecipeHolder<?> getLastClickedRecipe() {
+	public RecipeDisplayId getLastClickedRecipe() {
 		return this.lastClickedRecipe;
 	}
 
@@ -168,15 +168,24 @@ public class RecipeBookPage {
 			this.updateButtonsForPage();
 			return true;
 		} else {
+			SlotDisplay.ResolutionContext resolutionContext = SlotDisplay.ResolutionContext.forLevel(this.minecraft.level);
+
 			for (RecipeButton recipeButton : this.buttons) {
 				if (recipeButton.mouseClicked(d, e, i)) {
 					if (i == 0) {
-						this.lastClickedRecipe = recipeButton.getRecipe();
+						this.lastClickedRecipe = recipeButton.getCurrentRecipe();
 						this.lastClickedRecipeCollection = recipeButton.getCollection();
 					} else if (i == 1 && !this.overlay.isVisible() && !recipeButton.isOnlyOption()) {
 						this.overlay
 							.init(
-								recipeButton.getCollection(), this.isFiltering, recipeButton.getX(), recipeButton.getY(), j + l / 2, k + 13 + m / 2, (float)recipeButton.getWidth()
+								recipeButton.getCollection(),
+								resolutionContext,
+								this.isFiltering,
+								recipeButton.getX(),
+								recipeButton.getY(),
+								j + l / 2,
+								k + 13 + m / 2,
+								(float)recipeButton.getWidth()
 							);
 					}
 
@@ -188,13 +197,11 @@ public class RecipeBookPage {
 		}
 	}
 
-	public void recipesShown(List<RecipeHolder<?>> list) {
-		for (RecipeShownListener recipeShownListener : this.showListeners) {
-			recipeShownListener.recipesShown(list);
-		}
+	public void recipeShown(RecipeDisplayId recipeDisplayId) {
+		this.parent.recipeShown(recipeDisplayId);
 	}
 
-	public RecipeBook getRecipeBook() {
+	public ClientRecipeBook getRecipeBook() {
 		return this.recipeBook;
 	}
 

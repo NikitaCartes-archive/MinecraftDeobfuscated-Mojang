@@ -86,6 +86,10 @@ public interface StringRepresentable {
 		public E byName(@Nullable String string, E enum_) {
 			return (E)Objects.requireNonNullElse(this.byName(string), enum_);
 		}
+
+		public E byName(@Nullable String string, Supplier<? extends E> supplier) {
+			return (E)Objects.requireNonNullElseGet(this.byName(string), supplier);
+		}
 	}
 
 	public static class StringRepresentableCodec<S extends StringRepresentable> implements Codec<S> {

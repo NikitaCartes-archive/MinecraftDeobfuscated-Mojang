@@ -26,7 +26,7 @@ public class VillagerGoalPackages {
 
 	public static ImmutableList<Pair<Integer, ? extends BehaviorControl<? super Villager>>> getCorePackage(VillagerProfession villagerProfession, float f) {
 		return ImmutableList.of(
-			Pair.of(0, new Swim(0.8F)),
+			Pair.of(0, new Swim<>(0.8F)),
 			Pair.of(0, InteractWithDoor.create()),
 			Pair.of(0, new LookAtTargetSink(45, 90)),
 			Pair.of(0, new VillagerPanicTrigger()),

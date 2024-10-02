@@ -2,6 +2,8 @@ package net.minecraft.world.inventory;
 
 import java.util.List;
 import net.minecraft.recipebook.ServerPlaceRecipe;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -11,6 +13,7 @@ import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipePropertySet;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
@@ -29,17 +32,24 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu {
 	private final ContainerData data;
 	protected final Level level;
 	private final RecipeType<? extends AbstractCookingRecipe> recipeType;
+	private final RecipePropertySet acceptedInputs;
 	private final RecipeBookType recipeBookType;
 
 	protected AbstractFurnaceMenu(
-		MenuType<?> menuType, RecipeType<? extends AbstractCookingRecipe> recipeType, RecipeBookType recipeBookType, int i, Inventory inventory
+		MenuType<?> menuType,
+		RecipeType<? extends AbstractCookingRecipe> recipeType,
+		ResourceKey<RecipePropertySet> resourceKey,
+		RecipeBookType recipeBookType,
+		int i,
+		Inventory inventory
 	) {
-		this(menuType, recipeType, recipeBookType, i, inventory, new SimpleContainer(3), new SimpleContainerData(4));
+		this(menuType, recipeType, resourceKey, recipeBookType, i, inventory, new SimpleContainer(3), new SimpleContainerData(4));
 	}
 
 	protected AbstractFurnaceMenu(
 		MenuType<?> menuType,
 		RecipeType<? extends AbstractCookingRecipe> recipeType,
+		ResourceKey<RecipePropertySet> resourceKey,
 		RecipeBookType recipeBookType,
 		int i,
 		Inventory inventory,
@@ -54,6 +64,7 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu {
 		this.container = container;
 		this.data = containerData;
 		this.level = inventory.player.level();
+		this.acceptedInputs = this.level.recipeAccess().propertySet(resourceKey);
 		this.addSlot(new Slot(container, 0, 56, 17));
 		this.addSlot(new FurnaceFuelSlot(this, container, 1, 56, 53));
 		this.addSlot(new FurnaceResultSlot(inventory.player, container, 2, 116, 35));
@@ -127,7 +138,7 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu {
 	}
 
 	protected boolean canSmelt(ItemStack itemStack) {
-		return this.level.getRecipeManager().getRecipeFor(this.recipeType, new SingleRecipeInput(itemStack), this.level).isPresent();
+		return this.acceptedInputs.test(itemStack);
 	}
 
 	protected boolean isFuel(ItemStack itemStack) {
@@ -159,7 +170,7 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu {
 	}
 
 	@Override
-	public RecipeBookMenu.PostPlaceAction handlePlacement(boolean bl, boolean bl2, RecipeHolder<?> recipeHolder, Inventory inventory) {
+	public RecipeBookMenu.PostPlaceAction handlePlacement(boolean bl, boolean bl2, RecipeHolder<?> recipeHolder, ServerLevel serverLevel, Inventory inventory) {
 		final List<Slot> list = List.of(this.getSlot(0), this.getSlot(2));
 		return ServerPlaceRecipe.placeRecipe(new ServerPlaceRecipe.CraftingMenuAccess<AbstractCookingRecipe>() {
 			@Override
@@ -174,7 +185,7 @@ public abstract class AbstractFurnaceMenu extends RecipeBookMenu {
 
 			@Override
 			public boolean recipeMatches(RecipeHolder<AbstractCookingRecipe> recipeHolder) {
-				return recipeHolder.value().matches(new SingleRecipeInput(AbstractFurnaceMenu.this.container.getItem(0)), AbstractFurnaceMenu.this.level);
+				return recipeHolder.value().matches(new SingleRecipeInput(AbstractFurnaceMenu.this.container.getItem(0)), serverLevel);
 			}
 		}, 1, 1, List.of(this.getSlot(0)), list, inventory, (RecipeHolder<AbstractCookingRecipe>)recipeHolder, bl, bl2);
 	}

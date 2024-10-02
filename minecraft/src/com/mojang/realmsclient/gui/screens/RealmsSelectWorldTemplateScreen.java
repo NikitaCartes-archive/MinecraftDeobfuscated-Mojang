@@ -19,6 +19,7 @@ import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -33,7 +34,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.realms.RealmsObjectSelectionList;
 import net.minecraft.realms.RealmsScreen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.CommonLinks;
@@ -341,13 +341,14 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 	}
 
 	@Environment(EnvType.CLIENT)
-	class WorldTemplateList extends RealmsObjectSelectionList<RealmsSelectWorldTemplateScreen.Entry> {
+	class WorldTemplateList extends ObjectSelectionList<RealmsSelectWorldTemplateScreen.Entry> {
 		public WorldTemplateList(final RealmsSelectWorldTemplateScreen realmsSelectWorldTemplateScreen) {
 			this(realmsSelectWorldTemplateScreen, Collections.emptyList());
 		}
 
 		public WorldTemplateList(final Iterable<WorldTemplate> realmsSelectWorldTemplateScreen, final Iterable iterable) {
 			super(
+				Minecraft.getInstance(),
 				realmsSelectWorldTemplateScreen.width,
 				realmsSelectWorldTemplateScreen.height - 33 - realmsSelectWorldTemplateScreen.getHeaderHeight(),
 				realmsSelectWorldTemplateScreen.getHeaderHeight(),
@@ -375,11 +376,6 @@ public class RealmsSelectWorldTemplateScreen extends RealmsScreen {
 			super.setSelected(entry);
 			this.this$0.selectedTemplate = entry == null ? null : entry.template;
 			this.this$0.updateButtonStates();
-		}
-
-		@Override
-		public int getMaxPosition() {
-			return this.getItemCount() * 46;
 		}
 
 		@Override

@@ -25,7 +25,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 
 public class PrimedTnt extends Entity implements TraceableEntity {
 	private static final EntityDataAccessor<Integer> DATA_FUSE_ID = SynchedEntityData.defineId(PrimedTnt.class, EntityDataSerializers.INT);
@@ -188,8 +188,8 @@ public class PrimedTnt extends Entity implements TraceableEntity {
 
 	@Nullable
 	@Override
-	public Entity changeDimension(DimensionTransition dimensionTransition) {
-		Entity entity = super.changeDimension(dimensionTransition);
+	public Entity teleport(TeleportTransition teleportTransition) {
+		Entity entity = super.teleport(teleportTransition);
 		if (entity instanceof PrimedTnt primedTnt) {
 			primedTnt.setUsedPortal(true);
 		}

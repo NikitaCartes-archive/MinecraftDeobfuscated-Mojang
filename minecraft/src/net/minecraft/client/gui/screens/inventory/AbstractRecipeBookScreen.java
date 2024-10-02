@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
 
 @Environment(EnvType.CLIENT)
 public abstract class AbstractRecipeBookScreen<T extends RecipeBookMenu> extends AbstractContainerScreen<T> implements RecipeUpdateListener {
@@ -121,7 +122,7 @@ public abstract class AbstractRecipeBookScreen<T extends RecipeBookMenu> extends
 	}
 
 	@Override
-	public RecipeBookComponent getRecipeBookComponent() {
-		return this.recipeBookComponent;
+	public void fillGhostRecipe(RecipeDisplay recipeDisplay) {
+		this.recipeBookComponent.fillGhostRecipe(recipeDisplay);
 	}
 }

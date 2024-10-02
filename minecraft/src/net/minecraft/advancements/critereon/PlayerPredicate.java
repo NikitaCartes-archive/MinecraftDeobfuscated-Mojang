@@ -22,18 +22,21 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.stats.RecipeBook;
+import net.minecraft.stats.ServerRecipeBook;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
 import net.minecraft.stats.StatsCounter;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -43,7 +46,7 @@ public record PlayerPredicate(
 	MinMaxBounds.Ints level,
 	GameTypePredicate gameType,
 	List<PlayerPredicate.StatMatcher<?>> stats,
-	Object2BooleanMap<ResourceLocation> recipes,
+	Object2BooleanMap<ResourceKey<Recipe<?>>> recipes,
 	Map<ResourceLocation, PlayerPredicate.AdvancementPredicate> advancements,
 	Optional<EntityPredicate> lookingAt,
 	Optional<InputPredicate> input
@@ -54,7 +57,9 @@ public record PlayerPredicate(
 					MinMaxBounds.Ints.CODEC.optionalFieldOf("level", MinMaxBounds.Ints.ANY).forGetter(PlayerPredicate::level),
 					GameTypePredicate.CODEC.optionalFieldOf("gamemode", GameTypePredicate.ANY).forGetter(PlayerPredicate::gameType),
 					PlayerPredicate.StatMatcher.CODEC.listOf().optionalFieldOf("stats", List.of()).forGetter(PlayerPredicate::stats),
-					ExtraCodecs.object2BooleanMap(ResourceLocation.CODEC).optionalFieldOf("recipes", Object2BooleanMaps.emptyMap()).forGetter(PlayerPredicate::recipes),
+					ExtraCodecs.object2BooleanMap(ResourceKey.codec(Registries.RECIPE))
+						.optionalFieldOf("recipes", Object2BooleanMaps.emptyMap())
+						.forGetter(PlayerPredicate::recipes),
 					Codec.unboundedMap(ResourceLocation.CODEC, PlayerPredicate.AdvancementPredicate.CODEC)
 						.optionalFieldOf("advancements", Map.of())
 						.forGetter(PlayerPredicate::advancements),
@@ -81,10 +86,10 @@ public record PlayerPredicate(
 				}
 			}
 
-			RecipeBook recipeBook = serverPlayer.getRecipeBook();
+			ServerRecipeBook serverRecipeBook = serverPlayer.getRecipeBook();
 
-			for (Entry<ResourceLocation> entry : this.recipes.object2BooleanEntrySet()) {
-				if (recipeBook.contains((ResourceLocation)entry.getKey()) != entry.getBooleanValue()) {
+			for (Entry<ResourceKey<Recipe<?>>> entry : this.recipes.object2BooleanEntrySet()) {
+				if (serverRecipeBook.contains((ResourceKey<Recipe<?>>)entry.getKey()) != entry.getBooleanValue()) {
 					return false;
 				}
 			}
@@ -173,7 +178,7 @@ public record PlayerPredicate(
 		private MinMaxBounds.Ints level = MinMaxBounds.Ints.ANY;
 		private GameTypePredicate gameType = GameTypePredicate.ANY;
 		private final ImmutableList.Builder<PlayerPredicate.StatMatcher<?>> stats = ImmutableList.builder();
-		private final Object2BooleanMap<ResourceLocation> recipes = new Object2BooleanOpenHashMap<>();
+		private final Object2BooleanMap<ResourceKey<Recipe<?>>> recipes = new Object2BooleanOpenHashMap<>();
 		private final Map<ResourceLocation, PlayerPredicate.AdvancementPredicate> advancements = Maps.<ResourceLocation, PlayerPredicate.AdvancementPredicate>newHashMap();
 		private Optional<EntityPredicate> lookingAt = Optional.empty();
 		private Optional<InputPredicate> input = Optional.empty();
@@ -192,8 +197,8 @@ public record PlayerPredicate(
 			return this;
 		}
 
-		public PlayerPredicate.Builder addRecipe(ResourceLocation resourceLocation, boolean bl) {
-			this.recipes.put(resourceLocation, bl);
+		public PlayerPredicate.Builder addRecipe(ResourceKey<Recipe<?>> resourceKey, boolean bl) {
+			this.recipes.put(resourceKey, bl);
 			return this;
 		}
 

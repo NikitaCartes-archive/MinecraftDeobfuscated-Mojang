@@ -173,8 +173,8 @@ public class BrewingStandBlockEntity extends BaseContainerBlockEntity implements
 		}
 
 		itemStack.shrink(1);
-		if (itemStack.getItem().hasCraftingRemainingItem()) {
-			ItemStack itemStack2 = new ItemStack(itemStack.getItem().getCraftingRemainingItem());
+		ItemStack itemStack2 = itemStack.getItem().getCraftingRemainder();
+		if (!itemStack2.isEmpty()) {
 			if (itemStack.isEmpty()) {
 				itemStack = itemStack2;
 			} else {

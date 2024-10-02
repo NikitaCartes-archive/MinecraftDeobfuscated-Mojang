@@ -34,6 +34,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.CHERRY_LEAVES, renderType2);
 		hashMap.put(Blocks.BIRCH_LEAVES, renderType2);
 		hashMap.put(Blocks.DARK_OAK_LEAVES, renderType2);
+		hashMap.put(Blocks.PALE_OAK_LEAVES, renderType2);
 		hashMap.put(Blocks.AZALEA_LEAVES, renderType2);
 		hashMap.put(Blocks.FLOWERING_AZALEA_LEAVES, renderType2);
 		hashMap.put(Blocks.MANGROVE_ROOTS, renderType2);
@@ -46,6 +47,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.ACACIA_SAPLING, renderType3);
 		hashMap.put(Blocks.CHERRY_SAPLING, renderType3);
 		hashMap.put(Blocks.DARK_OAK_SAPLING, renderType3);
+		hashMap.put(Blocks.PALE_OAK_SAPLING, renderType3);
 		hashMap.put(Blocks.GLASS, renderType3);
 		hashMap.put(Blocks.WHITE_BED, renderType3);
 		hashMap.put(Blocks.ORANGE_BED, renderType3);
@@ -113,6 +115,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.ACACIA_TRAPDOOR, renderType3);
 		hashMap.put(Blocks.CHERRY_TRAPDOOR, renderType3);
 		hashMap.put(Blocks.DARK_OAK_TRAPDOOR, renderType3);
+		hashMap.put(Blocks.PALE_OAK_TRAPDOOR, renderType3);
 		hashMap.put(Blocks.CRIMSON_TRAPDOOR, renderType3);
 		hashMap.put(Blocks.WARPED_TRAPDOOR, renderType3);
 		hashMap.put(Blocks.MANGROVE_TRAPDOOR, renderType3);
@@ -130,6 +133,8 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.PUMPKIN_STEM, renderType3);
 		hashMap.put(Blocks.MELON_STEM, renderType3);
 		hashMap.put(Blocks.VINE, renderType3);
+		hashMap.put(Blocks.PALE_MOSS_CARPET, renderType3);
+		hashMap.put(Blocks.PALE_HANGING_MOSS, renderType3);
 		hashMap.put(Blocks.GLOW_LICHEN, renderType3);
 		hashMap.put(Blocks.LILY_PAD, renderType3);
 		hashMap.put(Blocks.NETHER_WART, renderType3);
@@ -144,6 +149,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.POTTED_ACACIA_SAPLING, renderType3);
 		hashMap.put(Blocks.POTTED_CHERRY_SAPLING, renderType3);
 		hashMap.put(Blocks.POTTED_DARK_OAK_SAPLING, renderType3);
+		hashMap.put(Blocks.POTTED_PALE_OAK_SAPLING, renderType3);
 		hashMap.put(Blocks.POTTED_MANGROVE_PROPAGULE, renderType3);
 		hashMap.put(Blocks.POTTED_FERN, renderType3);
 		hashMap.put(Blocks.POTTED_DANDELION, renderType3);
@@ -183,6 +189,7 @@ public class ItemBlockRenderTypes {
 		hashMap.put(Blocks.ACACIA_DOOR, renderType3);
 		hashMap.put(Blocks.CHERRY_DOOR, renderType3);
 		hashMap.put(Blocks.DARK_OAK_DOOR, renderType3);
+		hashMap.put(Blocks.PALE_OAK_DOOR, renderType3);
 		hashMap.put(Blocks.MANGROVE_DOOR, renderType3);
 		hashMap.put(Blocks.BAMBOO_DOOR, renderType3);
 		hashMap.put(Blocks.COPPER_DOOR, renderType3);

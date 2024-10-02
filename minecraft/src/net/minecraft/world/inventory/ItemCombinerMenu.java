@@ -1,6 +1,5 @@
 package net.minecraft.world.inventory;
 
-import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -12,26 +11,32 @@ import net.minecraft.world.level.block.state.BlockState;
 public abstract class ItemCombinerMenu extends AbstractContainerMenu {
 	private static final int INVENTORY_SLOTS_PER_ROW = 9;
 	private static final int INVENTORY_ROWS = 3;
+	private static final int INPUT_SLOT_START = 0;
 	protected final ContainerLevelAccess access;
 	protected final Player player;
 	protected final Container inputSlots;
-	private final List<Integer> inputSlotIndexes;
 	protected final ResultContainer resultSlots = new ResultContainer();
 	private final int resultSlotIndex;
 
-	protected abstract boolean mayPickup(Player player, boolean bl);
+	protected boolean mayPickup(Player player, boolean bl) {
+		return true;
+	}
 
 	protected abstract void onTake(Player player, ItemStack itemStack);
 
 	protected abstract boolean isValidBlock(BlockState blockState);
 
-	public ItemCombinerMenu(@Nullable MenuType<?> menuType, int i, Inventory inventory, ContainerLevelAccess containerLevelAccess) {
+	public ItemCombinerMenu(
+		@Nullable MenuType<?> menuType,
+		int i,
+		Inventory inventory,
+		ContainerLevelAccess containerLevelAccess,
+		ItemCombinerMenuSlotDefinition itemCombinerMenuSlotDefinition
+	) {
 		super(menuType, i);
 		this.access = containerLevelAccess;
 		this.player = inventory.player;
-		ItemCombinerMenuSlotDefinition itemCombinerMenuSlotDefinition = this.createInputSlotDefinitions();
 		this.inputSlots = this.createContainer(itemCombinerMenuSlotDefinition.getNumOfInputSlots());
-		this.inputSlotIndexes = itemCombinerMenuSlotDefinition.getInputSlotIndexes();
 		this.resultSlotIndex = itemCombinerMenuSlotDefinition.getResultSlotIndex();
 		this.createInputSlots(itemCombinerMenuSlotDefinition);
 		this.createResultSlot(itemCombinerMenuSlotDefinition);
@@ -76,8 +81,6 @@ public abstract class ItemCombinerMenu extends AbstractContainerMenu {
 	}
 
 	public abstract void createResult();
-
-	protected abstract ItemCombinerMenuSlotDefinition createInputSlotDefinitions();
 
 	private SimpleContainer createContainer(int i) {
 		return new SimpleContainer(i) {
@@ -124,13 +127,12 @@ public abstract class ItemCombinerMenu extends AbstractContainerMenu {
 				}
 
 				slot.onQuickCraft(itemStack2, itemStack);
-			} else if (this.inputSlotIndexes.contains(i)) {
+			} else if (i >= 0 && i < this.getResultSlot()) {
 				if (!this.moveItemStackTo(itemStack2, j, k, false)) {
 					return ItemStack.EMPTY;
 				}
 			} else if (this.canMoveIntoInputSlots(itemStack2) && i >= this.getInventorySlotStart() && i < this.getUseRowEnd()) {
-				int l = this.getSlotToQuickMoveTo(itemStack);
-				if (!this.moveItemStackTo(itemStack2, l, this.getResultSlot(), false)) {
+				if (!this.moveItemStackTo(itemStack2, 0, this.getResultSlot(), false)) {
 					return ItemStack.EMPTY;
 				}
 			} else if (i >= this.getInventorySlotStart() && i < this.getInventorySlotEnd()) {
@@ -161,10 +163,6 @@ public abstract class ItemCombinerMenu extends AbstractContainerMenu {
 
 	protected boolean canMoveIntoInputSlots(ItemStack itemStack) {
 		return true;
-	}
-
-	public int getSlotToQuickMoveTo(ItemStack itemStack) {
-		return this.inputSlots.isEmpty() ? 0 : (Integer)this.inputSlotIndexes.get(0);
 	}
 
 	public int getResultSlot() {

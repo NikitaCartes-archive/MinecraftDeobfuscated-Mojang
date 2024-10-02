@@ -14,7 +14,7 @@ import java.util.Set;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 
 public class EffectDurationFix extends DataFix {
-	private static final Set<String> ITEM_TYPES = Set.of("minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion", "minecraft:tipped_arrow");
+	private static final Set<String> POTION_ITEMS = Set.of("minecraft:potion", "minecraft:splash_potion", "minecraft:lingering_potion", "minecraft:tipped_arrow");
 
 	public EffectDurationFix(Schema schema) {
 		super(schema, false);
@@ -30,12 +30,11 @@ public class EffectDurationFix extends DataFix {
 			this.fixTypeEverywhereTyped("EffectDurationEntity", schema.getType(References.ENTITY), typed -> typed.update(DSL.remainderFinder(), this::updateEntity)),
 			this.fixTypeEverywhereTyped("EffectDurationPlayer", schema.getType(References.PLAYER), typed -> typed.update(DSL.remainderFinder(), this::updateEntity)),
 			this.fixTypeEverywhereTyped("EffectDurationItem", type, typed -> {
-				Optional<Pair<String, String>> optional = typed.getOptional(opticFinder);
-				if (optional.filter(ITEM_TYPES::contains).isPresent()) {
-					Optional<? extends Typed<?>> optional2 = typed.getOptionalTyped(opticFinder2);
-					if (optional2.isPresent()) {
-						Dynamic<?> dynamic = ((Typed)optional2.get()).get(DSL.remainderFinder());
-						Typed<?> typed2 = ((Typed)optional2.get()).set(DSL.remainderFinder(), dynamic.update("CustomPotionEffects", this::fix));
+				if (typed.getOptional(opticFinder).filter(pair -> POTION_ITEMS.contains(pair.getSecond())).isPresent()) {
+					Optional<? extends Typed<?>> optional = typed.getOptionalTyped(opticFinder2);
+					if (optional.isPresent()) {
+						Dynamic<?> dynamic = ((Typed)optional.get()).get(DSL.remainderFinder());
+						Typed<?> typed2 = ((Typed)optional.get()).set(DSL.remainderFinder(), dynamic.update("CustomPotionEffects", this::fix));
 						return typed.set(opticFinder2, typed2);
 					}
 				}

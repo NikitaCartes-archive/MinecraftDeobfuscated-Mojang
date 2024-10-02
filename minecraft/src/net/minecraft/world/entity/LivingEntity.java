@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
+import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
@@ -177,6 +178,14 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	public static final float EXTRA_RENDER_CULLING_SIZE_WITH_BIG_HAT = 0.5F;
 	public static final float DEFAULT_BABY_SCALE = 0.5F;
 	public static final String ATTRIBUTES_FIELD = "attributes";
+	public static final Predicate<LivingEntity> PLAYER_NOT_WEARING_DISGUISE_ITEM = livingEntity -> {
+		if (livingEntity instanceof Player player) {
+			ItemStack itemStack = player.getItemBySlot(EquipmentSlot.HEAD);
+			return !itemStack.is(ItemTags.GAZE_DISGUISE_EQUIPMENT);
+		} else {
+			return true;
+		}
+	};
 	private final AttributeMap attributes;
 	private final CombatTracker combatTracker = new CombatTracker(this);
 	private final Map<Holder<MobEffect>, MobEffectInstance> activeEffects = Maps.<Holder<MobEffect>, MobEffectInstance>newHashMap();
@@ -1563,6 +1572,28 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		return !this.isRemoved() && this.getHealth() > 0.0F;
 	}
 
+	public boolean isLookingAtMe(
+		LivingEntity livingEntity, double d, boolean bl, boolean bl2, Predicate<LivingEntity> predicate, DoubleSupplier... doubleSuppliers
+	) {
+		if (!predicate.test(livingEntity)) {
+			return false;
+		} else {
+			Vec3 vec3 = livingEntity.getViewVector(1.0F).normalize();
+
+			for (DoubleSupplier doubleSupplier : doubleSuppliers) {
+				Vec3 vec32 = new Vec3(this.getX() - livingEntity.getX(), doubleSupplier.getAsDouble() - livingEntity.getEyeY(), this.getZ() - livingEntity.getZ());
+				double e = vec32.length();
+				vec32 = vec32.normalize();
+				double f = vec3.dot(vec32);
+				if (f > 1.0 - d / (bl ? e : 1.0)) {
+					return livingEntity.hasLineOfSight(this, bl2 ? ClipContext.Block.VISUAL : ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, doubleSupplier);
+				}
+			}
+
+			return false;
+		}
+	}
+
 	@Override
 	public int getMaxFallDistance() {
 		return this.getComfortableFallDistance(0.0F);
@@ -2626,11 +2657,6 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.noJumpDelay--;
 		}
 
-		if (this.isControlledByLocalInstance()) {
-			this.lerpSteps = 0;
-			this.syncPacketPositionCodec(this.getX(), this.getY(), this.getZ());
-		}
-
 		if (this.lerpSteps > 0) {
 			this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
 			this.lerpSteps--;
@@ -2714,10 +2740,10 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			this.resetFallDistance();
 		}
 
-		label115: {
+		label112: {
 			if (this.getControllingPassenger() instanceof Player player && this.isAlive()) {
 				this.travelRidden(player, vec32);
-				break label115;
+				break label112;
 			}
 
 			this.travel(vec32);
@@ -2885,6 +2911,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	@Override
+	public void cancelLerp() {
+		this.lerpSteps = 0;
+	}
+
+	@Override
 	public void lerpTo(double d, double e, double f, float g, float h, int i) {
 		this.lerpX = d;
 		this.lerpY = e;
@@ -2945,14 +2976,16 @@ public abstract class LivingEntity extends Entity implements Attackable {
 	}
 
 	public boolean hasLineOfSight(Entity entity) {
+		return this.hasLineOfSight(entity, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity::getEyeY);
+	}
+
+	public boolean hasLineOfSight(Entity entity, ClipContext.Block block, ClipContext.Fluid fluid, DoubleSupplier doubleSupplier) {
 		if (entity.level() != this.level()) {
 			return false;
 		} else {
 			Vec3 vec3 = new Vec3(this.getX(), this.getEyeY(), this.getZ());
-			Vec3 vec32 = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ());
-			return vec32.distanceTo(vec3) > 128.0
-				? false
-				: this.level().clip(new ClipContext(vec3, vec32, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this)).getType() == HitResult.Type.MISS;
+			Vec3 vec32 = new Vec3(entity.getX(), doubleSupplier.getAsDouble(), entity.getZ());
+			return vec32.distanceTo(vec3) > 128.0 ? false : this.level().clip(new ClipContext(vec3, vec32, block, fluid, this)).getType() == HitResult.Type.MISS;
 		}
 	}
 

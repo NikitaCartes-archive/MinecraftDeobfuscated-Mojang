@@ -298,7 +298,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 			this.name = parseCustomNameSafe(compoundTag.getString("CustomName"), provider);
 		}
 
-		this.lockKey = LockCode.fromTag(compoundTag);
+		this.lockKey = LockCode.fromTag(compoundTag, provider);
 	}
 
 	@Override
@@ -311,7 +311,7 @@ public class BeaconBlockEntity extends BlockEntity implements MenuProvider, Name
 			compoundTag.putString("CustomName", Component.Serializer.toJson(this.name, provider));
 		}
 
-		this.lockKey.addToTag(compoundTag);
+		this.lockKey.addToTag(compoundTag, provider);
 	}
 
 	public void setCustomName(@Nullable Component component) {

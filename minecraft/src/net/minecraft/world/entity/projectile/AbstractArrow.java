@@ -198,6 +198,10 @@ public abstract class AbstractArrow extends Projectile {
 		} else {
 			this.inGroundTime = 0;
 			Vec3 vec33 = this.position();
+			if (this.isInWater()) {
+				this.addBubblePatricles(vec33);
+			}
+
 			if (this.isCritArrow()) {
 				for (int i = 0; i < 4; i++) {
 					this.level()
@@ -266,18 +270,21 @@ public abstract class AbstractArrow extends Projectile {
 
 	private void applyInertia() {
 		Vec3 vec3 = this.getDeltaMovement();
-		Vec3 vec32 = this.position();
 		float f = 0.99F;
 		if (this.isInWater()) {
-			for (int i = 0; i < 4; i++) {
-				float g = 0.25F;
-				this.level().addParticle(ParticleTypes.BUBBLE, vec32.x - vec3.x * 0.25, vec32.y - vec3.y * 0.25, vec32.z - vec3.z * 0.25, vec3.x, vec3.y, vec3.z);
-			}
-
 			f = this.getWaterInertia();
 		}
 
 		this.setDeltaMovement(vec3.scale((double)f));
+	}
+
+	private void addBubblePatricles(Vec3 vec3) {
+		Vec3 vec32 = this.getDeltaMovement();
+
+		for (int i = 0; i < 4; i++) {
+			float f = 0.25F;
+			this.level().addParticle(ParticleTypes.BUBBLE, vec3.x - vec32.x * 0.25, vec3.y - vec32.y * 0.25, vec3.z - vec32.z * 0.25, vec32.x, vec32.y, vec32.z);
+		}
 	}
 
 	@Override

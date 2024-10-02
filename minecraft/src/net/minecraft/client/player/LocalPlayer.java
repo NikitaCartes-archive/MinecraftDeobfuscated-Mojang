@@ -74,7 +74,7 @@ import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.WritableBookContent;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.display.RecipeDisplayId;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Portal;
@@ -199,28 +199,26 @@ public class LocalPlayer extends AbstractClientPlayer {
 	@Override
 	public void tick() {
 		this.dropSpamThrottler.tick();
-		if (this.level().hasChunkAt(this.getBlockX(), this.getBlockZ())) {
-			super.tick();
-			this.sendShiftKeyState();
-			if (!this.lastSentInput.equals(this.input.keyPresses)) {
-				this.connection.send(new ServerboundPlayerInputPacket(this.input.keyPresses));
-				this.lastSentInput = this.input.keyPresses;
-			}
+		super.tick();
+		this.sendShiftKeyState();
+		if (!this.lastSentInput.equals(this.input.keyPresses)) {
+			this.connection.send(new ServerboundPlayerInputPacket(this.input.keyPresses));
+			this.lastSentInput = this.input.keyPresses;
+		}
 
-			if (this.isPassenger()) {
-				this.connection.send(new ServerboundMovePlayerPacket.Rot(this.getYRot(), this.getXRot(), this.onGround(), this.horizontalCollision));
-				Entity entity = this.getRootVehicle();
-				if (entity != this && entity.isControlledByLocalInstance()) {
-					this.connection.send(new ServerboundMoveVehiclePacket(entity));
-					this.sendIsSprintingIfNeeded();
-				}
-			} else {
-				this.sendPosition();
+		if (this.isPassenger()) {
+			this.connection.send(new ServerboundMovePlayerPacket.Rot(this.getYRot(), this.getXRot(), this.onGround(), this.horizontalCollision));
+			Entity entity = this.getRootVehicle();
+			if (entity != this && entity.isControlledByLocalInstance()) {
+				this.connection.send(new ServerboundMoveVehiclePacket(entity));
+				this.sendIsSprintingIfNeeded();
 			}
+		} else {
+			this.sendPosition();
+		}
 
-			for (AmbientSoundHandler ambientSoundHandler : this.ambientSoundHandlers) {
-				ambientSoundHandler.tick();
-			}
+		for (AmbientSoundHandler ambientSoundHandler : this.ambientSoundHandlers) {
+			ambientSoundHandler.tick();
 		}
 	}
 
@@ -386,10 +384,10 @@ public class LocalPlayer extends AbstractClientPlayer {
 		return this.recipeBook;
 	}
 
-	public void removeRecipeHighlight(RecipeHolder<?> recipeHolder) {
-		if (this.recipeBook.willHighlight(recipeHolder)) {
-			this.recipeBook.removeHighlight(recipeHolder);
-			this.connection.send(new ServerboundRecipeBookSeenRecipePacket(recipeHolder));
+	public void removeRecipeHighlight(RecipeDisplayId recipeDisplayId) {
+		if (this.recipeBook.willHighlight(recipeDisplayId)) {
+			this.recipeBook.removeHighlight(recipeDisplayId);
+			this.connection.send(new ServerboundRecipeBookSeenRecipePacket(recipeDisplayId));
 		}
 	}
 

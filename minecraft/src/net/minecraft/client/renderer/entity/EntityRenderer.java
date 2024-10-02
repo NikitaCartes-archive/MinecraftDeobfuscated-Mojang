@@ -208,13 +208,12 @@ public abstract class EntityRenderer<T extends Entity, S extends EntityRenderSta
 			poseStack.mulPose(this.entityRenderDispatcher.cameraOrientation());
 			poseStack.scale(0.025F, -0.025F, 0.025F);
 			Matrix4f matrix4f = poseStack.last().pose();
-			float f = Minecraft.getInstance().options.getBackgroundOpacity(0.25F);
-			int k = (int)(f * 255.0F) << 24;
 			Font font = this.getFont();
-			float g = (float)(-font.width(component) / 2);
-			font.drawInBatch(component, g, (float)j, -2130706433, false, matrix4f, multiBufferSource, bl ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, k, i);
+			float f = (float)(-font.width(component)) / 2.0F;
+			int k = (int)(Minecraft.getInstance().options.getBackgroundOpacity(0.25F) * 255.0F) << 24;
+			font.drawInBatch(component, f, (float)j, -2130706433, false, matrix4f, multiBufferSource, bl ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL, k, i);
 			if (bl) {
-				font.drawInBatch(component, g, (float)j, -1, false, matrix4f, multiBufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.lightCoordsWithEmission(i, 2));
+				font.drawInBatch(component, f, (float)j, -1, false, matrix4f, multiBufferSource, Font.DisplayMode.NORMAL, 0, LightTexture.lightCoordsWithEmission(i, 2));
 			}
 
 			poseStack.popPose();

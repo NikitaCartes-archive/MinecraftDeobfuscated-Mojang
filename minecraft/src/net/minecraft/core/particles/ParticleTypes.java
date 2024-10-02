@@ -71,6 +71,9 @@ public class ParticleTypes {
 	public static final ParticleType<VibrationParticleOption> VIBRATION = register(
 		"vibration", true, particleType -> VibrationParticleOption.CODEC, particleType -> VibrationParticleOption.STREAM_CODEC
 	);
+	public static final ParticleType<TargetColorParticleOption> TRAIL = register(
+		"trail", false, particleType -> TargetColorParticleOption.CODEC, particleType -> TargetColorParticleOption.STREAM_CODEC
+	);
 	public static final SimpleParticleType ITEM_SLIME = register("item_slime", false);
 	public static final SimpleParticleType ITEM_COBWEB = register("item_cobweb", false);
 	public static final SimpleParticleType ITEM_SNOWBALL = register("item_snowball", false);
@@ -138,6 +141,9 @@ public class ParticleTypes {
 	public static final SimpleParticleType OMINOUS_SPAWNING = register("ominous_spawning", true);
 	public static final SimpleParticleType RAID_OMEN = register("raid_omen", false);
 	public static final SimpleParticleType TRIAL_OMEN = register("trial_omen", false);
+	public static final ParticleType<BlockParticleOption> BLOCK_CRUMBLE = register(
+		"block_crumble", false, BlockParticleOption::codec, BlockParticleOption::streamCodec
+	);
 	public static final Codec<ParticleOptions> CODEC = BuiltInRegistries.PARTICLE_TYPE
 		.byNameCodec()
 		.dispatch("type", ParticleOptions::getType, ParticleType::codec);

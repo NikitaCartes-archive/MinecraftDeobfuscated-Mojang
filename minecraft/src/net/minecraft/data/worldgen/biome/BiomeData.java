@@ -23,7 +23,7 @@ public abstract class BiomeData {
 		bootstrapContext.register(Biomes.FOREST, OverworldBiomes.forest(holderGetter, holderGetter2, false, false, false));
 		bootstrapContext.register(Biomes.FLOWER_FOREST, OverworldBiomes.forest(holderGetter, holderGetter2, false, false, true));
 		bootstrapContext.register(Biomes.BIRCH_FOREST, OverworldBiomes.forest(holderGetter, holderGetter2, true, false, false));
-		bootstrapContext.register(Biomes.DARK_FOREST, OverworldBiomes.darkForest(holderGetter, holderGetter2));
+		bootstrapContext.register(Biomes.DARK_FOREST, OverworldBiomes.darkForest(holderGetter, holderGetter2, false));
 		bootstrapContext.register(Biomes.OLD_GROWTH_BIRCH_FOREST, OverworldBiomes.forest(holderGetter, holderGetter2, true, true, false));
 		bootstrapContext.register(Biomes.OLD_GROWTH_PINE_TAIGA, OverworldBiomes.oldGrowthTaiga(holderGetter, holderGetter2, false));
 		bootstrapContext.register(Biomes.OLD_GROWTH_SPRUCE_TAIGA, OverworldBiomes.oldGrowthTaiga(holderGetter, holderGetter2, true));

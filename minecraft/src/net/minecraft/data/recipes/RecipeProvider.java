@@ -32,6 +32,7 @@ import net.minecraft.data.BlockFamily;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -150,10 +151,10 @@ public abstract class RecipeProvider {
 			.save(this.output, getItemName(item2) + "_smithing");
 	}
 
-	protected void trimSmithing(Item item, ResourceLocation resourceLocation) {
+	protected void trimSmithing(Item item, ResourceKey<Recipe<?>> resourceKey) {
 		SmithingTrimRecipeBuilder.smithingTrim(Ingredient.of(item), this.tag(ItemTags.TRIMMABLE_ARMOR), this.tag(ItemTags.TRIM_MATERIALS), RecipeCategory.MISC)
 			.unlocks("has_smithing_trim_template", this.has(item))
-			.save(this.output, resourceLocation);
+			.save(this.output, resourceKey);
 	}
 
 	protected void twoByTwoPacker(RecipeCategory recipeCategory, ItemLike itemLike, ItemLike itemLike2) {
@@ -484,7 +485,7 @@ public abstract class RecipeProvider {
 			.requires(itemLike2)
 			.group(string4)
 			.unlockedBy(getHasName(itemLike2), this.has(itemLike2))
-			.save(this.output, ResourceLocation.parse(string3));
+			.save(this.output, ResourceKey.create(Registries.RECIPE, ResourceLocation.parse(string3)));
 		this.shaped(recipeCategory2, itemLike2)
 			.define('#', itemLike)
 			.pattern("###")
@@ -492,7 +493,7 @@ public abstract class RecipeProvider {
 			.pattern("###")
 			.group(string2)
 			.unlockedBy(getHasName(itemLike), this.has(itemLike))
-			.save(this.output, ResourceLocation.parse(string));
+			.save(this.output, ResourceKey.create(Registries.RECIPE, ResourceLocation.parse(string)));
 	}
 
 	protected void copySmithingTemplate(ItemLike itemLike, ItemLike itemLike2) {
@@ -725,15 +726,15 @@ public abstract class RecipeProvider {
 					provider -> {
 						final PackOutput.PathProvider pathProvider = this.packOutput.createRegistryElementsPathProvider(Registries.RECIPE);
 						final PackOutput.PathProvider pathProvider2 = this.packOutput.createRegistryElementsPathProvider(Registries.ADVANCEMENT);
-						final Set<ResourceLocation> set = Sets.<ResourceLocation>newHashSet();
+						final Set<ResourceKey<Recipe<?>>> set = Sets.<ResourceKey<Recipe<?>>>newHashSet();
 						final List<CompletableFuture<?>> list = new ArrayList();
 						RecipeOutput recipeOutput = new RecipeOutput() {
 							@Override
-							public void accept(ResourceLocation resourceLocation, Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder) {
-								if (!set.add(resourceLocation)) {
-									throw new IllegalStateException("Duplicate recipe " + resourceLocation);
+							public void accept(ResourceKey<Recipe<?>> resourceKey, Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder) {
+								if (!set.add(resourceKey)) {
+									throw new IllegalStateException("Duplicate recipe " + resourceKey);
 								} else {
-									this.saveRecipe(resourceLocation, recipe);
+									this.saveRecipe(resourceKey, recipe);
 									if (advancementHolder != null) {
 										this.saveAdvancement(advancementHolder);
 									}
@@ -753,8 +754,8 @@ public abstract class RecipeProvider {
 								this.saveAdvancement(advancementHolder);
 							}
 
-							private void saveRecipe(ResourceLocation resourceLocation, Recipe<?> recipe) {
-								list.add(DataProvider.saveStable(cachedOutput, provider, Recipe.CODEC, recipe, pathProvider.json(resourceLocation)));
+							private void saveRecipe(ResourceKey<Recipe<?>> resourceKey, Recipe<?> recipe) {
+								list.add(DataProvider.saveStable(cachedOutput, provider, Recipe.CODEC, recipe, pathProvider.json(resourceKey.location())));
 							}
 
 							private void saveAdvancement(AdvancementHolder advancementHolder) {

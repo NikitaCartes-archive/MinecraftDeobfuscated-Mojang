@@ -10,7 +10,7 @@ import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -19,6 +19,7 @@ import net.minecraft.world.item.crafting.BlastingRecipe;
 import net.minecraft.world.item.crafting.CampfireCookingRecipe;
 import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
@@ -98,18 +99,18 @@ public class SimpleCookingRecipeBuilder implements RecipeBuilder {
 	}
 
 	@Override
-	public void save(RecipeOutput recipeOutput, ResourceLocation resourceLocation) {
-		this.ensureValid(resourceLocation);
+	public void save(RecipeOutput recipeOutput, ResourceKey<Recipe<?>> resourceKey) {
+		this.ensureValid(resourceKey);
 		Advancement.Builder builder = recipeOutput.advancement()
-			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceLocation))
-			.rewards(AdvancementRewards.Builder.recipe(resourceLocation))
+			.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(resourceKey))
+			.rewards(AdvancementRewards.Builder.recipe(resourceKey))
 			.requirements(AdvancementRequirements.Strategy.OR);
 		this.criteria.forEach(builder::addCriterion);
 		AbstractCookingRecipe abstractCookingRecipe = this.factory
 			.create(
 				(String)Objects.requireNonNullElse(this.group, ""), this.bookCategory, this.ingredient, new ItemStack(this.result), this.experience, this.cookingTime
 			);
-		recipeOutput.accept(resourceLocation, abstractCookingRecipe, builder.build(resourceLocation.withPrefix("recipes/" + this.category.getFolderName() + "/")));
+		recipeOutput.accept(resourceKey, abstractCookingRecipe, builder.build(resourceKey.location().withPrefix("recipes/" + this.category.getFolderName() + "/")));
 	}
 
 	private static CookingBookCategory determineSmeltingRecipeCategory(ItemLike itemLike) {
@@ -136,9 +137,9 @@ public class SimpleCookingRecipeBuilder implements RecipeBuilder {
 		}
 	}
 
-	private void ensureValid(ResourceLocation resourceLocation) {
+	private void ensureValid(ResourceKey<Recipe<?>> resourceKey) {
 		if (this.criteria.isEmpty()) {
-			throw new IllegalStateException("No way of obtaining recipe " + resourceLocation);
+			throw new IllegalStateException("No way of obtaining recipe " + resourceKey.location());
 		}
 	}
 }

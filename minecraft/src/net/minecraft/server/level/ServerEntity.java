@@ -15,6 +15,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBundlePacket;
+import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundMoveMinecartPacket;
 import net.minecraft.network.protocol.game.ClientboundProjectilePowerPacket;
@@ -25,7 +26,6 @@ import net.minecraft.network.protocol.game.ClientboundSetEntityLinkPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket;
-import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
 import net.minecraft.network.protocol.game.VecDeltaCodec;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -152,7 +152,7 @@ public class ServerEntity {
 					if (bl6 || this.teleportDelay > 400 || this.wasRiding || this.wasOnGround != this.entity.onGround()) {
 						this.wasOnGround = this.entity.onGround();
 						this.teleportDelay = 0;
-						packet2 = new ClientboundTeleportEntityPacket(this.entity);
+						packet2 = ClientboundEntityPositionSyncPacket.of(this.entity);
 						bl4 = true;
 						bl5 = true;
 					} else if ((!bl3 || !bl) && !(this.entity instanceof AbstractArrow)) {

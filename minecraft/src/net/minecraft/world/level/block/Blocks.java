@@ -9,7 +9,9 @@ import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.data.worldgen.features.CaveFeatures;
 import net.minecraft.data.worldgen.features.TreeFeatures;
+import net.minecraft.data.worldgen.features.VegetationFeatures;
 import net.minecraft.references.Items;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -19,6 +21,7 @@ import net.minecraft.util.valueproviders.ConstantInt;
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.biome.Biome;
@@ -126,6 +129,27 @@ public class Blocks {
 		"dark_oak_planks",
 		BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).instrument(NoteBlockInstrument.BASS).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava()
 	);
+	public static final Block PALE_OAK_WOOD = register(
+		"pale_oak_wood",
+		RotatedPillarBlock::new,
+		BlockBehaviour.Properties.of()
+			.mapColor(MapColor.STONE)
+			.instrument(NoteBlockInstrument.BASS)
+			.strength(2.0F)
+			.sound(SoundType.WOOD)
+			.ignitedByLava()
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
+	public static final Block PALE_OAK_PLANKS = register(
+		"pale_oak_planks",
+		BlockBehaviour.Properties.of()
+			.mapColor(MapColor.QUARTZ)
+			.instrument(NoteBlockInstrument.BASS)
+			.strength(2.0F, 3.0F)
+			.sound(SoundType.WOOD)
+			.ignitedByLava()
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
 	public static final Block MANGROVE_PLANKS = register(
 		"mangrove_planks",
 		BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASS).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava()
@@ -188,6 +212,18 @@ public class Blocks {
 		"dark_oak_sapling",
 		properties -> new SaplingBlock(TreeGrower.DARK_OAK, properties),
 		BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).noCollission().randomTicks().instabreak().sound(SoundType.GRASS).pushReaction(PushReaction.DESTROY)
+	);
+	public static final Block PALE_OAK_SAPLING = register(
+		"pale_oak_sapling",
+		properties -> new SaplingBlock(TreeGrower.PALE_OAK, properties),
+		BlockBehaviour.Properties.of()
+			.mapColor(MapColor.PLANT)
+			.noCollission()
+			.randomTicks()
+			.instabreak()
+			.sound(SoundType.GRASS)
+			.pushReaction(PushReaction.DESTROY)
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
 	);
 	public static final Block MANGROVE_PROPAGULE = register(
 		"mangrove_propagule",
@@ -324,6 +360,11 @@ public class Blocks {
 	public static final Block DARK_OAK_LOG = register(
 		"dark_oak_log", RotatedPillarBlock::new, logProperties(MapColor.COLOR_BROWN, MapColor.COLOR_BROWN, SoundType.WOOD)
 	);
+	public static final Block PALE_OAK_LOG = register(
+		"pale_oak_log",
+		RotatedPillarBlock::new,
+		logProperties(PALE_OAK_PLANKS.defaultMapColor(), PALE_OAK_WOOD.defaultMapColor(), SoundType.WOOD).requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
 	public static final Block MANGROVE_LOG = register("mangrove_log", RotatedPillarBlock::new, logProperties(MapColor.COLOR_RED, MapColor.PODZOL, SoundType.WOOD));
 	public static final Block MANGROVE_ROOTS = register(
 		"mangrove_roots",
@@ -364,6 +405,11 @@ public class Blocks {
 	);
 	public static final Block STRIPPED_DARK_OAK_LOG = register(
 		"stripped_dark_oak_log", RotatedPillarBlock::new, logProperties(MapColor.COLOR_BROWN, MapColor.COLOR_BROWN, SoundType.WOOD)
+	);
+	public static final Block STRIPPED_PALE_OAK_LOG = register(
+		"stripped_pale_oak_log",
+		RotatedPillarBlock::new,
+		logProperties(PALE_OAK_PLANKS.defaultMapColor(), PALE_OAK_PLANKS.defaultMapColor(), SoundType.WOOD).requiredFeatures(FeatureFlags.WINTER_DROP)
 	);
 	public static final Block STRIPPED_OAK_LOG = register("stripped_oak_log", RotatedPillarBlock::new, logProperties(MapColor.WOOD, MapColor.WOOD, SoundType.WOOD));
 	public static final Block STRIPPED_MANGROVE_LOG = register(
@@ -457,6 +503,17 @@ public class Blocks {
 		RotatedPillarBlock::new,
 		BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).instrument(NoteBlockInstrument.BASS).strength(2.0F).sound(SoundType.WOOD).ignitedByLava()
 	);
+	public static final Block STRIPPED_PALE_OAK_WOOD = register(
+		"stripped_pale_oak_wood",
+		RotatedPillarBlock::new,
+		BlockBehaviour.Properties.of()
+			.mapColor(PALE_OAK_PLANKS.defaultMapColor())
+			.instrument(NoteBlockInstrument.BASS)
+			.strength(2.0F)
+			.sound(SoundType.WOOD)
+			.ignitedByLava()
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
 	public static final Block STRIPPED_MANGROVE_WOOD = register(
 		"stripped_mangrove_wood", RotatedPillarBlock::new, logProperties(MapColor.COLOR_RED, MapColor.COLOR_RED, SoundType.WOOD)
 	);
@@ -482,6 +539,23 @@ public class Blocks {
 			.isRedstoneConductor(Blocks::never)
 	);
 	public static final Block DARK_OAK_LEAVES = register("dark_oak_leaves", LeavesBlock::new, leavesProperties(SoundType.GRASS));
+	public static final Block PALE_OAK_LEAVES = register(
+		"pale_oak_leaves",
+		LeavesBlock::new,
+		BlockBehaviour.Properties.of()
+			.mapColor(MapColor.TERRACOTTA_GREEN)
+			.strength(0.2F)
+			.randomTicks()
+			.sound(SoundType.GRASS)
+			.noOcclusion()
+			.isValidSpawn(Blocks::ocelotOrParrot)
+			.isSuffocating(Blocks::never)
+			.isViewBlocking(Blocks::never)
+			.ignitedByLava()
+			.pushReaction(PushReaction.DESTROY)
+			.isRedstoneConductor(Blocks::never)
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
 	public static final Block MANGROVE_LEAVES = register("mangrove_leaves", MangroveLeavesBlock::new, leavesProperties(SoundType.GRASS));
 	public static final Block AZALEA_LEAVES = register("azalea_leaves", LeavesBlock::new, leavesProperties(SoundType.AZALEA_LEAVES));
 	public static final Block FLOWERING_AZALEA_LEAVES = register("flowering_azalea_leaves", LeavesBlock::new, leavesProperties(SoundType.AZALEA_LEAVES));
@@ -1003,6 +1077,16 @@ public class Blocks {
 			.sound(SoundType.SPAWNER)
 			.noOcclusion()
 	);
+	public static final Block CREAKING_HEART = register(
+		"creaking_heart",
+		CreakingHeartBlock::new,
+		BlockBehaviour.Properties.of()
+			.mapColor(MapColor.COLOR_ORANGE)
+			.instrument(NoteBlockInstrument.BASEDRUM)
+			.strength(5.0F)
+			.sound(SoundType.CREAKING_HEART)
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
 	public static final Block OAK_STAIRS = registerLegacyStair("oak_stairs", OAK_PLANKS);
 	public static final Block CHEST = register(
 		"chest",
@@ -1127,6 +1211,18 @@ public class Blocks {
 			.strength(1.0F)
 			.ignitedByLava()
 	);
+	public static final Block PALE_OAK_SIGN = register(
+		"pale_oak_sign",
+		properties -> new StandingSignBlock(WoodType.PALE_OAK, properties),
+		BlockBehaviour.Properties.of()
+			.mapColor(PALE_OAK_PLANKS.defaultMapColor())
+			.forceSolidOn()
+			.instrument(NoteBlockInstrument.BASS)
+			.noCollission()
+			.strength(1.0F)
+			.ignitedByLava()
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
 	public static final Block MANGROVE_SIGN = register(
 		"mangrove_sign",
 		properties -> new StandingSignBlock(WoodType.MANGROVE, properties),
@@ -1232,6 +1328,18 @@ public class Blocks {
 			.strength(1.0F)
 			.ignitedByLava()
 	);
+	public static final Block PALE_OAK_WALL_SIGN = register(
+		"pale_oak_wall_sign",
+		properties -> new WallSignBlock(WoodType.PALE_OAK, properties),
+		wallVariant(PALE_OAK_SIGN, true)
+			.mapColor(PALE_OAK_PLANKS.defaultMapColor())
+			.forceSolidOn()
+			.instrument(NoteBlockInstrument.BASS)
+			.noCollission()
+			.strength(1.0F)
+			.ignitedByLava()
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
 	public static final Block MANGROVE_WALL_SIGN = register(
 		"mangrove_wall_sign",
 		properties -> new WallSignBlock(WoodType.MANGROVE, properties),
@@ -1324,6 +1432,18 @@ public class Blocks {
 			.noCollission()
 			.strength(1.0F)
 			.ignitedByLava()
+	);
+	public static final Block PALE_OAK_HANGING_SIGN = register(
+		"pale_oak_hanging_sign",
+		properties -> new CeilingHangingSignBlock(WoodType.PALE_OAK, properties),
+		BlockBehaviour.Properties.of()
+			.mapColor(PALE_OAK_PLANKS.defaultMapColor())
+			.forceSolidOn()
+			.instrument(NoteBlockInstrument.BASS)
+			.noCollission()
+			.strength(1.0F)
+			.ignitedByLava()
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
 	);
 	public static final Block CRIMSON_HANGING_SIGN = register(
 		"crimson_hanging_sign",
@@ -1433,6 +1553,18 @@ public class Blocks {
 			.noCollission()
 			.strength(1.0F)
 			.ignitedByLava()
+	);
+	public static final Block PALE_OAK_WALL_HANGING_SIGN = register(
+		"pale_oak_wall_hanging_sign",
+		properties -> new WallHangingSignBlock(WoodType.PALE_OAK, properties),
+		wallVariant(PALE_OAK_HANGING_SIGN, true)
+			.mapColor(PALE_OAK_PLANKS.defaultMapColor())
+			.forceSolidOn()
+			.instrument(NoteBlockInstrument.BASS)
+			.noCollission()
+			.strength(1.0F)
+			.ignitedByLava()
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
 	);
 	public static final Block MANGROVE_WALL_HANGING_SIGN = register(
 		"mangrove_wall_hanging_sign",
@@ -1569,6 +1701,19 @@ public class Blocks {
 			.strength(0.5F)
 			.ignitedByLava()
 			.pushReaction(PushReaction.DESTROY)
+	);
+	public static final Block PALE_OAK_PRESSURE_PLATE = register(
+		"pale_oak_pressure_plate",
+		properties -> new PressurePlateBlock(BlockSetType.PALE_OAK, properties),
+		BlockBehaviour.Properties.of()
+			.mapColor(PALE_OAK_PLANKS.defaultMapColor())
+			.forceSolidOn()
+			.instrument(NoteBlockInstrument.BASS)
+			.noCollission()
+			.strength(0.5F)
+			.ignitedByLava()
+			.pushReaction(PushReaction.DESTROY)
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
 	);
 	public static final Block MANGROVE_PRESSURE_PLATE = register(
 		"mangrove_pressure_plate",
@@ -1877,6 +2022,18 @@ public class Blocks {
 			.noOcclusion()
 			.isValidSpawn(Blocks::never)
 			.ignitedByLava()
+	);
+	public static final Block PALE_OAK_TRAPDOOR = register(
+		"pale_oak_trapdoor",
+		properties -> new TrapDoorBlock(BlockSetType.PALE_OAK, properties),
+		BlockBehaviour.Properties.of()
+			.mapColor(PALE_OAK_PLANKS.defaultMapColor())
+			.instrument(NoteBlockInstrument.BASS)
+			.strength(3.0F)
+			.noOcclusion()
+			.isValidSpawn(Blocks::never)
+			.ignitedByLava()
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
 	);
 	public static final Block MANGROVE_TRAPDOOR = register(
 		"mangrove_trapdoor",
@@ -2256,6 +2413,9 @@ public class Blocks {
 	public static final Block POTTED_DARK_OAK_SAPLING = register(
 		"potted_dark_oak_sapling", properties -> new FlowerPotBlock(DARK_OAK_SAPLING, properties), flowerPotProperties()
 	);
+	public static final Block POTTED_PALE_OAK_SAPLING = register(
+		"potted_pale_oak_sapling", properties -> new FlowerPotBlock(PALE_OAK_SAPLING, properties), flowerPotProperties().requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
 	public static final Block POTTED_MANGROVE_PROPAGULE = register(
 		"potted_mangrove_propagule", properties -> new FlowerPotBlock(MANGROVE_PROPAGULE, properties), flowerPotProperties()
 	);
@@ -2303,6 +2463,9 @@ public class Blocks {
 	public static final Block CHERRY_BUTTON = register("cherry_button", properties -> new ButtonBlock(BlockSetType.CHERRY, 30, properties), buttonProperties());
 	public static final Block DARK_OAK_BUTTON = register(
 		"dark_oak_button", properties -> new ButtonBlock(BlockSetType.DARK_OAK, 30, properties), buttonProperties()
+	);
+	public static final Block PALE_OAK_BUTTON = register(
+		"pale_oak_button", properties -> new ButtonBlock(BlockSetType.PALE_OAK, 30, properties), buttonProperties().requiredFeatures(FeatureFlags.WINTER_DROP)
 	);
 	public static final Block MANGROVE_BUTTON = register(
 		"mangrove_button", properties -> new ButtonBlock(BlockSetType.MANGROVE, 30, properties), buttonProperties()
@@ -2691,6 +2854,7 @@ public class Blocks {
 	public static final Block ACACIA_STAIRS = registerLegacyStair("acacia_stairs", ACACIA_PLANKS);
 	public static final Block CHERRY_STAIRS = registerLegacyStair("cherry_stairs", CHERRY_PLANKS);
 	public static final Block DARK_OAK_STAIRS = registerLegacyStair("dark_oak_stairs", DARK_OAK_PLANKS);
+	public static final Block PALE_OAK_STAIRS = registerLegacyStair("pale_oak_stairs", PALE_OAK_PLANKS);
 	public static final Block MANGROVE_STAIRS = registerLegacyStair("mangrove_stairs", MANGROVE_PLANKS);
 	public static final Block BAMBOO_STAIRS = registerLegacyStair("bamboo_stairs", BAMBOO_PLANKS);
 	public static final Block BAMBOO_MOSAIC_STAIRS = registerLegacyStair("bamboo_mosaic_stairs", BAMBOO_MOSAIC);
@@ -3378,6 +3542,17 @@ public class Blocks {
 		SlabBlock::new,
 		BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN).instrument(NoteBlockInstrument.BASS).strength(2.0F, 3.0F).sound(SoundType.WOOD).ignitedByLava()
 	);
+	public static final Block PALE_OAK_SLAB = register(
+		"pale_oak_slab",
+		SlabBlock::new,
+		BlockBehaviour.Properties.of()
+			.mapColor(PALE_OAK_PLANKS.defaultMapColor())
+			.instrument(NoteBlockInstrument.BASS)
+			.strength(2.0F, 3.0F)
+			.sound(SoundType.WOOD)
+			.ignitedByLava()
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
 	public static final Block MANGROVE_SLAB = register(
 		"mangrove_slab",
 		SlabBlock::new,
@@ -3559,6 +3734,17 @@ public class Blocks {
 			.strength(2.0F, 3.0F)
 			.ignitedByLava()
 	);
+	public static final Block PALE_OAK_FENCE_GATE = register(
+		"pale_oak_fence_gate",
+		properties -> new FenceGateBlock(WoodType.PALE_OAK, properties),
+		BlockBehaviour.Properties.of()
+			.mapColor(PALE_OAK_PLANKS.defaultMapColor())
+			.forceSolidOn()
+			.instrument(NoteBlockInstrument.BASS)
+			.strength(2.0F, 3.0F)
+			.ignitedByLava()
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
 	public static final Block MANGROVE_FENCE_GATE = register(
 		"mangrove_fence_gate",
 		properties -> new FenceGateBlock(WoodType.MANGROVE, properties),
@@ -3638,6 +3824,17 @@ public class Blocks {
 			.strength(2.0F, 3.0F)
 			.ignitedByLava()
 			.sound(SoundType.WOOD)
+	);
+	public static final Block PALE_OAK_FENCE = register(
+		"pale_oak_fence",
+		FenceBlock::new,
+		BlockBehaviour.Properties.of()
+			.mapColor(PALE_OAK_PLANKS.defaultMapColor())
+			.instrument(NoteBlockInstrument.BASS)
+			.strength(2.0F, 3.0F)
+			.ignitedByLava()
+			.sound(SoundType.WOOD)
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
 	);
 	public static final Block MANGROVE_FENCE = register(
 		"mangrove_fence",
@@ -3724,6 +3921,18 @@ public class Blocks {
 			.noOcclusion()
 			.ignitedByLava()
 			.pushReaction(PushReaction.DESTROY)
+	);
+	public static final Block PALE_OAK_DOOR = register(
+		"pale_oak_door",
+		properties -> new DoorBlock(BlockSetType.PALE_OAK, properties),
+		BlockBehaviour.Properties.of()
+			.mapColor(PALE_OAK_PLANKS.defaultMapColor())
+			.instrument(NoteBlockInstrument.BASS)
+			.strength(3.0F)
+			.noOcclusion()
+			.ignitedByLava()
+			.pushReaction(PushReaction.DESTROY)
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
 	);
 	public static final Block MANGROVE_DOOR = register(
 		"mangrove_door",
@@ -5922,7 +6131,7 @@ public class Blocks {
 	);
 	public static final Block MOSS_BLOCK = register(
 		"moss_block",
-		MossBlock::new,
+		properties -> new BonemealableFeaturePlacerBlock(CaveFeatures.MOSS_PATCH_BONEMEAL, properties),
 		BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN).strength(0.1F).sound(SoundType.MOSS).pushReaction(PushReaction.DESTROY)
 	);
 	public static final Block BIG_DRIPLEAF = register(
@@ -6114,6 +6323,37 @@ public class Blocks {
 			.strength(10.0F)
 			.pushReaction(PushReaction.NORMAL)
 			.explosionResistance(1200.0F)
+	);
+	public static final Block PALE_MOSS_BLOCK = register(
+		"pale_moss_block",
+		properties -> new BonemealableFeaturePlacerBlock(VegetationFeatures.PALE_MOSS_PATCH_BONEMEAL, properties),
+		BlockBehaviour.Properties.of()
+			.mapColor(MapColor.COLOR_GRAY)
+			.strength(0.1F)
+			.sound(SoundType.MOSS)
+			.pushReaction(PushReaction.DESTROY)
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
+	public static final Block PALE_MOSS_CARPET = register(
+		"pale_moss_carpet",
+		MossyCarpetBlock::new,
+		BlockBehaviour.Properties.of()
+			.mapColor(PALE_MOSS_BLOCK.defaultMapColor())
+			.strength(0.1F)
+			.sound(SoundType.MOSS_CARPET)
+			.pushReaction(PushReaction.DESTROY)
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
+	public static final Block PALE_HANGING_MOSS = register(
+		"pale_hanging_moss",
+		HangingMossBlock::new,
+		BlockBehaviour.Properties.of()
+			.mapColor(PALE_MOSS_BLOCK.defaultMapColor())
+			.strength(0.1F)
+			.noCollission()
+			.sound(SoundType.MOSS_CARPET)
+			.pushReaction(PushReaction.DESTROY)
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
 	);
 
 	private static ToIntFunction<BlockState> litBlockEmission(int i) {

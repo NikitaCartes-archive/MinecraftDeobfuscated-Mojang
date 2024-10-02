@@ -1,20 +1,31 @@
 package net.minecraft.world.item.crafting;
 
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.Items;
 
 public class CampfireCookingRecipe extends AbstractCookingRecipe {
 	public CampfireCookingRecipe(String string, CookingBookCategory cookingBookCategory, Ingredient ingredient, ItemStack itemStack, float f, int i) {
-		super(RecipeType.CAMPFIRE_COOKING, string, cookingBookCategory, ingredient, itemStack, f, i);
+		super(string, cookingBookCategory, ingredient, itemStack, f, i);
 	}
 
 	@Override
-	public ItemStack getCategoryIconItem() {
-		return new ItemStack(Blocks.CAMPFIRE);
+	protected Item furnaceIcon() {
+		return Items.CAMPFIRE;
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<CampfireCookingRecipe> getSerializer() {
 		return RecipeSerializer.CAMPFIRE_COOKING_RECIPE;
+	}
+
+	@Override
+	public RecipeType<CampfireCookingRecipe> getType() {
+		return RecipeType.CAMPFIRE_COOKING;
+	}
+
+	@Override
+	public BasicRecipeBookCategory recipeBookCategory() {
+		return BasicRecipeBookCategory.CAMPFIRE;
 	}
 }

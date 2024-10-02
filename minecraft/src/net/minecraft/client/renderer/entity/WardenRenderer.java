@@ -4,7 +4,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.WardenModel;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.renderer.entity.layers.WardenEmissiveLayer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.layers.LivingEntityEmissiveLayer;
 import net.minecraft.client.renderer.entity.state.WardenRenderState;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -22,22 +23,43 @@ public class WardenRenderer extends MobRenderer<Warden, WardenRenderState, Warde
 
 	public WardenRenderer(EntityRendererProvider.Context context) {
 		super(context, new WardenModel(context.bakeLayer(ModelLayers.WARDEN)), 0.9F);
-		this.addLayer(new WardenEmissiveLayer(this, BIOLUMINESCENT_LAYER_TEXTURE, (wardenRenderState, f) -> 1.0F, WardenModel::getBioluminescentLayerModelParts));
 		this.addLayer(
-			new WardenEmissiveLayer(
-				this, PULSATING_SPOTS_TEXTURE_1, (wardenRenderState, f) -> Math.max(0.0F, Mth.cos(f * 0.045F) * 0.25F), WardenModel::getPulsatingSpotsLayerModelParts
+			new LivingEntityEmissiveLayer<>(
+				this, BIOLUMINESCENT_LAYER_TEXTURE, (wardenRenderState, f) -> 1.0F, WardenModel::getBioluminescentLayerModelParts, RenderType::entityTranslucentEmissive
 			)
 		);
 		this.addLayer(
-			new WardenEmissiveLayer(
+			new LivingEntityEmissiveLayer<>(
+				this,
+				PULSATING_SPOTS_TEXTURE_1,
+				(wardenRenderState, f) -> Math.max(0.0F, Mth.cos(f * 0.045F) * 0.25F),
+				WardenModel::getPulsatingSpotsLayerModelParts,
+				RenderType::entityTranslucentEmissive
+			)
+		);
+		this.addLayer(
+			new LivingEntityEmissiveLayer<>(
 				this,
 				PULSATING_SPOTS_TEXTURE_2,
 				(wardenRenderState, f) -> Math.max(0.0F, Mth.cos(f * 0.045F + (float) Math.PI) * 0.25F),
-				WardenModel::getPulsatingSpotsLayerModelParts
+				WardenModel::getPulsatingSpotsLayerModelParts,
+				RenderType::entityTranslucentEmissive
 			)
 		);
-		this.addLayer(new WardenEmissiveLayer(this, TEXTURE, (wardenRenderState, f) -> wardenRenderState.tendrilAnimation, WardenModel::getTendrilsLayerModelParts));
-		this.addLayer(new WardenEmissiveLayer(this, HEART_TEXTURE, (wardenRenderState, f) -> wardenRenderState.heartAnimation, WardenModel::getHeartLayerModelParts));
+		this.addLayer(
+			new LivingEntityEmissiveLayer<>(
+				this, TEXTURE, (wardenRenderState, f) -> wardenRenderState.tendrilAnimation, WardenModel::getTendrilsLayerModelParts, RenderType::entityTranslucentEmissive
+			)
+		);
+		this.addLayer(
+			new LivingEntityEmissiveLayer<>(
+				this,
+				HEART_TEXTURE,
+				(wardenRenderState, f) -> wardenRenderState.heartAnimation,
+				WardenModel::getHeartLayerModelParts,
+				RenderType::entityTranslucentEmissive
+			)
+		);
 	}
 
 	public ResourceLocation getTextureLocation(WardenRenderState wardenRenderState) {

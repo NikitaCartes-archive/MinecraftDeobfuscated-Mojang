@@ -4,6 +4,7 @@ import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -80,6 +81,12 @@ public class SpawnUtil {
 				: false;
 		SpawnUtil.Strategy ON_TOP_OF_COLLIDER = (serverLevel, blockPos, blockState, blockPos2, blockState2) -> blockState2.getCollisionShape(serverLevel, blockPos2)
 					.isEmpty()
+				&& Block.isFaceFull(blockState.getCollisionShape(serverLevel, blockPos), Direction.UP);
+		SpawnUtil.Strategy ON_TOP_OF_COLLIDER_NO_LEAVES = (serverLevel, blockPos, blockState, blockPos2, blockState2) -> blockState2.getCollisionShape(
+						serverLevel, blockPos2
+					)
+					.isEmpty()
+				&& !blockState.is(BlockTags.LEAVES)
 				&& Block.isFaceFull(blockState.getCollisionShape(serverLevel, blockPos), Direction.UP);
 
 		boolean canSpawnOn(ServerLevel serverLevel, BlockPos blockPos, BlockState blockState, BlockPos blockPos2, BlockState blockState2);

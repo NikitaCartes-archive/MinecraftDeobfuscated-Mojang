@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.block.model.BlockFaceUV;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Vector3f;
@@ -33,13 +32,7 @@ public class MissingBlockModel {
 
 		BlockElement blockElement = new BlockElement(new Vector3f(0.0F, 0.0F, 0.0F), new Vector3f(16.0F, 16.0F, 16.0F), map);
 		BlockModel blockModel = new BlockModel(
-			null,
-			List.of(blockElement),
-			Map.of("particle", Either.left(new Material(TextureAtlas.LOCATION_BLOCKS, MissingTextureAtlasSprite.getLocation()))),
-			null,
-			null,
-			ItemTransforms.NO_TRANSFORMS,
-			List.of()
+			null, List.of(blockElement), Map.of("particle", Either.left(BlockModel.MISSING_MATERIAL)), null, null, ItemTransforms.NO_TRANSFORMS, List.of()
 		);
 		blockModel.name = "missingno";
 		return blockModel;

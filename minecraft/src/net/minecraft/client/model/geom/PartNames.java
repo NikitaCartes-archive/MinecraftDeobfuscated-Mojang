@@ -60,6 +60,7 @@ public class PartNames {
 	public static final String HEAD = "head";
 	public static final String HAT = "hat";
 	public static final String BODY = "body";
+	public static final String UPPER_BODY = "upper_body";
 	public static final String HAT_RIM = "hat_rim";
 	public static final String JACKET = "jacket";
 	public static final String TOP_GILLS = "top_gills";

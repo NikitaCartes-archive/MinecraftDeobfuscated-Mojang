@@ -106,21 +106,23 @@ public class ServerPlaceRecipe<R extends Recipe<?>> {
 			if (stackedItemContents.canCraft(recipeHolder.value(), j, list::add)) {
 				this.clearGrid();
 				int k = j;
-				PlaceRecipeHelper.placeRecipe(this.gridWidth, this.gridHeight, recipeHolder, recipeHolder.value().placementInfo().slotInfo(), (optional, jx, kx, l) -> {
-					if (!optional.isEmpty()) {
-						Slot slotx = (Slot)this.inputGridSlots.get(jx);
-						int m = ((PlacementInfo.SlotInfo)optional.get()).placerOutputPosition();
-						int n = k;
+				PlaceRecipeHelper.placeRecipe(
+					this.gridWidth, this.gridHeight, recipeHolder.value(), recipeHolder.value().placementInfo().slotInfo(), (optional, jx, kx, l) -> {
+						if (!optional.isEmpty()) {
+							Slot slotx = (Slot)this.inputGridSlots.get(jx);
+							int m = ((PlacementInfo.SlotInfo)optional.get()).placerOutputPosition();
+							int n = k;
 
-						while (n > 0) {
-							Holder<Item> holder = (Holder<Item>)list.get(m);
-							n = this.moveItemToGrid(slotx, holder, n);
-							if (n == -1) {
-								return;
+							while (n > 0) {
+								Holder<Item> holder = (Holder<Item>)list.get(m);
+								n = this.moveItemToGrid(slotx, holder, n);
+								if (n == -1) {
+									return;
+								}
 							}
 						}
 					}
-				});
+				);
 			}
 		}
 	}

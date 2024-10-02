@@ -24,6 +24,7 @@ public final class ItemTags {
 	public static final TagKey<Item> LOGS_THAT_BURN = bind("logs_that_burn");
 	public static final TagKey<Item> LOGS = bind("logs");
 	public static final TagKey<Item> DARK_OAK_LOGS = bind("dark_oak_logs");
+	public static final TagKey<Item> PALE_OAK_LOGS = bind("pale_oak_logs");
 	public static final TagKey<Item> OAK_LOGS = bind("oak_logs");
 	public static final TagKey<Item> BIRCH_LOGS = bind("birch_logs");
 	public static final TagKey<Item> ACACIA_LOGS = bind("acacia_logs");
@@ -174,6 +175,7 @@ public final class ItemTags {
 	public static final TagKey<Item> VANISHING_ENCHANTABLE = bind("enchantable/vanishing");
 	public static final TagKey<Item> MACE_ENCHANTABLE = bind("enchantable/mace");
 	public static final TagKey<Item> MAP_INVISIBILITY_EQUIPMENT = bind("map_invisibility_equipment");
+	public static final TagKey<Item> GAZE_DISGUISE_EQUIPMENT = bind("gaze_disguise_equipment");
 
 	private ItemTags() {
 	}

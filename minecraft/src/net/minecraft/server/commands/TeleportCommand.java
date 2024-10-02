@@ -20,7 +20,6 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -100,7 +99,7 @@ public class TeleportCommand {
 																	commandContext.getSource().getLevel(),
 																	Vec3Argument.getCoordinates(commandContext, "location"),
 																	null,
-																	new TeleportCommand.LookAtEntity(EntityArgument.getEntity(commandContext, "facingEntity"), EntityAnchorArgument.Anchor.FEET)
+																	new LookAt.LookAtEntity(EntityArgument.getEntity(commandContext, "facingEntity"), EntityAnchorArgument.Anchor.FEET)
 																)
 														)
 														.then(
@@ -112,7 +111,7 @@ public class TeleportCommand {
 																			commandContext.getSource().getLevel(),
 																			Vec3Argument.getCoordinates(commandContext, "location"),
 																			null,
-																			new TeleportCommand.LookAtEntity(
+																			new LookAt.LookAtEntity(
 																				EntityArgument.getEntity(commandContext, "facingEntity"), EntityAnchorArgument.getAnchor(commandContext, "facingAnchor")
 																			)
 																		)
@@ -129,7 +128,7 @@ public class TeleportCommand {
 															commandContext.getSource().getLevel(),
 															Vec3Argument.getCoordinates(commandContext, "location"),
 															null,
-															new TeleportCommand.LookAtPosition(Vec3Argument.getVec3(commandContext, "facingLocation"))
+															new LookAt.LookAtPosition(Vec3Argument.getVec3(commandContext, "facingLocation"))
 														)
 												)
 										)
@@ -182,7 +181,7 @@ public class TeleportCommand {
 		ServerLevel serverLevel,
 		Coordinates coordinates,
 		@Nullable Coordinates coordinates2,
-		@Nullable TeleportCommand.LookAt lookAt
+		@Nullable LookAt lookAt
 	) throws CommandSyntaxException {
 		Vec3 vec3 = coordinates.getPosition(commandSourceStack);
 		Vec2 vec2 = coordinates2 == null ? null : coordinates2.getRotation(commandSourceStack);
@@ -266,7 +265,7 @@ public class TeleportCommand {
 		Set<Relative> set,
 		float g,
 		float h,
-		@Nullable TeleportCommand.LookAt lookAt
+		@Nullable LookAt lookAt
 	) throws CommandSyntaxException {
 		BlockPos blockPos = BlockPos.containing(d, e, f);
 		if (!Level.isInSpawnableBounds(blockPos)) {
@@ -293,29 +292,6 @@ public class TeleportCommand {
 					pathfinderMob.getNavigation().stop();
 				}
 			}
-		}
-	}
-
-	@FunctionalInterface
-	interface LookAt {
-		void perform(CommandSourceStack commandSourceStack, Entity entity);
-	}
-
-	static record LookAtEntity(Entity entity, EntityAnchorArgument.Anchor anchor) implements TeleportCommand.LookAt {
-		@Override
-		public void perform(CommandSourceStack commandSourceStack, Entity entity) {
-			if (entity instanceof ServerPlayer serverPlayer) {
-				serverPlayer.lookAt(commandSourceStack.getAnchor(), this.entity, this.anchor);
-			} else {
-				entity.lookAt(commandSourceStack.getAnchor(), this.anchor.apply(this.entity));
-			}
-		}
-	}
-
-	static record LookAtPosition(Vec3 position) implements TeleportCommand.LookAt {
-		@Override
-		public void perform(CommandSourceStack commandSourceStack, Entity entity) {
-			entity.lookAt(commandSourceStack.getAnchor(), this.position);
 		}
 	}
 }

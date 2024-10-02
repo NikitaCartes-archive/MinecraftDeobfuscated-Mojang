@@ -11,7 +11,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -24,6 +26,7 @@ import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.RandomizableContainer;
@@ -39,10 +42,12 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.JigsawBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.material.FluidState;
@@ -174,6 +179,31 @@ public class StructureTemplate {
 
 	public List<StructureTemplate.StructureBlockInfo> filterBlocks(BlockPos blockPos, StructurePlaceSettings structurePlaceSettings, Block block) {
 		return this.filterBlocks(blockPos, structurePlaceSettings, block, true);
+	}
+
+	public List<StructureTemplate.JigsawBlockInfo> getJigsaws(BlockPos blockPos, Rotation rotation) {
+		if (this.palettes.isEmpty()) {
+			return new ArrayList();
+		} else {
+			StructurePlaceSettings structurePlaceSettings = new StructurePlaceSettings().setRotation(rotation);
+			List<StructureTemplate.JigsawBlockInfo> list = structurePlaceSettings.getRandomPalette(this.palettes, blockPos).jigsaws();
+			List<StructureTemplate.JigsawBlockInfo> list2 = new ArrayList(list.size());
+
+			for (StructureTemplate.JigsawBlockInfo jigsawBlockInfo : list) {
+				StructureTemplate.StructureBlockInfo structureBlockInfo = jigsawBlockInfo.info;
+				list2.add(
+					jigsawBlockInfo.withInfo(
+						new StructureTemplate.StructureBlockInfo(
+							calculateRelativePosition(structurePlaceSettings, structureBlockInfo.pos()).offset(blockPos),
+							structureBlockInfo.state.rotate(structurePlaceSettings.getRotation()),
+							structureBlockInfo.nbt
+						)
+					)
+				);
+			}
+
+			return list2;
+		}
 	}
 
 	public ObjectArrayList<StructureTemplate.StructureBlockInfo> filterBlocks(
@@ -753,12 +783,77 @@ public class StructureTemplate {
 		return listTag;
 	}
 
+	public static JigsawBlockEntity.JointType getJointType(CompoundTag compoundTag, BlockState blockState) {
+		return (JigsawBlockEntity.JointType)JigsawBlockEntity.JointType.CODEC
+			.byName(
+				compoundTag.getString("joint"),
+				(Supplier)(() -> JigsawBlock.getFrontFacing(blockState).getAxis().isHorizontal()
+						? JigsawBlockEntity.JointType.ALIGNED
+						: JigsawBlockEntity.JointType.ROLLABLE)
+			);
+	}
+
+	public static record JigsawBlockInfo(
+		StructureTemplate.StructureBlockInfo info,
+		JigsawBlockEntity.JointType jointType,
+		ResourceLocation name,
+		ResourceLocation pool,
+		ResourceLocation target,
+		int placementPriority,
+		int selectionPriority
+	) {
+
+		public static StructureTemplate.JigsawBlockInfo of(StructureTemplate.StructureBlockInfo structureBlockInfo) {
+			CompoundTag compoundTag = (CompoundTag)Objects.requireNonNull(structureBlockInfo.nbt(), () -> structureBlockInfo + " nbt was null");
+			return new StructureTemplate.JigsawBlockInfo(
+				structureBlockInfo,
+				StructureTemplate.getJointType(compoundTag, structureBlockInfo.state()),
+				ResourceLocation.parse(compoundTag.getString("name")),
+				ResourceLocation.parse(compoundTag.getString("pool")),
+				ResourceLocation.parse(compoundTag.getString("target")),
+				compoundTag.getInt("placement_priority"),
+				compoundTag.getInt("selection_priority")
+			);
+		}
+
+		public String toString() {
+			return String.format(
+				Locale.ROOT,
+				"<JigsawBlockInfo | %s | %s | name: %s | pool: %s | target: %s | placement: %d | selection: %d | %s>",
+				this.info.pos,
+				this.info.state,
+				this.name,
+				this.pool,
+				this.target,
+				this.placementPriority,
+				this.selectionPriority,
+				this.info.nbt
+			);
+		}
+
+		public StructureTemplate.JigsawBlockInfo withInfo(StructureTemplate.StructureBlockInfo structureBlockInfo) {
+			return new StructureTemplate.JigsawBlockInfo(
+				structureBlockInfo, this.jointType, this.name, this.pool, this.target, this.placementPriority, this.selectionPriority
+			);
+		}
+	}
+
 	public static final class Palette {
 		private final List<StructureTemplate.StructureBlockInfo> blocks;
 		private final Map<Block, List<StructureTemplate.StructureBlockInfo>> cache = Maps.<Block, List<StructureTemplate.StructureBlockInfo>>newHashMap();
+		@Nullable
+		private List<StructureTemplate.JigsawBlockInfo> cachedJigsaws;
 
 		Palette(List<StructureTemplate.StructureBlockInfo> list) {
 			this.blocks = list;
+		}
+
+		public List<StructureTemplate.JigsawBlockInfo> jigsaws() {
+			if (this.cachedJigsaws == null) {
+				this.cachedJigsaws = this.blocks(Blocks.JIGSAW).stream().map(StructureTemplate.JigsawBlockInfo::of).toList();
+			}
+
+			return this.cachedJigsaws;
 		}
 
 		public List<StructureTemplate.StructureBlockInfo> blocks() {

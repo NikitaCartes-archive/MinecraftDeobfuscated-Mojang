@@ -252,6 +252,7 @@ public class ClientHandshakePacketListenerImpl implements ClientLoginPacketListe
 	public void fillListenerSpecificCrashDetails(CrashReport crashReport, CrashReportCategory crashReportCategory) {
 		crashReportCategory.setDetail("Server type", (CrashReportDetail<String>)(() -> this.serverData != null ? this.serverData.type().toString() : "<unknown>"));
 		crashReportCategory.setDetail("Login phase", (CrashReportDetail<String>)(() -> ((ClientHandshakePacketListenerImpl.State)this.state.get()).toString()));
+		crashReportCategory.setDetail("Is Local", (CrashReportDetail<String>)(() -> String.valueOf(this.connection.isMemoryConnection())));
 	}
 
 	@Environment(EnvType.CLIENT)

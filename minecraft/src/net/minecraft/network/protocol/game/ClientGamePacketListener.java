@@ -4,7 +4,7 @@ import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.protocol.common.ClientCommonPacketListener;
 import net.minecraft.network.protocol.ping.ClientPongPacketListener;
 
-public interface ClientGamePacketListener extends ClientPongPacketListener, ClientCommonPacketListener {
+public interface ClientGamePacketListener extends ClientCommonPacketListener, ClientPongPacketListener {
 	@Override
 	default ConnectionProtocol protocol() {
 		return ConnectionProtocol.PLAY;
@@ -22,7 +22,11 @@ public interface ClientGamePacketListener extends ClientPongPacketListener, Clie
 
 	void handleAwardStats(ClientboundAwardStatsPacket clientboundAwardStatsPacket);
 
-	void handleAddOrRemoveRecipes(ClientboundRecipePacket clientboundRecipePacket);
+	void handleRecipeBookAdd(ClientboundRecipeBookAddPacket clientboundRecipeBookAddPacket);
+
+	void handleRecipeBookRemove(ClientboundRecipeBookRemovePacket clientboundRecipeBookRemovePacket);
+
+	void handleRecipeBookSettings(ClientboundRecipeBookSettingsPacket clientboundRecipeBookSettingsPacket);
 
 	void handleBlockDestruction(ClientboundBlockDestructionPacket clientboundBlockDestructionPacket);
 
@@ -82,6 +86,8 @@ public interface ClientGamePacketListener extends ClientPongPacketListener, Clie
 
 	void handleMovePlayer(ClientboundPlayerPositionPacket clientboundPlayerPositionPacket);
 
+	void handleRotatePlayer(ClientboundPlayerRotationPacket clientboundPlayerRotationPacket);
+
 	void handleParticleEvent(ClientboundLevelParticlesPacket clientboundLevelParticlesPacket);
 
 	void handlePlayerAbilities(ClientboundPlayerAbilitiesPacket clientboundPlayerAbilitiesPacket);
@@ -127,6 +133,8 @@ public interface ClientGamePacketListener extends ClientPongPacketListener, Clie
 	void handleSoundEntityEvent(ClientboundSoundEntityPacket clientboundSoundEntityPacket);
 
 	void handleTakeItemEntity(ClientboundTakeItemEntityPacket clientboundTakeItemEntityPacket);
+
+	void handleEntityPositionSync(ClientboundEntityPositionSyncPacket clientboundEntityPositionSyncPacket);
 
 	void handleTeleportEntity(ClientboundTeleportEntityPacket clientboundTeleportEntityPacket);
 

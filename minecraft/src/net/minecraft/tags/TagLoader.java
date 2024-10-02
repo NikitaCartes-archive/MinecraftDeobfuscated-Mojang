@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.SequencedSet;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.core.Holder;
@@ -38,11 +37,11 @@ import org.slf4j.Logger;
 
 public class TagLoader<T> {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	final Function<ResourceLocation, Optional<? extends T>> idToValue;
+	final TagLoader.ElementLookup<T> elementLookup;
 	private final String directory;
 
-	public TagLoader(Function<ResourceLocation, Optional<? extends T>> function, String string) {
-		this.idToValue = function;
+	public TagLoader(TagLoader.ElementLookup<T> elementLookup, String string) {
+		this.elementLookup = elementLookup;
 		this.directory = string;
 	}
 
@@ -110,8 +109,8 @@ public class TagLoader<T> {
 		TagEntry.Lookup<T> lookup = new TagEntry.Lookup<T>() {
 			@Nullable
 			@Override
-			public T element(ResourceLocation resourceLocation) {
-				return (T)((Optional)TagLoader.this.idToValue.apply(resourceLocation)).orElse(null);
+			public T element(ResourceLocation resourceLocation, boolean bl) {
+				return (T)TagLoader.this.elementLookup.get(resourceLocation, bl).orElse(null);
 			}
 
 			@Nullable
@@ -149,10 +148,7 @@ public class TagLoader<T> {
 
 	public static <T> void loadTagsForRegistry(ResourceManager resourceManager, WritableRegistry<T> writableRegistry) {
 		ResourceKey<? extends Registry<T>> resourceKey = writableRegistry.key();
-		HolderGetter<T> holderGetter = writableRegistry.createRegistrationLookup();
-		TagLoader<Holder<T>> tagLoader = new TagLoader<>(
-			resourceLocation -> holderGetter.get(ResourceKey.create(resourceKey, resourceLocation)), Registries.tagsDirPath(resourceKey)
-		);
+		TagLoader<Holder<T>> tagLoader = new TagLoader<>(TagLoader.ElementLookup.fromWritableRegistry(writableRegistry), Registries.tagsDirPath(resourceKey));
 		tagLoader.build(tagLoader.load(resourceManager))
 			.forEach((resourceLocation, list) -> writableRegistry.bindTag(TagKey.create(resourceKey, resourceLocation), list));
 	}
@@ -165,7 +161,9 @@ public class TagLoader<T> {
 
 	private static <T> Optional<Registry.PendingTags<T>> loadPendingTags(ResourceManager resourceManager, Registry<T> registry) {
 		ResourceKey<? extends Registry<T>> resourceKey = registry.key();
-		TagLoader<Holder<T>> tagLoader = new TagLoader<>(registry::get, Registries.tagsDirPath(resourceKey));
+		TagLoader<Holder<T>> tagLoader = new TagLoader<>(
+			(TagLoader.ElementLookup<Holder<T>>)TagLoader.ElementLookup.fromFrozenRegistry(registry), Registries.tagsDirPath(resourceKey)
+		);
 		TagLoader.LoadResult<T> loadResult = new TagLoader.LoadResult<>(resourceKey, wrapTags(registry.key(), tagLoader.build(tagLoader.load(resourceManager))));
 		return loadResult.tags().isEmpty() ? Optional.empty() : Optional.of(registry.prepareTagReload(loadResult));
 	}
@@ -188,6 +186,19 @@ public class TagLoader<T> {
 		}
 
 		return null;
+	}
+
+	public interface ElementLookup<T> {
+		Optional<? extends T> get(ResourceLocation resourceLocation, boolean bl);
+
+		static <T> TagLoader.ElementLookup<? extends Holder<T>> fromFrozenRegistry(Registry<T> registry) {
+			return (resourceLocation, bl) -> registry.get(resourceLocation);
+		}
+
+		static <T> TagLoader.ElementLookup<Holder<T>> fromWritableRegistry(WritableRegistry<T> writableRegistry) {
+			HolderGetter<T> holderGetter = writableRegistry.createRegistrationLookup();
+			return (resourceLocation, bl) -> ((HolderGetter<T>)(bl ? holderGetter : writableRegistry)).get(ResourceKey.create(writableRegistry.key(), resourceLocation));
+		}
 	}
 
 	public static record EntryWithSource(TagEntry entry, String source) {

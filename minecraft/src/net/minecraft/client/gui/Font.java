@@ -109,7 +109,7 @@ public class Font {
 		FormattedCharSequence formattedCharSequence, float f, float g, int i, int j, Matrix4f matrix4f, MultiBufferSource multiBufferSource, int k
 	) {
 		int l = adjustColor(j);
-		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(multiBufferSource, 0.0F, 0.0F, l, false, matrix4f, Font.DisplayMode.NORMAL, k);
+		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(this, multiBufferSource, 0.0F, 0.0F, l, false, matrix4f, Font.DisplayMode.NORMAL, k);
 
 		for (int m = -1; m <= 1; m++) {
 			for (int n = -1; n <= 1; n++) {
@@ -131,10 +131,10 @@ public class Font {
 		}
 
 		Font.StringRenderOutput stringRenderOutput2 = new Font.StringRenderOutput(
-			multiBufferSource, f, g, adjustColor(i), false, matrix4f, Font.DisplayMode.POLYGON_OFFSET, k
+			this, multiBufferSource, f, g, adjustColor(i), false, matrix4f, Font.DisplayMode.POLYGON_OFFSET, k
 		);
 		formattedCharSequence.accept(stringRenderOutput2);
-		stringRenderOutput2.finish(0, f);
+		stringRenderOutput2.finish();
 	}
 
 	private static int adjustColor(int i) {
@@ -195,9 +195,9 @@ public class Font {
 	private float renderText(
 		String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, Font.DisplayMode displayMode, int j, int k
 	) {
-		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(multiBufferSource, f, g, i, bl, matrix4f, displayMode, k);
+		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(this, multiBufferSource, f, g, i, j, bl, matrix4f, displayMode, k);
 		StringDecomposer.iterateFormatted(string, Style.EMPTY, stringRenderOutput);
-		return stringRenderOutput.finish(j, f);
+		return stringRenderOutput.finish();
 	}
 
 	private float renderText(
@@ -212,29 +212,15 @@ public class Font {
 		int j,
 		int k
 	) {
-		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(multiBufferSource, f, g, i, bl, matrix4f, displayMode, k);
+		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(this, multiBufferSource, f, g, i, j, bl, matrix4f, displayMode, k);
 		formattedCharSequence.accept(stringRenderOutput);
-		return stringRenderOutput.finish(j, f);
+		return stringRenderOutput.finish();
 	}
 
-	void renderChar(
-		BakedGlyph bakedGlyph,
-		boolean bl,
-		boolean bl2,
-		float f,
-		float g,
-		float h,
-		Matrix4f matrix4f,
-		VertexConsumer vertexConsumer,
-		float i,
-		float j,
-		float k,
-		float l,
-		int m
-	) {
-		bakedGlyph.render(bl2, g, h, matrix4f, vertexConsumer, i, j, k, l, m);
+	void renderChar(BakedGlyph bakedGlyph, boolean bl, boolean bl2, float f, float g, float h, Matrix4f matrix4f, VertexConsumer vertexConsumer, int i, int j) {
+		bakedGlyph.render(bl2, g, h, matrix4f, vertexConsumer, i, j);
 		if (bl) {
-			bakedGlyph.render(bl2, g + f, h, matrix4f, vertexConsumer, i, j, k, l, m);
+			bakedGlyph.render(bl2, g + f, h, matrix4f, vertexConsumer, i, j);
 		}
 	}
 
@@ -294,10 +280,8 @@ public class Font {
 		final MultiBufferSource bufferSource;
 		private final boolean dropShadow;
 		private final float dimFactor;
-		private final float r;
-		private final float g;
-		private final float b;
-		private final float a;
+		private final int color;
+		private final int backgroundColor;
 		private final Matrix4f pose;
 		private final Font.DisplayMode mode;
 		private final int packedLightCoords;
@@ -315,6 +299,7 @@ public class Font {
 		}
 
 		public StringRenderOutput(
+			final Font font,
 			final MultiBufferSource multiBufferSource,
 			final float f,
 			final float g,
@@ -324,74 +309,74 @@ public class Font {
 			final Font.DisplayMode displayMode,
 			final int j
 		) {
+			this(font, multiBufferSource, f, g, i, 0, bl, matrix4f, displayMode, j);
+		}
+
+		public StringRenderOutput(
+			final Font font,
+			final MultiBufferSource multiBufferSource,
+			final float f,
+			final float g,
+			final int i,
+			final int j,
+			final boolean bl,
+			final Matrix4f matrix4f,
+			final Font.DisplayMode displayMode,
+			final int k
+		) {
+			this.this$0 = font;
 			this.bufferSource = multiBufferSource;
 			this.x = f;
 			this.y = g;
 			this.dropShadow = bl;
 			this.dimFactor = bl ? 0.25F : 1.0F;
-			this.r = (float)(i >> 16 & 0xFF) / 255.0F * this.dimFactor;
-			this.g = (float)(i >> 8 & 0xFF) / 255.0F * this.dimFactor;
-			this.b = (float)(i & 0xFF) / 255.0F * this.dimFactor;
-			this.a = (float)(i >> 24 & 0xFF) / 255.0F;
+			this.color = ARGB.scaleRGB(i, this.dimFactor);
+			this.backgroundColor = j;
 			this.pose = matrix4f;
 			this.mode = displayMode;
-			this.packedLightCoords = j;
+			this.packedLightCoords = k;
 		}
 
 		@Override
 		public boolean accept(int i, Style style, int j) {
-			FontSet fontSet = Font.this.getFontSet(style.getFont());
-			GlyphInfo glyphInfo = fontSet.getGlyphInfo(j, Font.this.filterFishyGlyphs);
+			FontSet fontSet = this.this$0.getFontSet(style.getFont());
+			GlyphInfo glyphInfo = fontSet.getGlyphInfo(j, this.this$0.filterFishyGlyphs);
 			BakedGlyph bakedGlyph = style.isObfuscated() && j != 32 ? fontSet.getRandomGlyph(glyphInfo) : fontSet.getGlyph(j);
 			boolean bl = style.isBold();
-			float f = this.a;
 			TextColor textColor = style.getColor();
-			float g;
-			float h;
-			float l;
-			if (textColor != null) {
-				int k = textColor.getValue();
-				g = (float)(k >> 16 & 0xFF) / 255.0F * this.dimFactor;
-				h = (float)(k >> 8 & 0xFF) / 255.0F * this.dimFactor;
-				l = (float)(k & 0xFF) / 255.0F * this.dimFactor;
-			} else {
-				g = this.r;
-				h = this.g;
-				l = this.b;
+			int k = textColor != null ? ARGB.color(ARGB.alpha(this.color), ARGB.scaleRGB(textColor.getValue(), this.dimFactor)) : this.color;
+			float f = glyphInfo.getAdvance(bl);
+			float g = i == 0 ? this.x - 1.0F : this.x;
+			if (this.backgroundColor != 0) {
+				BakedGlyph.Effect effect = new BakedGlyph.Effect(g, this.y + 9.0F, this.x + f, this.y - 1.0F, -0.01F, this.backgroundColor);
+				BakedGlyph bakedGlyph2 = this.this$0.getFontSet(Style.DEFAULT_FONT).whiteGlyph();
+				VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph2.renderType(this.mode));
+				bakedGlyph2.renderEffect(effect, this.pose, vertexConsumer, this.packedLightCoords);
 			}
 
 			if (!(bakedGlyph instanceof EmptyGlyph)) {
-				float m = bl ? glyphInfo.getBoldOffset() : 0.0F;
-				float n = this.dropShadow ? glyphInfo.getShadowOffset() : 0.0F;
+				float h = bl ? glyphInfo.getBoldOffset() : 0.0F;
+				float l = this.dropShadow ? glyphInfo.getShadowOffset() : 0.0F;
 				VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph.renderType(this.mode));
-				Font.this.renderChar(bakedGlyph, bl, style.isItalic(), m, this.x + n, this.y + n, this.pose, vertexConsumer, g, h, l, f, this.packedLightCoords);
+				this.this$0.renderChar(bakedGlyph, bl, style.isItalic(), h, this.x + l, this.y + l, this.pose, vertexConsumer, k, this.packedLightCoords);
 			}
 
-			float m = glyphInfo.getAdvance(bl);
-			float n = this.dropShadow ? 1.0F : 0.0F;
+			float h = this.dropShadow ? 1.0F : 0.0F;
 			if (style.isStrikethrough()) {
-				this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0F, this.y + n + 4.5F, this.x + n + m, this.y + n + 4.5F - 1.0F, 0.01F, g, h, l, f));
+				this.addEffect(new BakedGlyph.Effect(g + h, this.y + h + 4.5F, this.x + h + f, this.y + h + 4.5F - 1.0F, 0.01F, k));
 			}
 
 			if (style.isUnderlined()) {
-				this.addEffect(new BakedGlyph.Effect(this.x + n - 1.0F, this.y + n + 9.0F, this.x + n + m, this.y + n + 9.0F - 1.0F, 0.01F, g, h, l, f));
+				this.addEffect(new BakedGlyph.Effect(g + h, this.y + h + 9.0F, this.x + h + f, this.y + h + 9.0F - 1.0F, 0.01F, k));
 			}
 
-			this.x += m;
+			this.x += f;
 			return true;
 		}
 
-		public float finish(int i, float f) {
-			if (i != 0) {
-				float g = (float)(i >> 24 & 0xFF) / 255.0F;
-				float h = (float)(i >> 16 & 0xFF) / 255.0F;
-				float j = (float)(i >> 8 & 0xFF) / 255.0F;
-				float k = (float)(i & 0xFF) / 255.0F;
-				this.addEffect(new BakedGlyph.Effect(f - 1.0F, this.y + 9.0F, this.x, this.y - 1.0F, 0.01F, h, j, k, g));
-			}
-
+		public float finish() {
 			if (this.effects != null) {
-				BakedGlyph bakedGlyph = Font.this.getFontSet(Style.DEFAULT_FONT).whiteGlyph();
+				BakedGlyph bakedGlyph = this.this$0.getFontSet(Style.DEFAULT_FONT).whiteGlyph();
 				VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph.renderType(this.mode));
 
 				for (BakedGlyph.Effect effect : this.effects) {

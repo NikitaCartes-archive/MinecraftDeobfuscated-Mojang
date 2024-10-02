@@ -1,25 +1,27 @@
 package net.minecraft.network.protocol.game;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.crafting.RecipePropertySet;
+import net.minecraft.world.item.crafting.SelectableRecipe;
+import net.minecraft.world.item.crafting.StonecutterRecipe;
 
-public class ClientboundUpdateRecipesPacket implements Packet<ClientGamePacketListener> {
+public record ClientboundUpdateRecipesPacket(
+	Map<ResourceKey<RecipePropertySet>, RecipePropertySet> itemSets, SelectableRecipe.SingleInputSet<StonecutterRecipe> stonecutterRecipes
+) implements Packet<ClientGamePacketListener> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundUpdateRecipesPacket> STREAM_CODEC = StreamCodec.composite(
-		RecipeHolder.STREAM_CODEC.apply(ByteBufCodecs.list()),
-		clientboundUpdateRecipesPacket -> clientboundUpdateRecipesPacket.recipes,
+		ByteBufCodecs.map(HashMap::new, ResourceKey.streamCodec(RecipePropertySet.TYPE_KEY), RecipePropertySet.STREAM_CODEC),
+		ClientboundUpdateRecipesPacket::itemSets,
+		SelectableRecipe.SingleInputSet.noRecipeCodec(),
+		ClientboundUpdateRecipesPacket::stonecutterRecipes,
 		ClientboundUpdateRecipesPacket::new
 	);
-	private final List<RecipeHolder<?>> recipes;
-
-	public ClientboundUpdateRecipesPacket(Collection<RecipeHolder<?>> collection) {
-		this.recipes = List.copyOf(collection);
-	}
 
 	@Override
 	public PacketType<ClientboundUpdateRecipesPacket> type() {
@@ -28,9 +30,5 @@ public class ClientboundUpdateRecipesPacket implements Packet<ClientGamePacketLi
 
 	public void handle(ClientGamePacketListener clientGamePacketListener) {
 		clientGamePacketListener.handleUpdateRecipes(this);
-	}
-
-	public List<RecipeHolder<?>> getRecipes() {
-		return this.recipes;
 	}
 }

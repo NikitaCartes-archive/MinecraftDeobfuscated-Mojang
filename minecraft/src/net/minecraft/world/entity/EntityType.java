@@ -116,6 +116,8 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraft.world.entity.monster.breeze.Breeze;
+import net.minecraft.world.entity.monster.creaking.Creaking;
+import net.minecraft.world.entity.monster.creaking.CreakingTransient;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
@@ -312,6 +314,26 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	);
 	public static final EntityType<Cow> COW = register(
 		"cow", EntityType.Builder.of(Cow::new, MobCategory.CREATURE).sized(0.9F, 1.4F).eyeHeight(1.3F).passengerAttachments(1.36875F).clientTrackingRange(10)
+	);
+	public static final EntityType<Creaking> CREAKING = register(
+		"creaking",
+		EntityType.Builder.of(Creaking::new, MobCategory.MONSTER)
+			.fireImmune()
+			.sized(0.9F, 2.7F)
+			.eyeHeight(2.3F)
+			.clientTrackingRange(8)
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
+	public static final EntityType<CreakingTransient> CREAKING_TRANSIENT = register(
+		"creaking_transient",
+		EntityType.Builder.of(CreakingTransient::new, MobCategory.MONSTER)
+			.noSave()
+			.noSummon()
+			.fireImmune()
+			.sized(0.9F, 2.7F)
+			.eyeHeight(2.3F)
+			.clientTrackingRange(8)
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
 	);
 	public static final EntityType<Creeper> CREEPER = register(
 		"creeper", EntityType.Builder.of(Creeper::new, MobCategory.MONSTER).sized(0.6F, 1.7F).clientTrackingRange(8)
@@ -631,6 +653,24 @@ public class EntityType<T extends Entity> implements FeatureElement, EntityTypeT
 	public static final EntityType<Painting> PAINTING = register(
 		"painting",
 		EntityType.Builder.<Painting>of(Painting::new, MobCategory.MISC).noLootTable().sized(0.5F, 0.5F).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE)
+	);
+	public static final EntityType<Boat> PALE_OAK_BOAT = register(
+		"pale_oak_boat",
+		EntityType.Builder.of(boatFactory(() -> Items.PALE_OAK_BOAT), MobCategory.MISC)
+			.noLootTable()
+			.sized(1.375F, 0.5625F)
+			.eyeHeight(0.5625F)
+			.clientTrackingRange(10)
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
+	);
+	public static final EntityType<ChestBoat> PALE_OAK_CHEST_BOAT = register(
+		"pale_oak_chest_boat",
+		EntityType.Builder.of(chestBoatFactory(() -> Items.PALE_OAK_CHEST_BOAT), MobCategory.MISC)
+			.noLootTable()
+			.sized(1.375F, 0.5625F)
+			.eyeHeight(0.5625F)
+			.clientTrackingRange(10)
+			.requiredFeatures(FeatureFlags.WINTER_DROP)
 	);
 	public static final EntityType<Panda> PANDA = register(
 		"panda", EntityType.Builder.of(Panda::new, MobCategory.CREATURE).sized(1.3F, 1.25F).clientTrackingRange(10)

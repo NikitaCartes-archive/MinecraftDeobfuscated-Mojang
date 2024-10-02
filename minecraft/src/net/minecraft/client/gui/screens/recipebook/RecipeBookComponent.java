@@ -5,13 +5,14 @@ import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.ClientRecipeBook;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.RecipeBookCategories;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
@@ -33,17 +34,24 @@ import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.stats.RecipeBook;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.inventory.AbstractFurnaceMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.inventory.RecipeBookType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.BasicRecipeBookCategory;
+import net.minecraft.world.item.crafting.RecipeBookCategory;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.RecipeDisplayId;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
-public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements Renderable, GuiEventListener, NarratableEntry, RecipeShownListener {
+public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements Renderable, GuiEventListener, NarratableEntry {
 	public static final WidgetSprites RECIPE_BUTTON_SPRITES = new WidgetSprites(
 		ResourceLocation.withDefaultNamespace("recipe_book/button"), ResourceLocation.withDefaultNamespace("recipe_book/button_highlighted")
 	);
@@ -64,7 +72,7 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 	private int height;
 	private float time;
 	@Nullable
-	private RecipeHolder<?> ghostRecipe;
+	private RecipeDisplayId lastPlacedRecipe;
 	private final GhostSlots ghostSlots;
 	private final List<RecipeBookTabButton> tabButtons = Lists.<RecipeBookTabButton>newArrayList();
 	@Nullable
@@ -75,10 +83,11 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 	@Nullable
 	private EditBox searchBox;
 	private String lastSearch = "";
+	private final List<RecipeBookComponent.TabInfo> tabInfos;
 	private ClientRecipeBook book;
 	private final RecipeBookPage recipeBookPage;
 	@Nullable
-	private RecipeHolder<?> lastRecipe;
+	private RecipeDisplayId lastRecipe;
 	@Nullable
 	private RecipeCollection lastRecipeCollection;
 	private final StackedItemContents stackedContents = new StackedItemContents();
@@ -89,11 +98,12 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 	@Nullable
 	private ScreenRectangle magnifierIconPlacement;
 
-	public RecipeBookComponent(T recipeBookMenu) {
+	public RecipeBookComponent(T recipeBookMenu, List<RecipeBookComponent.TabInfo> list) {
 		this.menu = recipeBookMenu;
+		this.tabInfos = list;
 		SlotSelectTime slotSelectTime = () -> Mth.floor(this.time / 30.0F);
 		this.ghostSlots = new GhostSlots(slotSelectTime);
-		this.recipeBookPage = new RecipeBookPage(slotSelectTime, recipeBookMenu instanceof AbstractFurnaceMenu);
+		this.recipeBookPage = new RecipeBookPage(this, slotSelectTime, recipeBookMenu instanceof AbstractFurnaceMenu);
 	}
 
 	public void init(int i, int j, Minecraft minecraft, boolean bl) {
@@ -128,14 +138,13 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 			ScreenAxis.HORIZONTAL, i + 8, this.searchBox.getY(), this.searchBox.getX() - this.getXOrigin(), this.searchBox.getHeight()
 		);
 		this.recipeBookPage.init(this.minecraft, i, j);
-		this.recipeBookPage.addListener(this);
 		this.filterButton = new StateSwitchingButton(i + 110, j + 12, 26, 16, bl);
 		this.updateFilterButtonTooltip();
 		this.initFilterButtonTextures();
 		this.tabButtons.clear();
 
-		for (RecipeBookCategories recipeBookCategories : RecipeBookCategories.getCategories(this.menu.getRecipeBookType())) {
-			this.tabButtons.add(new RecipeBookTabButton(recipeBookCategories));
+		for (RecipeBookComponent.TabInfo tabInfo : this.tabInfos) {
+			this.tabButtons.add(new RecipeBookTabButton(tabInfo));
 		}
 
 		if (this.selectedTab != null) {
@@ -210,21 +219,21 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 
 	public void slotClicked(@Nullable Slot slot) {
 		if (slot != null && this.isCraftingSlot(slot)) {
-			this.clearGhostRecipe();
+			this.lastPlacedRecipe = null;
+			this.ghostSlots.clear();
 			if (this.isVisible()) {
 				this.updateStackedContents();
 			}
 		}
 	}
 
-	protected abstract void selectMatchingRecipes(RecipeCollection recipeCollection, StackedItemContents stackedItemContents, RecipeBook recipeBook);
+	protected abstract void selectMatchingRecipes(RecipeCollection recipeCollection, StackedItemContents stackedItemContents);
 
 	private void updateCollections(boolean bl, boolean bl2) {
 		List<RecipeCollection> list = this.book.getCollection(this.selectedTab.getCategory());
-		list.forEach(recipeCollection -> this.selectMatchingRecipes(recipeCollection, this.stackedContents, this.book));
+		list.forEach(recipeCollection -> this.selectMatchingRecipes(recipeCollection, this.stackedContents));
 		List<RecipeCollection> list2 = Lists.<RecipeCollection>newArrayList(list);
-		list2.removeIf(recipeCollection -> !recipeCollection.hasKnownRecipes());
-		list2.removeIf(recipeCollection -> !recipeCollection.hasFitting());
+		list2.removeIf(recipeCollection -> !recipeCollection.hasAnySelected());
 		String string = this.searchBox.getValue();
 		if (!string.isEmpty()) {
 			ClientPacketListener clientPacketListener = this.minecraft.getConnection();
@@ -248,8 +257,8 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 		int l = 0;
 
 		for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
-			RecipeBookCategories recipeBookCategories = recipeBookTabButton.getCategory();
-			if (recipeBookCategories == RecipeBookCategories.CRAFTING_SEARCH || recipeBookCategories == RecipeBookCategories.FURNACE_SEARCH) {
+			RecipeBookCategory recipeBookCategory = recipeBookTabButton.getCategory();
+			if (recipeBookCategory instanceof SearchRecipeBookCategory) {
 				recipeBookTabButton.visible = true;
 				recipeBookTabButton.setPosition(i, j + 27 * l++);
 			} else if (recipeBookTabButton.updateVisibility(this.book)) {
@@ -325,15 +334,15 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 	public boolean mouseClicked(double d, double e, int i) {
 		if (this.isVisible() && !this.minecraft.player.isSpectator()) {
 			if (this.recipeBookPage.mouseClicked(d, e, i, this.getXOrigin(), this.getYOrigin(), 147, 166)) {
-				RecipeHolder<?> recipeHolder = this.recipeBookPage.getLastClickedRecipe();
+				RecipeDisplayId recipeDisplayId = this.recipeBookPage.getLastClickedRecipe();
 				RecipeCollection recipeCollection = this.recipeBookPage.getLastClickedRecipeCollection();
-				if (recipeHolder != null && recipeCollection != null) {
-					if (!this.tryPlaceRecipe(recipeCollection, recipeHolder)) {
+				if (recipeDisplayId != null && recipeCollection != null) {
+					if (!this.tryPlaceRecipe(recipeCollection, recipeDisplayId)) {
 						return false;
 					}
 
 					this.lastRecipeCollection = recipeCollection;
-					this.lastRecipe = recipeHolder;
+					this.lastRecipe = recipeDisplayId;
 					if (!this.isOffsetNextToMainGUI()) {
 						this.setVisible(false);
 					}
@@ -383,12 +392,13 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 		}
 	}
 
-	private boolean tryPlaceRecipe(RecipeCollection recipeCollection, RecipeHolder<?> recipeHolder) {
-		if (!recipeCollection.isCraftable(recipeHolder) && this.ghostRecipe == recipeHolder) {
+	private boolean tryPlaceRecipe(RecipeCollection recipeCollection, RecipeDisplayId recipeDisplayId) {
+		if (!recipeCollection.isCraftable(recipeDisplayId) && recipeDisplayId.equals(this.lastPlacedRecipe)) {
 			return false;
 		} else {
-			this.clearGhostRecipe();
-			this.minecraft.gameMode.handlePlaceRecipe(this.minecraft.player.containerMenu.containerId, recipeHolder, Screen.hasShiftDown());
+			this.lastPlacedRecipe = recipeDisplayId;
+			this.ghostSlots.clear();
+			this.minecraft.gameMode.handlePlaceRecipe(this.minecraft.player.containerMenu.containerId, recipeDisplayId, Screen.hasShiftDown());
 			return true;
 		}
 	}
@@ -505,25 +515,17 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 		}
 	}
 
-	@Override
-	public void recipesShown(List<RecipeHolder<?>> list) {
-		for (RecipeHolder<?> recipeHolder : list) {
-			this.minecraft.player.removeRecipeHighlight(recipeHolder);
-		}
+	public void recipeShown(RecipeDisplayId recipeDisplayId) {
+		this.minecraft.player.removeRecipeHighlight(recipeDisplayId);
 	}
 
-	private void clearGhostRecipe() {
-		this.ghostRecipe = null;
+	public void fillGhostRecipe(RecipeDisplay recipeDisplay) {
 		this.ghostSlots.clear();
+		SlotDisplay.ResolutionContext resolutionContext = SlotDisplay.ResolutionContext.forLevel((Level)Objects.requireNonNull(this.minecraft.level));
+		this.fillGhostRecipe(this.ghostSlots, recipeDisplay, resolutionContext);
 	}
 
-	public void setupGhostRecipe(RecipeHolder<?> recipeHolder) {
-		this.ghostRecipe = recipeHolder;
-		this.ghostSlots.clear();
-		this.setupGhostRecipeSlots(this.ghostSlots, recipeHolder);
-	}
-
-	protected abstract void setupGhostRecipeSlots(GhostSlots ghostSlots, RecipeHolder<?> recipeHolder);
+	protected abstract void fillGhostRecipe(GhostSlots ghostSlots, RecipeDisplay recipeDisplay, SlotDisplay.ResolutionContext resolutionContext);
 
 	protected void sendUpdateSettings() {
 		if (this.minecraft.getConnection() != null) {
@@ -553,6 +555,21 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 		Screen.NarratableSearchResult narratableSearchResult = Screen.findNarratableWidget(list, null);
 		if (narratableSearchResult != null) {
 			narratableSearchResult.entry.updateNarration(narrationElementOutput.nest());
+		}
+	}
+
+	@Environment(EnvType.CLIENT)
+	public static record TabInfo(ItemStack primaryIcon, Optional<ItemStack> secondaryIcon, RecipeBookCategory category) {
+		public TabInfo(SearchRecipeBookCategory searchRecipeBookCategory) {
+			this(new ItemStack(Items.COMPASS), Optional.empty(), searchRecipeBookCategory);
+		}
+
+		public TabInfo(Item item, BasicRecipeBookCategory basicRecipeBookCategory) {
+			this(new ItemStack(item), Optional.empty(), basicRecipeBookCategory);
+		}
+
+		public TabInfo(Item item, Item item2, BasicRecipeBookCategory basicRecipeBookCategory) {
+			this(new ItemStack(item), Optional.of(new ItemStack(item2)), basicRecipeBookCategory);
 		}
 	}
 }

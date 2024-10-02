@@ -658,7 +658,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 			.addCriterion(
 				"pot_crafted_using_only_sherds",
 				RecipeCraftedTrigger.TriggerInstance.craftedItem(
-					ResourceLocation.withDefaultNamespace("decorated_pot"),
+					ResourceKey.create(Registries.RECIPE, ResourceLocation.withDefaultNamespace("decorated_pot")),
 					List.of(
 						ItemPredicate.Builder.item().of(holderGetter2, ItemTags.DECORATED_POT_SHERDS),
 						ItemPredicate.Builder.item().of(holderGetter2, ItemTags.DECORATED_POT_SHERDS),
@@ -868,7 +868,10 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 				true,
 				false
 			)
-			.addCriterion("crafter_crafted_crafter", RecipeCraftedTrigger.TriggerInstance.crafterCraftedItem(ResourceLocation.withDefaultNamespace("crafter")))
+			.addCriterion(
+				"crafter_crafted_crafter",
+				RecipeCraftedTrigger.TriggerInstance.crafterCraftedItem(ResourceKey.create(Registries.RECIPE, ResourceLocation.withDefaultNamespace("crafter")))
+			)
 			.save(consumer, "adventure/crafters_crafting_crafters");
 		Advancement.Builder.advancement()
 			.parent(advancementHolder13)
@@ -1006,7 +1009,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 		builder.requirements(AdvancementRequirements.Strategy.OR);
 		VanillaRecipeProvider.smithingTrims()
 			.map(VanillaRecipeProvider.TrimTemplate::id)
-			.forEach(resourceLocation -> builder.addCriterion("armor_trimmed_" + resourceLocation, RecipeCraftedTrigger.TriggerInstance.craftedItem(resourceLocation)));
+			.forEach(resourceKey -> builder.addCriterion("armor_trimmed_" + resourceKey, RecipeCraftedTrigger.TriggerInstance.craftedItem(resourceKey)));
 		return builder;
 	}
 

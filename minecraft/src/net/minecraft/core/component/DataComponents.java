@@ -6,10 +6,12 @@ import java.util.function.UnaryOperator;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.EncoderCache;
 import net.minecraft.util.ExtraCodecs;
@@ -51,6 +53,7 @@ import net.minecraft.world.item.component.UseCooldown;
 import net.minecraft.world.item.component.UseRemainder;
 import net.minecraft.world.item.component.WritableBookContent;
 import net.minecraft.world.item.component.WrittenBookContent;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.enchantment.Enchantable;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.item.enchantment.Repairable;
@@ -214,8 +217,8 @@ public class DataComponents {
 	public static final DataComponentType<JukeboxPlayable> JUKEBOX_PLAYABLE = register(
 		"jukebox_playable", builder -> builder.persistent(JukeboxPlayable.CODEC).networkSynchronized(JukeboxPlayable.STREAM_CODEC)
 	);
-	public static final DataComponentType<List<ResourceLocation>> RECIPES = register(
-		"recipes", builder -> builder.persistent(ResourceLocation.CODEC.listOf()).cacheEncoding()
+	public static final DataComponentType<List<ResourceKey<Recipe<?>>>> RECIPES = register(
+		"recipes", builder -> builder.persistent(ResourceKey.codec(Registries.RECIPE).listOf()).cacheEncoding()
 	);
 	public static final DataComponentType<LodestoneTracker> LODESTONE_TRACKER = register(
 		"lodestone_tracker", builder -> builder.persistent(LodestoneTracker.CODEC).networkSynchronized(LodestoneTracker.STREAM_CODEC).cacheEncoding()

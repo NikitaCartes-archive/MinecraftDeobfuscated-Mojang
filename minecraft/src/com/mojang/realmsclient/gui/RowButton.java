@@ -4,8 +4,8 @@ import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.ObjectSelectionList;
-import net.minecraft.realms.RealmsObjectSelectionList;
 
 @Environment(EnvType.CLIENT)
 public abstract class RowButton {
@@ -40,24 +40,22 @@ public abstract class RowButton {
 
 	public abstract void onClick(int i);
 
-	public static void drawButtonsInRow(
-		GuiGraphics guiGraphics, List<RowButton> list, RealmsObjectSelectionList<?> realmsObjectSelectionList, int i, int j, int k, int l
-	) {
+	public static void drawButtonsInRow(GuiGraphics guiGraphics, List<RowButton> list, AbstractSelectionList<?> abstractSelectionList, int i, int j, int k, int l) {
 		for (RowButton rowButton : list) {
-			if (realmsObjectSelectionList.getRowWidth() > rowButton.getRight()) {
+			if (abstractSelectionList.getRowWidth() > rowButton.getRight()) {
 				rowButton.drawForRowAt(guiGraphics, i, j, k, l);
 			}
 		}
 	}
 
 	public static void rowButtonMouseClicked(
-		RealmsObjectSelectionList<?> realmsObjectSelectionList, ObjectSelectionList.Entry<?> entry, List<RowButton> list, int i, double d, double e
+		AbstractSelectionList<?> abstractSelectionList, ObjectSelectionList.Entry<?> entry, List<RowButton> list, int i, double d, double e
 	) {
-		int j = realmsObjectSelectionList.children().indexOf(entry);
+		int j = abstractSelectionList.children().indexOf(entry);
 		if (j > -1) {
-			realmsObjectSelectionList.selectItem(j);
-			int k = realmsObjectSelectionList.getRowLeft();
-			int l = realmsObjectSelectionList.getRowTop(j);
+			abstractSelectionList.setSelectedIndex(j);
+			int k = abstractSelectionList.getRowLeft();
+			int l = abstractSelectionList.getRowTop(j);
 			int m = (int)(d - (double)k);
 			int n = (int)(e - (double)l);
 

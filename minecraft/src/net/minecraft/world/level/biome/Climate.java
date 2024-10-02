@@ -474,6 +474,7 @@ public class Climate {
 	}
 
 	static class SpawnFinder {
+		private static final long MAX_RADIUS = 2048L;
 		Climate.SpawnFinder.Result result;
 
 		SpawnFinder(List<Climate.ParameterPoint> list, Climate.Sampler sampler) {
@@ -504,20 +505,19 @@ public class Climate {
 		}
 
 		private static Climate.SpawnFinder.Result getSpawnPositionAndFitness(List<Climate.ParameterPoint> list, Climate.Sampler sampler, int i, int j) {
-			double d = Mth.square(2500.0);
-			int k = 2;
-			long l = (long)((double)Mth.square(10000.0F) * Math.pow((double)(Mth.square((long)i) + Mth.square((long)j)) / d, 2.0));
 			Climate.TargetPoint targetPoint = sampler.sample(QuartPos.fromBlock(i), 0, QuartPos.fromBlock(j));
 			Climate.TargetPoint targetPoint2 = new Climate.TargetPoint(
 				targetPoint.temperature(), targetPoint.humidity(), targetPoint.continentalness(), targetPoint.erosion(), 0L, targetPoint.weirdness()
 			);
-			long m = Long.MAX_VALUE;
+			long l = Long.MAX_VALUE;
 
 			for (Climate.ParameterPoint parameterPoint : list) {
-				m = Math.min(m, parameterPoint.fitness(targetPoint2));
+				l = Math.min(l, parameterPoint.fitness(targetPoint2));
 			}
 
-			return new Climate.SpawnFinder.Result(new BlockPos(i, 0, j), l + m);
+			long m = Mth.square((long)i) + Mth.square((long)j);
+			long n = l * Mth.square(2048L) + m;
+			return new Climate.SpawnFinder.Result(new BlockPos(i, 0, j), n);
 		}
 
 		static record Result(BlockPos location, long fitness) {

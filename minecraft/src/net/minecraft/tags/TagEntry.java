@@ -68,7 +68,7 @@ public class TagEntry {
 
 			collection.forEach(consumer);
 		} else {
-			T object = lookup.element(this.id);
+			T object = lookup.element(this.id, this.required);
 			if (object == null) {
 				return !this.required;
 			}
@@ -111,7 +111,7 @@ public class TagEntry {
 
 	public interface Lookup<T> {
 		@Nullable
-		T element(ResourceLocation resourceLocation);
+		T element(ResourceLocation resourceLocation, boolean bl);
 
 		@Nullable
 		Collection<T> tag(ResourceLocation resourceLocation);

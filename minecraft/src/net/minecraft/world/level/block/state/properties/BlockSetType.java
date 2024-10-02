@@ -140,6 +140,7 @@ public record BlockSetType(
 	);
 	public static final BlockSetType JUNGLE = register(new BlockSetType("jungle"));
 	public static final BlockSetType DARK_OAK = register(new BlockSetType("dark_oak"));
+	public static final BlockSetType PALE_OAK = register(new BlockSetType("pale_oak"));
 	public static final BlockSetType CRIMSON = register(
 		new BlockSetType(
 			"crimson",

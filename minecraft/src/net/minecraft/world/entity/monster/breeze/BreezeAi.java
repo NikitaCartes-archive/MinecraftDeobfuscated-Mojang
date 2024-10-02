@@ -66,7 +66,7 @@ public class BreezeAi {
 	}
 
 	private static void initCoreActivity(Brain<Breeze> brain) {
-		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), new LookAtTargetSink(45, 90)));
+		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim<>(0.8F), new LookAtTargetSink(45, 90)));
 	}
 
 	private static void initIdleActivity(Brain<Breeze> brain) {

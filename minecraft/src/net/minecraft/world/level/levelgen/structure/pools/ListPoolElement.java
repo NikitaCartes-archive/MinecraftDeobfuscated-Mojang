@@ -51,7 +51,7 @@ public class ListPoolElement extends StructurePoolElement {
 	}
 
 	@Override
-	public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
+	public List<StructureTemplate.JigsawBlockInfo> getShuffledJigsawBlocks(
 		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, RandomSource randomSource
 	) {
 		return ((StructurePoolElement)this.elements.get(0)).getShuffledJigsawBlocks(structureTemplateManager, blockPos, rotation, randomSource);

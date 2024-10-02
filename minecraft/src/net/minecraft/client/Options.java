@@ -281,6 +281,10 @@ public class Options {
 			}
 		}
 	);
+	private static final Component HIGH_CONTRAST_BLOCK_OUTLINE_TOOLTIP = Component.translatable("options.accessibility.high_contrast_block_outline.tooltip");
+	private final OptionInstance<Boolean> highContrastBlockOutline = OptionInstance.createBoolean(
+		"options.accessibility.high_contrast_block_outline", OptionInstance.cachedConstantTooltip(HIGH_CONTRAST_BLOCK_OUTLINE_TOOLTIP), false
+	);
 	private final OptionInstance<Boolean> narratorHotkey = OptionInstance.createBoolean(
 		"options.accessibility.narrator_hotkey",
 		OptionInstance.cachedConstantTooltip(
@@ -851,6 +855,10 @@ public class Options {
 		return this.highContrast;
 	}
 
+	public OptionInstance<Boolean> highContrastBlockOutline() {
+		return this.highContrastBlockOutline;
+	}
+
 	public OptionInstance<Boolean> narratorHotkey() {
 		return this.narratorHotkey;
 	}
@@ -1199,6 +1207,7 @@ public class Options {
 		fieldAccess.process("mouseSensitivity", this.sensitivity);
 		fieldAccess.process("damageTiltStrength", this.damageTiltStrength);
 		fieldAccess.process("highContrast", this.highContrast);
+		fieldAccess.process("highContrastBlockOutline", this.highContrastBlockOutline);
 		fieldAccess.process("narratorHotkey", this.narratorHotkey);
 		this.resourcePacks = fieldAccess.process("resourcePacks", this.resourcePacks, Options::readListOfStrings, GSON::toJson);
 		this.incompatibleResourcePacks = fieldAccess.process("incompatibleResourcePacks", this.incompatibleResourcePacks, Options::readListOfStrings, GSON::toJson);

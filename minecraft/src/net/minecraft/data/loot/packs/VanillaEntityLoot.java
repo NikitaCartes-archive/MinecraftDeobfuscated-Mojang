@@ -1020,6 +1020,8 @@ public class VanillaEntityLoot extends EntityLootSubProvider {
 						)
 				)
 		);
+		this.add(EntityType.CREAKING, LootTable.lootTable());
+		this.add(EntityType.CREAKING_TRANSIENT, LootTable.lootTable());
 		this.add(
 			EntityType.ZOMBIE,
 			LootTable.lootTable()

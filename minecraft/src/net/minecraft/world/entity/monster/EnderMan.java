@@ -3,6 +3,7 @@ package net.minecraft.world.entity.monster;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.DoubleSupplier;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -211,18 +212,8 @@ public class EnderMan extends Monster implements NeutralMob {
 		this.readPersistentAngerSaveData(this.level(), compoundTag);
 	}
 
-	boolean isLookingAtMe(Player player) {
-		ItemStack itemStack = player.getInventory().armor.get(3);
-		if (itemStack.is(Blocks.CARVED_PUMPKIN.asItem())) {
-			return false;
-		} else {
-			Vec3 vec3 = player.getViewVector(1.0F).normalize();
-			Vec3 vec32 = new Vec3(this.getX() - player.getX(), this.getEyeY() - player.getEyeY(), this.getZ() - player.getZ());
-			double d = vec32.length();
-			vec32 = vec32.normalize();
-			double e = vec3.dot(vec32);
-			return e > 1.0 - 0.025 / d ? player.hasLineOfSight(this) : false;
-		}
+	boolean isBeingStaredBy(Player player) {
+		return this.isLookingAtMe(player, 0.025, true, false, LivingEntity.PLAYER_NOT_WEARING_DISGUISE_ITEM, new DoubleSupplier[]{this::getEyeY});
 	}
 
 	@Override
@@ -431,7 +422,7 @@ public class EnderMan extends Monster implements NeutralMob {
 				return false;
 			} else {
 				double d = this.target.distanceToSqr(this.enderman);
-				return d > 256.0 ? false : this.enderman.isLookingAtMe((Player)this.target);
+				return d > 256.0 ? false : this.enderman.isBeingStaredBy((Player)this.target);
 			}
 		}
 
@@ -509,7 +500,7 @@ public class EnderMan extends Monster implements NeutralMob {
 		public EndermanLookForPlayerGoal(EnderMan enderMan, @Nullable TargetingConditions.Selector selector) {
 			super(enderMan, Player.class, 10, false, false, selector);
 			this.enderman = enderMan;
-			this.isAngerInducing = (livingEntity, serverLevel) -> (enderMan.isLookingAtMe((Player)livingEntity) || enderMan.isAngryAt(livingEntity, serverLevel))
+			this.isAngerInducing = (livingEntity, serverLevel) -> (enderMan.isBeingStaredBy((Player)livingEntity) || enderMan.isAngryAt(livingEntity, serverLevel))
 					&& !enderMan.hasIndirectPassenger(livingEntity);
 			this.startAggroTargetConditions = TargetingConditions.forCombat().range(this.getFollowDistance()).selector(this.isAngerInducing);
 		}
@@ -571,7 +562,7 @@ public class EnderMan extends Monster implements NeutralMob {
 				}
 			} else {
 				if (this.target != null && !this.enderman.isPassenger()) {
-					if (this.enderman.isLookingAtMe((Player)this.target)) {
+					if (this.enderman.isBeingStaredBy((Player)this.target)) {
 						if (this.target.distanceToSqr(this.enderman) < 16.0) {
 							this.enderman.teleport();
 						}

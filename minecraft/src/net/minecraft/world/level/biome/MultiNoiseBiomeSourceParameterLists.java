@@ -16,6 +16,11 @@ public class MultiNoiseBiomeSourceParameterLists {
 		bootstrapContext.register(OVERWORLD, new MultiNoiseBiomeSourceParameterList(MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD, holderGetter));
 	}
 
+	public static void winterDrop(BootstrapContext<MultiNoiseBiomeSourceParameterList> bootstrapContext) {
+		HolderGetter<Biome> holderGetter = bootstrapContext.lookup(Registries.BIOME);
+		bootstrapContext.register(OVERWORLD, new MultiNoiseBiomeSourceParameterList(MultiNoiseBiomeSourceParameterList.Preset.OVERWORLD_WINTER_DROP, holderGetter));
+	}
+
 	private static ResourceKey<MultiNoiseBiomeSourceParameterList> register(String string) {
 		return ResourceKey.create(Registries.MULTI_NOISE_BIOME_SOURCE_PARAMETER_LIST, ResourceLocation.withDefaultNamespace(string));
 	}

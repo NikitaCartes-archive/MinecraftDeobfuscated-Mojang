@@ -276,7 +276,7 @@ public class Sheep extends Animal implements Shearable {
 	public Sheep getBreedOffspring(ServerLevel serverLevel, AgeableMob ageableMob) {
 		Sheep sheep = EntityType.SHEEP.create(serverLevel, EntitySpawnReason.BREEDING);
 		if (sheep != null) {
-			sheep.setColor(this.getOffspringColor(this, (Sheep)ageableMob));
+			sheep.setColor(this.getOffspringColor(serverLevel, this, (Sheep)ageableMob));
 		}
 
 		return sheep;
@@ -300,19 +300,18 @@ public class Sheep extends Animal implements Shearable {
 		return super.finalizeSpawn(serverLevelAccessor, difficultyInstance, entitySpawnReason, spawnGroupData);
 	}
 
-	private DyeColor getOffspringColor(Animal animal, Animal animal2) {
-		DyeColor dyeColor = ((Sheep)animal).getColor();
-		DyeColor dyeColor2 = ((Sheep)animal2).getColor();
+	private DyeColor getOffspringColor(ServerLevel serverLevel, Sheep sheep, Sheep sheep2) {
+		DyeColor dyeColor = sheep.getColor();
+		DyeColor dyeColor2 = sheep2.getColor();
 		CraftingInput craftingInput = makeCraftInput(dyeColor, dyeColor2);
-		return (DyeColor)this.level()
-			.getRecipeManager()
-			.getRecipeFor(RecipeType.CRAFTING, craftingInput, this.level())
-			.map(recipeHolder -> ((CraftingRecipe)recipeHolder.value()).assemble(craftingInput, this.level().registryAccess()))
+		return (DyeColor)serverLevel.recipeAccess()
+			.getRecipeFor(RecipeType.CRAFTING, craftingInput, serverLevel)
+			.map(recipeHolder -> ((CraftingRecipe)recipeHolder.value()).assemble(craftingInput, serverLevel.registryAccess()))
 			.map(ItemStack::getItem)
 			.filter(DyeItem.class::isInstance)
 			.map(DyeItem.class::cast)
 			.map(DyeItem::getDyeColor)
-			.orElseGet(() -> this.level().random.nextBoolean() ? dyeColor : dyeColor2);
+			.orElseGet(() -> serverLevel.random.nextBoolean() ? dyeColor : dyeColor2);
 	}
 
 	private static CraftingInput makeCraftInput(DyeColor dyeColor, DyeColor dyeColor2) {

@@ -46,7 +46,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.component.FireworkExplosion;
-import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeAccess;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.block.BaseFireBlock;
@@ -928,7 +928,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable {
 		return predicate.test(this.getFluidState(blockPos));
 	}
 
-	public abstract RecipeManager getRecipeManager();
+	public abstract RecipeAccess recipeAccess();
 
 	public BlockPos getBlockRandomPos(int i, int j, int k, int l) {
 		this.randValue = this.randValue * 3 + 1013904223;

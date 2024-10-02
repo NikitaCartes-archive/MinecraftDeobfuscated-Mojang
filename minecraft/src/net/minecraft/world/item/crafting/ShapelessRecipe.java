@@ -10,6 +10,10 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.Level;
 
 public class ShapelessRecipe implements CraftingRecipe {
@@ -28,23 +32,18 @@ public class ShapelessRecipe implements CraftingRecipe {
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<ShapelessRecipe> getSerializer() {
 		return RecipeSerializer.SHAPELESS_RECIPE;
 	}
 
 	@Override
-	public String getGroup() {
+	public String group() {
 		return this.group;
 	}
 
 	@Override
 	public CraftingBookCategory category() {
 		return this.category;
-	}
-
-	@Override
-	public ItemStack getResultItem(HolderLookup.Provider provider) {
-		return this.result;
 	}
 
 	@Override
@@ -71,8 +70,14 @@ public class ShapelessRecipe implements CraftingRecipe {
 	}
 
 	@Override
-	public boolean canCraftInDimensions(int i, int j) {
-		return i * j >= this.ingredients.size();
+	public List<RecipeDisplay> display() {
+		return List.of(
+			new ShapelessCraftingRecipeDisplay(
+				this.ingredients.stream().map(Ingredient::display).toList(),
+				new SlotDisplay.ItemStackSlotDisplay(this.result),
+				new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)
+			)
+		);
 	}
 
 	public static class Serializer implements RecipeSerializer<ShapelessRecipe> {

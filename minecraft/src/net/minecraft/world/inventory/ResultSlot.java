@@ -1,11 +1,14 @@
 package net.minecraft.world.inventory;
 
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 
 public class ResultSlot extends Slot {
 	private final CraftingContainer craftSlots;
@@ -56,6 +59,25 @@ public class ResultSlot extends Slot {
 		this.removeCount = 0;
 	}
 
+	private static NonNullList<ItemStack> copyAllInputItems(CraftingInput craftingInput) {
+		NonNullList<ItemStack> nonNullList = NonNullList.withSize(craftingInput.size(), ItemStack.EMPTY);
+
+		for (int i = 0; i < nonNullList.size(); i++) {
+			nonNullList.set(i, craftingInput.getItem(i));
+		}
+
+		return nonNullList;
+	}
+
+	private NonNullList<ItemStack> getRemainingItems(CraftingInput craftingInput, Level level) {
+		return level instanceof ServerLevel serverLevel
+			? (NonNullList)serverLevel.recipeAccess()
+				.getRecipeFor(RecipeType.CRAFTING, craftingInput, serverLevel)
+				.map(recipeHolder -> ((CraftingRecipe)recipeHolder.value()).getRemainingItems(craftingInput))
+				.orElseGet(() -> copyAllInputItems(craftingInput))
+			: CraftingRecipe.defaultCraftingReminder(craftingInput);
+	}
+
 	@Override
 	public void onTake(Player player, ItemStack itemStack) {
 		this.checkTakeAchievements(itemStack);
@@ -63,7 +85,7 @@ public class ResultSlot extends Slot {
 		CraftingInput craftingInput = positioned.input();
 		int i = positioned.left();
 		int j = positioned.top();
-		NonNullList<ItemStack> nonNullList = player.level().getRecipeManager().getRemainingItemsFor(RecipeType.CRAFTING, craftingInput, player.level());
+		NonNullList<ItemStack> nonNullList = this.getRemainingItems(craftingInput, player.level());
 
 		for (int k = 0; k < craftingInput.height(); k++) {
 			for (int l = 0; l < craftingInput.width(); l++) {

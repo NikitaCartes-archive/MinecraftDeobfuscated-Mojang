@@ -74,12 +74,20 @@ public class MultiNoiseBiomeSourceParameterList {
 			ResourceLocation.withDefaultNamespace("overworld"), new MultiNoiseBiomeSourceParameterList.Preset.SourceProvider() {
 				@Override
 				public <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> function) {
-					return MultiNoiseBiomeSourceParameterList.Preset.generateOverworldBiomes(function);
+					return MultiNoiseBiomeSourceParameterList.Preset.generateOverworldBiomes(function, OverworldBiomeBuilder.Modifier.NONE);
+				}
+			}
+		);
+		public static final MultiNoiseBiomeSourceParameterList.Preset OVERWORLD_WINTER_DROP = new MultiNoiseBiomeSourceParameterList.Preset(
+			ResourceLocation.withDefaultNamespace("overworld_winter_drop"), new MultiNoiseBiomeSourceParameterList.Preset.SourceProvider() {
+				@Override
+				public <T> Climate.ParameterList<T> apply(Function<ResourceKey<Biome>, T> function) {
+					return MultiNoiseBiomeSourceParameterList.Preset.generateOverworldBiomes(function, OverworldBiomeBuilder.Modifier.WINTER_DROP);
 				}
 			}
 		);
 		static final Map<ResourceLocation, MultiNoiseBiomeSourceParameterList.Preset> BY_NAME = (Map<ResourceLocation, MultiNoiseBiomeSourceParameterList.Preset>)Stream.of(
-				NETHER, OVERWORLD
+				NETHER, OVERWORLD, OVERWORLD_WINTER_DROP
 			)
 			.collect(Collectors.toMap(MultiNoiseBiomeSourceParameterList.Preset::id, preset -> preset));
 		public static final Codec<MultiNoiseBiomeSourceParameterList.Preset> CODEC = ResourceLocation.CODEC
@@ -90,9 +98,9 @@ public class MultiNoiseBiomeSourceParameterList {
 				preset -> DataResult.success(preset.id)
 			);
 
-		static <T> Climate.ParameterList<T> generateOverworldBiomes(Function<ResourceKey<Biome>, T> function) {
+		static <T> Climate.ParameterList<T> generateOverworldBiomes(Function<ResourceKey<Biome>, T> function, OverworldBiomeBuilder.Modifier modifier) {
 			Builder<Pair<Climate.ParameterPoint, T>> builder = ImmutableList.builder();
-			new OverworldBiomeBuilder().addBiomes(pair -> builder.add(pair.mapSecond(function)));
+			new OverworldBiomeBuilder(modifier).addBiomes(pair -> builder.add(pair.mapSecond(function)));
 			return new Climate.ParameterList<>(builder.build());
 		}
 

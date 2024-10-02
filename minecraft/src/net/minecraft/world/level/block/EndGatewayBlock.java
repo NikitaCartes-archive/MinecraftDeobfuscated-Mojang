@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 
 public class EndGatewayBlock extends BaseEntityBlock implements Portal {
@@ -98,16 +98,16 @@ public class EndGatewayBlock extends BaseEntityBlock implements Portal {
 
 	@Nullable
 	@Override
-	public DimensionTransition getPortalDestination(ServerLevel serverLevel, Entity entity, BlockPos blockPos) {
+	public TeleportTransition getPortalDestination(ServerLevel serverLevel, Entity entity, BlockPos blockPos) {
 		if (serverLevel.getBlockEntity(blockPos) instanceof TheEndGatewayBlockEntity theEndGatewayBlockEntity) {
 			Vec3 vec3 = theEndGatewayBlockEntity.getPortalPosition(serverLevel, blockPos);
 			if (vec3 == null) {
 				return null;
 			} else {
 				return entity instanceof ThrownEnderpearl
-					? new DimensionTransition(serverLevel, vec3, Vec3.ZERO, 0.0F, 0.0F, Set.of(), DimensionTransition.PLACE_PORTAL_TICKET)
-					: new DimensionTransition(
-						serverLevel, vec3, Vec3.ZERO, 0.0F, 0.0F, Relative.union(Relative.DELTA, Relative.ROTATION), DimensionTransition.PLACE_PORTAL_TICKET
+					? new TeleportTransition(serverLevel, vec3, Vec3.ZERO, 0.0F, 0.0F, Set.of(), TeleportTransition.PLACE_PORTAL_TICKET)
+					: new TeleportTransition(
+						serverLevel, vec3, Vec3.ZERO, 0.0F, 0.0F, Relative.union(Relative.DELTA, Relative.ROTATION), TeleportTransition.PLACE_PORTAL_TICKET
 					);
 			}
 		} else {

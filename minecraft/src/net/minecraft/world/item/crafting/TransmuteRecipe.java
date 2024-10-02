@@ -14,6 +14,10 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
+import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 import net.minecraft.world.level.Level;
 
 public class TransmuteRecipe implements CraftingRecipe {
@@ -40,7 +44,7 @@ public class TransmuteRecipe implements CraftingRecipe {
 		for (int i = 0; i < craftingInput.size(); i++) {
 			ItemStack itemStack = craftingInput.getItem(i);
 			if (!itemStack.isEmpty()) {
-				if (!bl && this.input.test(itemStack)) {
+				if (!bl && this.input.test(itemStack) && itemStack.getItem() != this.result.value()) {
 					bl = true;
 				} else {
 					if (bl2 || !this.material.test(itemStack)) {
@@ -60,7 +64,7 @@ public class TransmuteRecipe implements CraftingRecipe {
 
 		for (int i = 0; i < craftingInput.size(); i++) {
 			ItemStack itemStack2 = craftingInput.getItem(i);
-			if (!itemStack2.isEmpty() && this.input.test(itemStack2)) {
+			if (!itemStack2.isEmpty() && this.input.test(itemStack2) && itemStack2.getItem() != this.result.value()) {
 				itemStack = itemStack2;
 			}
 		}
@@ -69,22 +73,21 @@ public class TransmuteRecipe implements CraftingRecipe {
 	}
 
 	@Override
-	public boolean canCraftInDimensions(int i, int j) {
-		return i * j >= 2;
+	public List<RecipeDisplay> display() {
+		return List.of(
+			new ShapelessCraftingRecipeDisplay(
+				List.of(this.input.display(), this.material.display()), new SlotDisplay.ItemSlotDisplay(this.result), new SlotDisplay.ItemSlotDisplay(Items.CRAFTING_TABLE)
+			)
+		);
 	}
 
 	@Override
-	public ItemStack getResultItem(HolderLookup.Provider provider) {
-		return new ItemStack(this.result);
-	}
-
-	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<TransmuteRecipe> getSerializer() {
 		return RecipeSerializer.TRANSMUTE;
 	}
 
 	@Override
-	public String getGroup() {
+	public String group() {
 		return this.group;
 	}
 

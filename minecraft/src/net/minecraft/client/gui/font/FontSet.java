@@ -15,6 +15,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.IntFunction;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
@@ -38,6 +39,8 @@ public class FontSet implements AutoCloseable {
 	private final CodepointMap<FontSet.GlyphInfoFilter> glyphInfos = new CodepointMap<>(FontSet.GlyphInfoFilter[]::new, FontSet.GlyphInfoFilter[][]::new);
 	private final Int2ObjectMap<IntList> glyphsByWidth = new Int2ObjectOpenHashMap<>();
 	private final List<FontTexture> textures = Lists.<FontTexture>newArrayList();
+	private final IntFunction<FontSet.GlyphInfoFilter> glyphInfoGetter = this::computeGlyphInfo;
+	private final IntFunction<BakedGlyph> glyphGetter = this::computeBakedGlyph;
 
 	public FontSet(TextureManager textureManager, ResourceLocation resourceLocation) {
 		this.textureManager = textureManager;
@@ -133,7 +136,7 @@ public class FontSet implements AutoCloseable {
 	}
 
 	public GlyphInfo getGlyphInfo(int i, boolean bl) {
-		return this.glyphInfos.computeIfAbsent(i, this::computeGlyphInfo).select(bl);
+		return this.glyphInfos.computeIfAbsent(i, this.glyphInfoGetter).select(bl);
 	}
 
 	private BakedGlyph computeBakedGlyph(int i) {
@@ -148,7 +151,7 @@ public class FontSet implements AutoCloseable {
 	}
 
 	public BakedGlyph getGlyph(int i) {
-		return this.glyphs.computeIfAbsent(i, this::computeBakedGlyph);
+		return this.glyphs.computeIfAbsent(i, this.glyphGetter);
 	}
 
 	private BakedGlyph stitch(SheetGlyphInfo sheetGlyphInfo) {

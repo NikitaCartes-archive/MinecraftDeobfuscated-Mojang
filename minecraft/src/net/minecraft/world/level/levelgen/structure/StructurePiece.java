@@ -54,6 +54,7 @@ public abstract class StructurePiece {
 		.add(Blocks.OAK_FENCE)
 		.add(Blocks.SPRUCE_FENCE)
 		.add(Blocks.DARK_OAK_FENCE)
+		.add(Blocks.PALE_OAK_FENCE)
 		.add(Blocks.ACACIA_FENCE)
 		.add(Blocks.BIRCH_FENCE)
 		.add(Blocks.JUNGLE_FENCE)

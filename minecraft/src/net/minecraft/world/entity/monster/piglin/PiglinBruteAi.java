@@ -8,7 +8,6 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.behavior.DoNothing;
@@ -81,7 +80,7 @@ public class PiglinBruteAi {
 			Activity.FIGHT,
 			10,
 			ImmutableList.of(
-				StopAttackingIfTargetInvalid.<Mob>create((serverLevel, livingEntity) -> !isNearestValidAttackTarget(serverLevel, piglinBrute, livingEntity)),
+				StopAttackingIfTargetInvalid.create((serverLevel, livingEntity) -> !isNearestValidAttackTarget(serverLevel, piglinBrute, livingEntity)),
 				SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(1.0F),
 				MeleeAttack.create(20)
 			),

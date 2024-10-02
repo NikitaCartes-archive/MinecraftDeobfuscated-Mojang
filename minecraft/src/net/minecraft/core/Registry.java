@@ -179,5 +179,7 @@ public interface Registry<T> extends Keyable, HolderLookup.RegistryLookup<T>, Id
 		HolderLookup.RegistryLookup<T> lookup();
 
 		void apply();
+
+		int size();
 	}
 }

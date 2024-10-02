@@ -38,8 +38,10 @@ public class BundleMouseActions implements ItemSlotMouseAction {
 			int k = vector2i.y == 0 ? -vector2i.x : vector2i.y;
 			if (k != 0) {
 				int l = BundleItem.getSelectedItem(itemStack);
-				l = ScrollWheelHandler.getNextScrollWheelSelection((double)k, l, j);
-				this.setSelectedBundleItem(itemStack, i, l);
+				int m = ScrollWheelHandler.getNextScrollWheelSelection((double)k, l, j);
+				if (l != m) {
+					this.toggleSelectedBundleItem(itemStack, i, m);
+				}
 			}
 
 			return true;
@@ -53,12 +55,12 @@ public class BundleMouseActions implements ItemSlotMouseAction {
 
 	@Override
 	public void onSlotClicked(Slot slot, ClickType clickType) {
-		if (clickType == ClickType.QUICK_MOVE) {
+		if (clickType == ClickType.QUICK_MOVE || clickType == ClickType.SWAP) {
 			this.unselectedBundleItem(slot.getItem(), slot.index);
 		}
 	}
 
-	private void setSelectedBundleItem(ItemStack itemStack, int i, int j) {
+	private void toggleSelectedBundleItem(ItemStack itemStack, int i, int j) {
 		if (this.minecraft.getConnection() != null && j < BundleItem.getNumberOfItemsToShow(itemStack)) {
 			ClientPacketListener clientPacketListener = this.minecraft.getConnection();
 			BundleItem.toggleSelectedItem(itemStack, j);
@@ -67,6 +69,6 @@ public class BundleMouseActions implements ItemSlotMouseAction {
 	}
 
 	public void unselectedBundleItem(ItemStack itemStack, int i) {
-		this.setSelectedBundleItem(itemStack, i, -1);
+		this.toggleSelectedBundleItem(itemStack, i, -1);
 	}
 }

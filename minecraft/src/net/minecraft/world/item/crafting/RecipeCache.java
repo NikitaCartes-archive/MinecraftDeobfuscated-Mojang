@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 
 public class RecipeCache {
 	private final RecipeCache.Entry[] entries;
@@ -16,11 +16,11 @@ public class RecipeCache {
 		this.entries = new RecipeCache.Entry[i];
 	}
 
-	public Optional<RecipeHolder<CraftingRecipe>> get(Level level, CraftingInput craftingInput) {
+	public Optional<RecipeHolder<CraftingRecipe>> get(ServerLevel serverLevel, CraftingInput craftingInput) {
 		if (craftingInput.isEmpty()) {
 			return Optional.empty();
 		} else {
-			this.validateRecipeManager(level);
+			this.validateRecipeManager(serverLevel);
 
 			for (int i = 0; i < this.entries.length; i++) {
 				RecipeCache.Entry entry = this.entries[i];
@@ -30,20 +30,20 @@ public class RecipeCache {
 				}
 			}
 
-			return this.compute(craftingInput, level);
+			return this.compute(craftingInput, serverLevel);
 		}
 	}
 
-	private void validateRecipeManager(Level level) {
-		RecipeManager recipeManager = level.getRecipeManager();
+	private void validateRecipeManager(ServerLevel serverLevel) {
+		RecipeManager recipeManager = serverLevel.recipeAccess();
 		if (recipeManager != this.cachedRecipeManager.get()) {
 			this.cachedRecipeManager = new WeakReference(recipeManager);
 			Arrays.fill(this.entries, null);
 		}
 	}
 
-	private Optional<RecipeHolder<CraftingRecipe>> compute(CraftingInput craftingInput, Level level) {
-		Optional<RecipeHolder<CraftingRecipe>> optional = level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, craftingInput, level);
+	private Optional<RecipeHolder<CraftingRecipe>> compute(CraftingInput craftingInput, ServerLevel serverLevel) {
+		Optional<RecipeHolder<CraftingRecipe>> optional = serverLevel.recipeAccess().getRecipeFor(RecipeType.CRAFTING, craftingInput, serverLevel);
 		this.insert(craftingInput, (RecipeHolder<CraftingRecipe>)optional.orElse(null));
 		return optional;
 	}

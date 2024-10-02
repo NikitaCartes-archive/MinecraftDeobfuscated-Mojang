@@ -4,6 +4,7 @@ import java.util.Optional;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
@@ -144,9 +145,9 @@ public class BundleItem extends Item {
 		}
 	}
 
-	private void dropContent(Player player, ItemStack itemStack) {
+	private void dropContent(Level level, Player player, ItemStack itemStack) {
 		if (this.dropContent(itemStack, player)) {
-			playDropContentsSound(player);
+			playDropContentsSound(level, player);
 			player.awardStat(Stats.ITEM_USED.get(this));
 		}
 	}
@@ -173,7 +174,7 @@ public class BundleItem extends Item {
 		BundleContents bundleContents = itemStack.get(DataComponents.BUNDLE_CONTENTS);
 		if (bundleContents != null) {
 			BundleContents.Mutable mutable = new BundleContents.Mutable(bundleContents);
-			mutable.setSelectedItem(i);
+			mutable.toggleSelectedItem(i);
 			itemStack.set(DataComponents.BUNDLE_CONTENTS, mutable.toImmutable());
 		}
 	}
@@ -231,7 +232,7 @@ public class BundleItem extends Item {
 			int j = this.getUseDuration(itemStack, livingEntity);
 			boolean bl = i == j;
 			if (bl || i < j - 10 && i % 2 == 0) {
-				this.dropContent(player, itemStack);
+				this.dropContent(level, player, itemStack);
 			}
 		}
 	}
@@ -290,8 +291,10 @@ public class BundleItem extends Item {
 		entity.playSound(SoundEvents.BUNDLE_INSERT_FAIL, 1.0F, 1.0F);
 	}
 
-	private static void playDropContentsSound(Entity entity) {
-		entity.playSound(SoundEvents.BUNDLE_DROP_CONTENTS, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F);
+	private static void playDropContentsSound(Level level, Entity entity) {
+		level.playSound(
+			null, entity.blockPosition(), SoundEvents.BUNDLE_DROP_CONTENTS, SoundSource.PLAYERS, 0.8F, 0.8F + entity.level().getRandom().nextFloat() * 0.4F
+		);
 	}
 
 	private void broadcastChangesOnContainerMenu(Player player) {

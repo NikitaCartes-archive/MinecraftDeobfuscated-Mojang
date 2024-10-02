@@ -76,17 +76,14 @@ public class JigsawBlock extends Block implements EntityBlock, GameMasterBlock {
 		}
 	}
 
-	public static boolean canAttach(StructureTemplate.StructureBlockInfo structureBlockInfo, StructureTemplate.StructureBlockInfo structureBlockInfo2) {
-		Direction direction = getFrontFacing(structureBlockInfo.state());
-		Direction direction2 = getFrontFacing(structureBlockInfo2.state());
-		Direction direction3 = getTopFacing(structureBlockInfo.state());
-		Direction direction4 = getTopFacing(structureBlockInfo2.state());
-		JigsawBlockEntity.JointType jointType = (JigsawBlockEntity.JointType)JigsawBlockEntity.JointType.byName(structureBlockInfo.nbt().getString("joint"))
-			.orElseGet(() -> direction.getAxis().isHorizontal() ? JigsawBlockEntity.JointType.ALIGNED : JigsawBlockEntity.JointType.ROLLABLE);
+	public static boolean canAttach(StructureTemplate.JigsawBlockInfo jigsawBlockInfo, StructureTemplate.JigsawBlockInfo jigsawBlockInfo2) {
+		Direction direction = getFrontFacing(jigsawBlockInfo.info().state());
+		Direction direction2 = getFrontFacing(jigsawBlockInfo2.info().state());
+		Direction direction3 = getTopFacing(jigsawBlockInfo.info().state());
+		Direction direction4 = getTopFacing(jigsawBlockInfo2.info().state());
+		JigsawBlockEntity.JointType jointType = jigsawBlockInfo.jointType();
 		boolean bl = jointType == JigsawBlockEntity.JointType.ROLLABLE;
-		return direction == direction2.getOpposite()
-			&& (bl || direction3 == direction4)
-			&& structureBlockInfo.nbt().getString("target").equals(structureBlockInfo2.nbt().getString("name"));
+		return direction == direction2.getOpposite() && (bl || direction3 == direction4) && jigsawBlockInfo.target().equals(jigsawBlockInfo2.name());
 	}
 
 	public static Direction getFrontFacing(BlockState blockState) {

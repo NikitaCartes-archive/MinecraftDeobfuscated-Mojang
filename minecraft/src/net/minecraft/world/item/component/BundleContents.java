@@ -193,7 +193,7 @@ public final class BundleContents implements TooltipComponent {
 			return BundleContents.canItemBeInBundle(itemStack) ? this.tryInsert(slot.safeTake(itemStack.getCount(), i, player)) : 0;
 		}
 
-		public void setSelectedItem(int i) {
+		public void toggleSelectedItem(int i) {
 			this.selectedItem = this.selectedItem != i && i < this.items.size() ? i : -1;
 		}
 
@@ -205,7 +205,7 @@ public final class BundleContents implements TooltipComponent {
 				int i = this.selectedItem != -1 && this.selectedItem < this.items.size() ? this.selectedItem : 0;
 				ItemStack itemStack = ((ItemStack)this.items.remove(i)).copy();
 				this.weight = this.weight.subtract(BundleContents.getWeight(itemStack).multiplyBy(Fraction.getFraction(itemStack.getCount(), 1)));
-				this.setSelectedItem(-1);
+				this.toggleSelectedItem(-1);
 				return itemStack;
 			}
 		}

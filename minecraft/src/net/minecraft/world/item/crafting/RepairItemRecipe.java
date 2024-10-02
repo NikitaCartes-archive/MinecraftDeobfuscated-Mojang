@@ -83,12 +83,7 @@ public class RepairItemRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public boolean canCraftInDimensions(int i, int j) {
-		return i * j >= 2;
-	}
-
-	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<RepairItemRecipe> getSerializer() {
 		return RecipeSerializer.REPAIR_ITEM;
 	}
 }

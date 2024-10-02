@@ -599,6 +599,21 @@ public abstract class RenderType extends RenderStateShard {
 			.setCullState(NO_CULL)
 			.createCompositeState(false)
 	);
+	public static final RenderType.CompositeRenderType SECONDARY_BLOCK_OUTLINE = create(
+		"secondary_block_outline",
+		DefaultVertexFormat.POSITION_COLOR_NORMAL,
+		VertexFormat.Mode.LINES,
+		1536,
+		RenderType.CompositeState.builder()
+			.setShaderState(RENDERTYPE_LINES_SHADER)
+			.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.of(7.0)))
+			.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+			.setOutputState(ITEM_ENTITY_TARGET)
+			.setWriteMaskState(COLOR_WRITE)
+			.setCullState(NO_CULL)
+			.createCompositeState(false)
+	);
 	public static final RenderType.CompositeRenderType LINE_STRIP = create(
 		"line_strip",
 		DefaultVertexFormat.POSITION_COLOR_NORMAL,
@@ -1159,6 +1174,10 @@ public abstract class RenderType extends RenderStateShard {
 
 	public static RenderType lines() {
 		return LINES;
+	}
+
+	public static RenderType secondaryBlockOutline() {
+		return SECONDARY_BLOCK_OUTLINE;
 	}
 
 	public static RenderType lineStrip() {

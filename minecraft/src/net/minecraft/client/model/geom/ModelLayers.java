@@ -68,6 +68,7 @@ public class ModelLayers {
 	public static final ModelLayerLocation CONDUIT_WIND = register("conduit", "wind");
 	public static final ModelLayerLocation COW = register("cow");
 	public static final ModelLayerLocation COW_BABY = register("cow_baby");
+	public static final ModelLayerLocation CREAKING = register("creaking");
 	public static final ModelLayerLocation CREEPER = register("creeper");
 	public static final ModelLayerLocation CREEPER_ARMOR = register("creeper", "armor");
 	public static final ModelLayerLocation CREEPER_HEAD = register("creeper_head");
@@ -147,6 +148,8 @@ public class ModelLayers {
 	public static final ModelLayerLocation OAK_CHEST_BOAT = register("chest_boat/oak");
 	public static final ModelLayerLocation OCELOT = register("ocelot");
 	public static final ModelLayerLocation OCELOT_BABY = register("ocelot_baby");
+	public static final ModelLayerLocation PALE_OAK_BOAT = register("boat/pale_oak");
+	public static final ModelLayerLocation PALE_OAK_CHEST_BOAT = register("chest_boat/pale_oak");
 	public static final ModelLayerLocation PANDA = register("panda");
 	public static final ModelLayerLocation PANDA_BABY = register("panda_baby");
 	public static final ModelLayerLocation PARROT = register("parrot");

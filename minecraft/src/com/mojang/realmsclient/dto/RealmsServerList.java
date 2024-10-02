@@ -1,12 +1,10 @@
 package com.mojang.realmsclient.dto;
 
-import com.google.common.collect.Lists;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.logging.LogUtils;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -19,17 +17,13 @@ public class RealmsServerList extends ValueObject {
 
 	public static RealmsServerList parse(String string) {
 		RealmsServerList realmsServerList = new RealmsServerList();
-		realmsServerList.servers = Lists.<RealmsServer>newArrayList();
+		realmsServerList.servers = new ArrayList();
 
 		try {
-			JsonParser jsonParser = new JsonParser();
-			JsonObject jsonObject = jsonParser.parse(string).getAsJsonObject();
+			JsonObject jsonObject = JsonParser.parseString(string).getAsJsonObject();
 			if (jsonObject.get("servers").isJsonArray()) {
-				JsonArray jsonArray = jsonObject.get("servers").getAsJsonArray();
-				Iterator<JsonElement> iterator = jsonArray.iterator();
-
-				while (iterator.hasNext()) {
-					realmsServerList.servers.add(RealmsServer.parse(((JsonElement)iterator.next()).getAsJsonObject()));
+				for (JsonElement jsonElement : jsonObject.get("servers").getAsJsonArray()) {
+					realmsServerList.servers.add(RealmsServer.parse(jsonElement.getAsJsonObject()));
 				}
 			}
 		} catch (Exception var6) {

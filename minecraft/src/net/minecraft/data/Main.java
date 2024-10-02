@@ -16,6 +16,7 @@ import net.minecraft.WorldVersion;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.data.advancements.packs.VanillaAdvancementProvider;
+import net.minecraft.data.advancements.packs.WinterDropAdvancementProvider;
 import net.minecraft.data.info.BiomeParametersDumpReport;
 import net.minecraft.data.info.BlockListReport;
 import net.minecraft.data.info.CommandsReport;
@@ -25,13 +26,16 @@ import net.minecraft.data.info.PacketReport;
 import net.minecraft.data.info.RegistryDumpReport;
 import net.minecraft.data.loot.packs.TradeRebalanceLootTableProvider;
 import net.minecraft.data.loot.packs.VanillaLootTableProvider;
+import net.minecraft.data.loot.packs.WinterDropLootTableProvider;
 import net.minecraft.data.metadata.PackMetadataGenerator;
 import net.minecraft.data.models.EquipmentModelProvider;
 import net.minecraft.data.models.ModelProvider;
 import net.minecraft.data.recipes.packs.VanillaRecipeProvider;
+import net.minecraft.data.recipes.packs.WinterDropRecipeProvider;
 import net.minecraft.data.registries.RegistriesDatapackGenerator;
 import net.minecraft.data.registries.TradeRebalanceRegistries;
 import net.minecraft.data.registries.VanillaRegistries;
+import net.minecraft.data.registries.WinterDropRegistries;
 import net.minecraft.data.structures.NbtToSnbt;
 import net.minecraft.data.structures.SnbtToNbt;
 import net.minecraft.data.structures.StructureUpdater;
@@ -53,6 +57,10 @@ import net.minecraft.data.tags.TradeRebalanceStructureTagsProvider;
 import net.minecraft.data.tags.VanillaBlockTagsProvider;
 import net.minecraft.data.tags.VanillaEnchantmentTagsProvider;
 import net.minecraft.data.tags.VanillaItemTagsProvider;
+import net.minecraft.data.tags.WinterDropBiomeTagsProvider;
+import net.minecraft.data.tags.WinterDropBlockTagsProvider;
+import net.minecraft.data.tags.WinterDropEntityTypeTagsProvider;
+import net.minecraft.data.tags.WinterDropItemTagsProvider;
 import net.minecraft.data.tags.WorldPresetTagsProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.obfuscate.DontObfuscate;
@@ -177,6 +185,26 @@ public class Main {
 					packOutput, Component.translatable("dataPack.minecart_improvements.description"), FeatureFlagSet.of(FeatureFlags.MINECART_IMPROVEMENTS)
 				)
 		);
+		CompletableFuture<RegistrySetBuilder.PatchedRegistries> completableFuture2x = WinterDropRegistries.createLookup(completableFuture);
+		completableFuture3 = completableFuture2x.thenApply(RegistrySetBuilder.PatchedRegistries::full);
+		packGenerator4 = dataGenerator.getBuiltinDatapack(bl2, "winter_drop");
+		packGenerator4.addProvider(bindRegistries(RegistriesDatapackGenerator::new, completableFuture2x.thenApply(RegistrySetBuilder.PatchedRegistries::patches)));
+		packGenerator4.addProvider(bindRegistries(WinterDropRecipeProvider.Runner::new, completableFuture3));
+		TagsProvider<Block> tagsProvider6 = packGenerator4.addProvider(
+			packOutput -> new WinterDropBlockTagsProvider(packOutput, completableFuture3, tagsProvider.contentsGetter())
+		);
+		packGenerator4.addProvider(
+			packOutput -> new WinterDropItemTagsProvider(packOutput, completableFuture3, tagsProvider2.contentsGetter(), tagsProvider6.contentsGetter())
+		);
+		packGenerator4.addProvider(packOutput -> new WinterDropBiomeTagsProvider(packOutput, completableFuture3, tagsProvider3.contentsGetter()));
+		packGenerator4.addProvider(bindRegistries(WinterDropLootTableProvider::create, completableFuture3));
+		packGenerator4.addProvider(
+			packOutput -> PackMetadataGenerator.forFeaturePack(
+					packOutput, Component.translatable("dataPack.winter_drop.description"), FeatureFlagSet.of(FeatureFlags.WINTER_DROP)
+				)
+		);
+		packGenerator4.addProvider(bindRegistries(WinterDropEntityTypeTagsProvider::new, completableFuture3));
+		packGenerator4.addProvider(bindRegistries(WinterDropAdvancementProvider::create, completableFuture3));
 		return dataGenerator;
 	}
 }

@@ -13,7 +13,6 @@ import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.AnimalMakeLove;
 import net.minecraft.world.entity.ai.behavior.BabyFollowAdult;
@@ -74,10 +73,10 @@ public class AxolotlAi {
 			Activity.FIGHT,
 			0,
 			ImmutableList.of(
-				StopAttackingIfTargetInvalid.<Mob>create(Axolotl::onStopAttacking),
+				StopAttackingIfTargetInvalid.create(Axolotl::onStopAttacking),
 				SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(AxolotlAi::getSpeedModifierChasing),
 				MeleeAttack.create(20),
-				EraseMemoryIf.<Mob>create(BehaviorUtils::isBreeding, MemoryModuleType.ATTACK_TARGET)
+				EraseMemoryIf.create(BehaviorUtils::isBreeding, MemoryModuleType.ATTACK_TARGET)
 			),
 			MemoryModuleType.ATTACK_TARGET
 		);

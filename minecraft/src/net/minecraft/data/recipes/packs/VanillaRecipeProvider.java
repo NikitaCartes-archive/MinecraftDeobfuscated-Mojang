@@ -11,6 +11,7 @@ import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
@@ -19,6 +20,7 @@ import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.data.recipes.SingleItemRecipeBuilder;
 import net.minecraft.data.recipes.SpecialRecipeBuilder;
 import net.minecraft.data.recipes.TransmuteRecipeBuilder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.flag.FeatureFlagSet;
@@ -39,6 +41,7 @@ import net.minecraft.world.item.crafting.FireworkStarRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.MapCloningRecipe;
 import net.minecraft.world.item.crafting.MapExtendingRecipe;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RepairItemRecipe;
 import net.minecraft.world.item.crafting.ShieldDecorationRecipe;
@@ -2746,7 +2749,11 @@ public class VanillaRecipeProvider extends RecipeProvider {
 				Items.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE,
 				Items.WILD_ARMOR_TRIM_SMITHING_TEMPLATE
 			)
-			.map(item -> new VanillaRecipeProvider.TrimTemplate(item, ResourceLocation.withDefaultNamespace(getItemName(item) + "_smithing_trim")));
+			.map(
+				item -> new VanillaRecipeProvider.TrimTemplate(
+						item, ResourceKey.create(Registries.RECIPE, ResourceLocation.withDefaultNamespace(getItemName(item) + "_smithing_trim"))
+					)
+			);
 	}
 
 	private void shulkerBoxRecipes() {
@@ -2766,9 +2773,10 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		Ingredient ingredient = this.tag(ItemTags.BUNDLES);
 
 		for (DyeColor dyeColor : DyeColor.values()) {
-			TransmuteRecipeBuilder.transmute(RecipeCategory.TOOLS, ingredient, Ingredient.of(DyeItem.byColor(dyeColor)), BundleItem.getByColor(dyeColor))
+			DyeItem dyeItem = DyeItem.byColor(dyeColor);
+			TransmuteRecipeBuilder.transmute(RecipeCategory.TOOLS, ingredient, Ingredient.of(dyeItem), BundleItem.getByColor(dyeColor))
 				.group("bundle_dye")
-				.unlockedBy("has_bundle", this.has(ItemTags.BUNDLES))
+				.unlockedBy(getHasName(dyeItem), this.has(dyeItem))
 				.save(this.output);
 		}
 	}
@@ -2789,6 +2797,6 @@ public class VanillaRecipeProvider extends RecipeProvider {
 		}
 	}
 
-	public static record TrimTemplate(Item template, ResourceLocation id) {
+	public static record TrimTemplate(Item template, ResourceKey<Recipe<?>> id) {
 	}
 }

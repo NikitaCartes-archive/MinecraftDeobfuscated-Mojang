@@ -539,19 +539,33 @@ public class OverworldBiomes {
 		return biome(true, f, bl ? 0.4F : 0.8F, bl ? 4020182 : 4159204, 329011, null, null, builder, builder2, NORMAL_MUSIC);
 	}
 
-	public static Biome darkForest(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2) {
+	public static Biome darkForest(HolderGetter<PlacedFeature> holderGetter, HolderGetter<ConfiguredWorldCarver<?>> holderGetter2, boolean bl) {
 		MobSpawnSettings.Builder builder = new MobSpawnSettings.Builder();
-		BiomeDefaultFeatures.farmAnimals(builder);
+		if (!bl) {
+			BiomeDefaultFeatures.farmAnimals(builder);
+		}
+
 		BiomeDefaultFeatures.commonSpawns(builder);
 		BiomeGenerationSettings.Builder builder2 = new BiomeGenerationSettings.Builder(holderGetter, holderGetter2);
 		globalOverworldGeneration(builder2);
-		builder2.addFeature(GenerationStep.Decoration.VEGETAL_DECORATION, VegetationPlacements.DARK_FOREST_VEGETATION);
-		BiomeDefaultFeatures.addForestFlowers(builder2);
+		builder2.addFeature(
+			GenerationStep.Decoration.VEGETAL_DECORATION, bl ? VegetationPlacements.PALE_GARDEN_VEGETATION : VegetationPlacements.DARK_FOREST_VEGETATION
+		);
+		if (!bl) {
+			BiomeDefaultFeatures.addForestFlowers(builder2);
+		}
+
 		BiomeDefaultFeatures.addDefaultOres(builder2);
 		BiomeDefaultFeatures.addDefaultSoftDisks(builder2);
-		BiomeDefaultFeatures.addDefaultFlowers(builder2);
+		if (!bl) {
+			BiomeDefaultFeatures.addDefaultFlowers(builder2);
+		}
+
 		BiomeDefaultFeatures.addForestGrass(builder2);
-		BiomeDefaultFeatures.addDefaultMushrooms(builder2);
+		if (!bl) {
+			BiomeDefaultFeatures.addDefaultMushrooms(builder2);
+		}
+
 		BiomeDefaultFeatures.addDefaultExtraVegetation(builder2);
 		Music music = Musics.createGameMusic(SoundEvents.MUSIC_BIOME_FOREST);
 		return new Biome.BiomeBuilder()
@@ -559,15 +573,26 @@ public class OverworldBiomes {
 			.temperature(0.7F)
 			.downfall(0.8F)
 			.specialEffects(
-				new BiomeSpecialEffects.Builder()
-					.waterColor(4159204)
-					.waterFogColor(329011)
-					.fogColor(12638463)
-					.skyColor(calculateSkyColor(0.7F))
-					.grassColorModifier(BiomeSpecialEffects.GrassColorModifier.DARK_FOREST)
-					.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
-					.backgroundMusic(music)
-					.build()
+				bl
+					? new BiomeSpecialEffects.Builder()
+						.waterColor(7768221)
+						.waterFogColor(5597568)
+						.fogColor(8484720)
+						.skyColor(12171705)
+						.grassColorOverride(7832178)
+						.foliageColorOverride(8883574)
+						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
+						.backgroundMusic(music)
+						.build()
+					: new BiomeSpecialEffects.Builder()
+						.waterColor(4159204)
+						.waterFogColor(329011)
+						.fogColor(12638463)
+						.skyColor(calculateSkyColor(0.7F))
+						.grassColorModifier(BiomeSpecialEffects.GrassColorModifier.DARK_FOREST)
+						.ambientMoodSound(AmbientMoodSettings.LEGACY_CAVE_SETTINGS)
+						.backgroundMusic(music)
+						.build()
 			)
 			.mobSpawnSettings(builder.build())
 			.generationSettings(builder2.build())

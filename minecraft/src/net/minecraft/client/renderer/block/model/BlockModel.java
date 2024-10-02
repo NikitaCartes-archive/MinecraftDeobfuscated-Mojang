@@ -57,6 +57,7 @@ public class BlockModel implements UnbakedModel {
 	private static final char REFERENCE_CHAR = '#';
 	public static final String PARTICLE_TEXTURE_REFERENCE = "particle";
 	private static final boolean DEFAULT_AMBIENT_OCCLUSION = true;
+	public static final Material MISSING_MATERIAL = new Material(TextureAtlas.LOCATION_BLOCKS, MissingTextureAtlasSprite.getLocation());
 	private final List<BlockElement> elements;
 	@Nullable
 	private final BlockModel.GuiLight guiLight;
@@ -201,7 +202,7 @@ public class BlockModel implements UnbakedModel {
 			string = (String)either.right().get();
 			if (list.contains(string)) {
 				LOGGER.warn("Unable to resolve texture due to reference chain {}->{} in {}", Joiner.on("->").join(list), string, this.name);
-				return new Material(TextureAtlas.LOCATION_BLOCKS, MissingTextureAtlasSprite.getLocation());
+				return MISSING_MATERIAL;
 			}
 
 			list.add(string);
@@ -216,7 +217,7 @@ public class BlockModel implements UnbakedModel {
 			}
 		}
 
-		return Either.left(new Material(TextureAtlas.LOCATION_BLOCKS, MissingTextureAtlasSprite.getLocation()));
+		return Either.left(MISSING_MATERIAL);
 	}
 
 	static boolean isTextureReference(String string) {

@@ -329,6 +329,8 @@ public class ItemModelGenerators {
 		this.generateFlatItem(Items.OAK_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.ORANGE_DYE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.PAINTING, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.PALE_OAK_BOAT, ModelTemplates.FLAT_ITEM);
+		this.generateFlatItem(Items.PALE_OAK_CHEST_BOAT, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.PAPER, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.PHANTOM_MEMBRANE, ModelTemplates.FLAT_ITEM);
 		this.generateFlatItem(Items.PIGLIN_BANNER_PATTERN, ModelTemplates.FLAT_ITEM);

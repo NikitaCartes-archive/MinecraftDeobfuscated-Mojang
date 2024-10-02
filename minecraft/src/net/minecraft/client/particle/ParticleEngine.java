@@ -190,6 +190,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.DRIPPING_DRIPSTONE_LAVA, DripParticle::createDripstoneLavaHangParticle);
 		this.register(ParticleTypes.FALLING_DRIPSTONE_LAVA, DripParticle::createDripstoneLavaFallParticle);
 		this.register(ParticleTypes.VIBRATION, VibrationSignalParticle.Provider::new);
+		this.register(ParticleTypes.TRAIL, TrailParticle.Provider::new);
 		this.register(ParticleTypes.GLOW_SQUID_INK, SquidInkParticle.GlowInkProvider::new);
 		this.register(ParticleTypes.GLOW, GlowParticle.GlowSquidProvider::new);
 		this.register(ParticleTypes.WAX_ON, GlowParticle.WaxOnProvider::new);
@@ -206,6 +207,7 @@ public class ParticleEngine implements PreparableReloadListener {
 		this.register(ParticleTypes.RAID_OMEN, SpellParticle.Provider::new);
 		this.register(ParticleTypes.TRIAL_OMEN, SpellParticle.Provider::new);
 		this.register(ParticleTypes.OMINOUS_SPAWNING, FlyStraightTowardsParticle.OminousSpawnProvider::new);
+		this.register(ParticleTypes.BLOCK_CRUMBLE, new TerrainParticle.CrumblingProvider());
 	}
 
 	private <T extends ParticleOptions> void register(ParticleType<T> particleType, ParticleProvider<T> particleProvider) {

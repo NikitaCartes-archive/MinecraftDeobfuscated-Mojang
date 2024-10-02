@@ -1,5 +1,6 @@
 package net.minecraft.world.item;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
 import java.util.List;
@@ -228,13 +229,8 @@ public class Item implements FeatureElement, ItemLike {
 		return BuiltInRegistries.ITEM.wrapAsHolder(this).getRegisteredName();
 	}
 
-	@Nullable
-	public final Item getCraftingRemainingItem() {
-		return this.craftingRemainingItem;
-	}
-
-	public boolean hasCraftingRemainingItem() {
-		return this.craftingRemainingItem != null;
+	public final ItemStack getCraftingRemainder() {
+		return this.craftingRemainingItem == null ? ItemStack.EMPTY : new ItemStack(this.craftingRemainingItem);
 	}
 
 	public void inventoryTick(ItemStack itemStack, Level level, Entity entity, int i, boolean bl) {
@@ -268,6 +264,7 @@ public class Item implements FeatureElement, ItemLike {
 		return Optional.empty();
 	}
 
+	@VisibleForTesting
 	public final String getDescriptionId() {
 		return this.descriptionId;
 	}

@@ -1,7 +1,7 @@
 package net.minecraft.world.inventory;
 
-import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SelectableRecipe;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.level.Level;
@@ -25,9 +25,9 @@ public class StonecutterMenu extends AbstractContainerMenu {
 	private static final int USE_ROW_SLOT_START = 29;
 	private static final int USE_ROW_SLOT_END = 38;
 	private final ContainerLevelAccess access;
-	private final DataSlot selectedRecipeIndex = DataSlot.standalone();
+	final DataSlot selectedRecipeIndex = DataSlot.standalone();
 	private final Level level;
-	private List<RecipeHolder<StonecutterRecipe>> recipes = Lists.<RecipeHolder<StonecutterRecipe>>newArrayList();
+	private SelectableRecipe.SingleInputSet<StonecutterRecipe> recipesForInput = SelectableRecipe.SingleInputSet.empty();
 	private ItemStack input = ItemStack.EMPTY;
 	long lastSoundTime;
 	final Slot inputSlot;
@@ -65,7 +65,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 				StonecutterMenu.this.resultContainer.awardUsedRecipes(player, this.getRelevantItems());
 				ItemStack itemStack2 = StonecutterMenu.this.inputSlot.remove(1);
 				if (!itemStack2.isEmpty()) {
-					StonecutterMenu.this.setupResultSlot();
+					StonecutterMenu.this.setupResultSlot(StonecutterMenu.this.selectedRecipeIndex.get());
 				}
 
 				containerLevelAccess.execute((level, blockPos) -> {
@@ -90,16 +90,16 @@ public class StonecutterMenu extends AbstractContainerMenu {
 		return this.selectedRecipeIndex.get();
 	}
 
-	public List<RecipeHolder<StonecutterRecipe>> getRecipes() {
-		return this.recipes;
+	public SelectableRecipe.SingleInputSet<StonecutterRecipe> getVisibleRecipes() {
+		return this.recipesForInput;
 	}
 
-	public int getNumRecipes() {
-		return this.recipes.size();
+	public int getNumberOfVisibleRecipes() {
+		return this.recipesForInput.size();
 	}
 
 	public boolean hasInputItem() {
-		return this.inputSlot.hasItem() && !this.recipes.isEmpty();
+		return this.inputSlot.hasItem() && !this.recipesForInput.isEmpty();
 	}
 
 	@Override
@@ -111,14 +111,14 @@ public class StonecutterMenu extends AbstractContainerMenu {
 	public boolean clickMenuButton(Player player, int i) {
 		if (this.isValidRecipeIndex(i)) {
 			this.selectedRecipeIndex.set(i);
-			this.setupResultSlot();
+			this.setupResultSlot(i);
 		}
 
 		return true;
 	}
 
 	private boolean isValidRecipeIndex(int i) {
-		return i >= 0 && i < this.recipes.size();
+		return i >= 0 && i < this.recipesForInput.size();
 	}
 
 	@Override
@@ -126,37 +126,38 @@ public class StonecutterMenu extends AbstractContainerMenu {
 		ItemStack itemStack = this.inputSlot.getItem();
 		if (!itemStack.is(this.input.getItem())) {
 			this.input = itemStack.copy();
-			this.setupRecipeList(container, itemStack);
+			this.setupRecipeList(itemStack);
 		}
 	}
 
-	private static SingleRecipeInput createRecipeInput(Container container) {
-		return new SingleRecipeInput(container.getItem(0));
-	}
-
-	private void setupRecipeList(Container container, ItemStack itemStack) {
-		this.recipes.clear();
+	private void setupRecipeList(ItemStack itemStack) {
 		this.selectedRecipeIndex.set(-1);
 		this.resultSlot.set(ItemStack.EMPTY);
 		if (!itemStack.isEmpty()) {
-			this.recipes = this.level.getRecipeManager().getRecipesFor(RecipeType.STONECUTTING, createRecipeInput(container), this.level);
+			this.recipesForInput = this.level.recipeAccess().stonecutterRecipes().selectByInput(itemStack);
+		} else {
+			this.recipesForInput = SelectableRecipe.SingleInputSet.empty();
 		}
 	}
 
-	void setupResultSlot() {
-		if (!this.recipes.isEmpty() && this.isValidRecipeIndex(this.selectedRecipeIndex.get())) {
-			RecipeHolder<StonecutterRecipe> recipeHolder = (RecipeHolder<StonecutterRecipe>)this.recipes.get(this.selectedRecipeIndex.get());
-			ItemStack itemStack = recipeHolder.value().assemble(createRecipeInput(this.container), this.level.registryAccess());
-			if (itemStack.isItemEnabled(this.level.enabledFeatures())) {
-				this.resultContainer.setRecipeUsed(recipeHolder);
-				this.resultSlot.set(itemStack);
-			} else {
-				this.resultSlot.set(ItemStack.EMPTY);
-			}
+	void setupResultSlot(int i) {
+		Optional<RecipeHolder<StonecutterRecipe>> optional;
+		if (!this.recipesForInput.isEmpty() && this.isValidRecipeIndex(i)) {
+			SelectableRecipe.SingleInputEntry<StonecutterRecipe> singleInputEntry = (SelectableRecipe.SingleInputEntry<StonecutterRecipe>)this.recipesForInput
+				.entries()
+				.get(i);
+			optional = singleInputEntry.recipe().recipe();
 		} else {
-			this.resultSlot.set(ItemStack.EMPTY);
+			optional = Optional.empty();
 		}
 
+		optional.ifPresentOrElse(recipeHolder -> {
+			this.resultContainer.setRecipeUsed(recipeHolder);
+			this.resultSlot.set(((StonecutterRecipe)recipeHolder.value()).assemble(new SingleRecipeInput(this.container.getItem(0)), this.level.registryAccess()));
+		}, () -> {
+			this.resultSlot.set(ItemStack.EMPTY);
+			this.resultContainer.setRecipeUsed(null);
+		});
 		this.broadcastChanges();
 	}
 
@@ -193,7 +194,7 @@ public class StonecutterMenu extends AbstractContainerMenu {
 				if (!this.moveItemStackTo(itemStack2, 2, 38, false)) {
 					return ItemStack.EMPTY;
 				}
-			} else if (this.level.getRecipeManager().getRecipeFor(RecipeType.STONECUTTING, new SingleRecipeInput(itemStack2), this.level).isPresent()) {
+			} else if (this.level.recipeAccess().stonecutterRecipes().acceptsInput(itemStack2)) {
 				if (!this.moveItemStackTo(itemStack2, 0, 1, false)) {
 					return ItemStack.EMPTY;
 				}

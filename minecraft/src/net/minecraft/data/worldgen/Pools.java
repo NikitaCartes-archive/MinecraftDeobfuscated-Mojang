@@ -11,12 +11,16 @@ import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 public class Pools {
 	public static final ResourceKey<StructureTemplatePool> EMPTY = createKey("empty");
 
+	public static ResourceKey<StructureTemplatePool> createKey(ResourceLocation resourceLocation) {
+		return ResourceKey.create(Registries.TEMPLATE_POOL, resourceLocation);
+	}
+
 	public static ResourceKey<StructureTemplatePool> createKey(String string) {
-		return ResourceKey.create(Registries.TEMPLATE_POOL, ResourceLocation.withDefaultNamespace(string));
+		return createKey(ResourceLocation.withDefaultNamespace(string));
 	}
 
 	public static ResourceKey<StructureTemplatePool> parseKey(String string) {
-		return ResourceKey.create(Registries.TEMPLATE_POOL, ResourceLocation.parse(string));
+		return createKey(ResourceLocation.parse(string));
 	}
 
 	public static void register(BootstrapContext<StructureTemplatePool> bootstrapContext, String string, StructureTemplatePool structureTemplatePool) {

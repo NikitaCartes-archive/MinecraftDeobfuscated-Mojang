@@ -55,6 +55,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.network.protocol.game.VecDeltaCodec;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -117,8 +118,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.portal.PortalShape;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -355,6 +356,9 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	public void onClientRemoval() {
+	}
+
+	public void onRemoval(Entity.RemovalReason removalReason) {
 	}
 
 	public void setPose(Pose pose) {
@@ -1478,7 +1482,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		this.setOldPos(this.position);
 	}
 
-	protected void setOldRot() {
+	public void setOldRot() {
 		this.setOldRot(this.getYRot(), this.getXRot());
 	}
 
@@ -2049,9 +2053,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	public boolean startRiding(Entity entity, boolean bl) {
 		if (entity == this.vehicle) {
 			return false;
-		} else if (!entity.couldAcceptPassenger()) {
-			return false;
-		} else {
+		} else if (entity.couldAcceptPassenger() && entity.type.canSerialize()) {
 			for (Entity entity2 = entity; entity2.vehicle != null; entity2 = entity2.vehicle) {
 				if (entity2.vehicle == this) {
 					return false;
@@ -2073,6 +2075,8 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			} else {
 				return false;
 			}
+		} else {
+			return false;
 		}
 	}
 
@@ -2140,6 +2144,9 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
 	protected boolean couldAcceptPassenger() {
 		return true;
+	}
+
+	public void cancelLerp() {
 	}
 
 	public void lerpTo(double d, double e, double f, float g, float h, int i) {
@@ -2218,12 +2225,12 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 					ProfilerFiller profilerFiller = Profiler.get();
 					profilerFiller.push("portal");
 					this.setPortalCooldown();
-					DimensionTransition dimensionTransition = this.portalProcess.getPortalDestination(serverLevel, this);
-					if (dimensionTransition != null) {
-						ServerLevel serverLevel2 = dimensionTransition.newLevel();
+					TeleportTransition teleportTransition = this.portalProcess.getPortalDestination(serverLevel, this);
+					if (teleportTransition != null) {
+						ServerLevel serverLevel2 = teleportTransition.newLevel();
 						if (serverLevel.getServer().isLevelEnabled(serverLevel2)
-							&& (serverLevel2.dimension() == serverLevel.dimension() || this.canChangeDimensions(serverLevel, serverLevel2))) {
-							this.changeDimension(dimensionTransition);
+							&& (serverLevel2.dimension() == serverLevel.dimension() || this.canTeleport(serverLevel, serverLevel2))) {
+							this.teleport(teleportTransition);
 						}
 					}
 
@@ -2612,52 +2619,103 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 	}
 
 	@Nullable
-	public Entity changeDimension(DimensionTransition dimensionTransition) {
+	public Entity teleport(TeleportTransition teleportTransition) {
 		if (this.level() instanceof ServerLevel serverLevel && !this.isRemoved()) {
-			ServerLevel serverLevel2 = dimensionTransition.newLevel();
-			List<Entity> list = this.getPassengers();
-			this.unRide();
-			List<Entity> list2 = new ArrayList();
-
-			for (Entity entity : list) {
-				float f = entity.getYRot() - this.getYRot();
-				float g = entity.getXRot() - this.getXRot();
-				float h = dimensionTransition.yRot() + (dimensionTransition.relatives().contains(Relative.Y_ROT) ? 0.0F : f);
-				float i = dimensionTransition.xRot() + (dimensionTransition.relatives().contains(Relative.X_ROT) ? 0.0F : g);
-				Entity entity2 = entity.changeDimension(dimensionTransition.withRotation(h, i));
-				if (entity2 != null) {
-					list2.add(entity2);
-				}
+			ServerLevel serverLevel2 = teleportTransition.newLevel();
+			boolean bl = serverLevel2.dimension() != serverLevel.dimension();
+			if (!teleportTransition.asPassenger()) {
+				this.stopRiding();
 			}
 
-			ProfilerFiller profilerFiller = Profiler.get();
-			profilerFiller.push("changeDimension");
-			Entity entityx = serverLevel2.dimension() == serverLevel.dimension() ? this : this.getType().create(serverLevel2, EntitySpawnReason.DIMENSION_TRAVEL);
-			if (entityx != null) {
-				if (this != entityx) {
-					entityx.restoreFrom(this);
-					this.removeAfterChangingDimensions();
-				}
-
-				entityx.teleportSetPosition(PositionMoveRotation.of(dimensionTransition), dimensionTransition.relatives());
-				if (this != entityx) {
-					serverLevel2.addDuringTeleport(entityx);
-				}
-
-				for (Entity entity3 : list2) {
-					entity3.startRiding(entityx, true);
-				}
-
-				serverLevel.resetEmptyTime();
-				serverLevel2.resetEmptyTime();
-				dimensionTransition.postDimensionTransition().onTransition(entityx);
+			if (bl) {
+				return this.teleportCrossDimension(serverLevel2, teleportTransition);
 			}
 
-			profilerFiller.pop();
-			return entityx;
+			return this.teleportSameDimension(serverLevel, teleportTransition);
 		}
 
 		return null;
+	}
+
+	private Entity teleportSameDimension(ServerLevel serverLevel, TeleportTransition teleportTransition) {
+		for (Entity entity : this.getPassengers()) {
+			entity.teleport(this.calculatePassengerTransition(teleportTransition, entity));
+		}
+
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("teleportSameDimension");
+		this.teleportSetPosition(PositionMoveRotation.of(teleportTransition), teleportTransition.relatives());
+		if (!teleportTransition.asPassenger()) {
+			this.sendTeleportTransitionToRidingPlayers(teleportTransition);
+		}
+
+		teleportTransition.postTeleportTransition().onTransition(this);
+		profilerFiller.pop();
+		return this;
+	}
+
+	private Entity teleportCrossDimension(ServerLevel serverLevel, TeleportTransition teleportTransition) {
+		List<Entity> list = this.getPassengers();
+		List<Entity> list2 = new ArrayList(list.size());
+		this.ejectPassengers();
+
+		for (Entity entity : list) {
+			Entity entity2 = entity.teleport(this.calculatePassengerTransition(teleportTransition, entity));
+			if (entity2 != null) {
+				list2.add(entity2);
+			}
+		}
+
+		ProfilerFiller profilerFiller = Profiler.get();
+		profilerFiller.push("teleportCrossDimension");
+		Entity entityx = this.getType().create(serverLevel, EntitySpawnReason.DIMENSION_TRAVEL);
+		if (entityx == null) {
+			profilerFiller.pop();
+			return null;
+		} else {
+			entityx.restoreFrom(this);
+			this.removeAfterChangingDimensions();
+			entityx.teleportSetPosition(PositionMoveRotation.of(teleportTransition), teleportTransition.relatives());
+			serverLevel.addDuringTeleport(entityx);
+
+			for (Entity entity3 : list2) {
+				entity3.startRiding(entityx, true);
+			}
+
+			serverLevel.resetEmptyTime();
+			teleportTransition.postTeleportTransition().onTransition(entityx);
+			profilerFiller.pop();
+			return entityx;
+		}
+	}
+
+	private TeleportTransition calculatePassengerTransition(TeleportTransition teleportTransition, Entity entity) {
+		float f = teleportTransition.yRot() + (teleportTransition.relatives().contains(Relative.Y_ROT) ? 0.0F : entity.getYRot() - this.getYRot());
+		float g = teleportTransition.xRot() + (teleportTransition.relatives().contains(Relative.X_ROT) ? 0.0F : entity.getXRot() - this.getXRot());
+		Vec3 vec3 = entity.position().subtract(this.position());
+		Vec3 vec32 = teleportTransition.position()
+			.add(
+				teleportTransition.relatives().contains(Relative.X) ? 0.0 : vec3.x(),
+				teleportTransition.relatives().contains(Relative.Y) ? 0.0 : vec3.y(),
+				teleportTransition.relatives().contains(Relative.Z) ? 0.0 : vec3.z()
+			);
+		return teleportTransition.withPosition(vec32).withRotation(f, g).transitionAsPassenger();
+	}
+
+	private void sendTeleportTransitionToRidingPlayers(TeleportTransition teleportTransition) {
+		Entity entity = this.getControllingPassenger();
+
+		for (Entity entity2 : this.getIndirectPassengers()) {
+			if (entity2 instanceof ServerPlayer) {
+				ServerPlayer serverPlayer = (ServerPlayer)entity2;
+				if (entity != null && serverPlayer.getId() == entity.getId()) {
+					serverPlayer.connection
+						.send(ClientboundTeleportEntityPacket.teleport(this.getId(), PositionMoveRotation.of(teleportTransition), teleportTransition.relatives(), this.onGround));
+				} else {
+					serverPlayer.connection.send(ClientboundTeleportEntityPacket.teleport(this.getId(), PositionMoveRotation.of(this), Set.of(), this.onGround));
+				}
+			}
+		}
 	}
 
 	public void teleportSetPosition(PositionMoveRotation positionMoveRotation, Set<Relative> set) {
@@ -2671,6 +2729,13 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		this.setOldPosAndRot();
 		this.setDeltaMovement(positionMoveRotation3.deltaMovement());
 		this.blocksInside.clear();
+	}
+
+	public void forceSetRotation(float f, float g) {
+		this.setYRot(f);
+		this.setYHeadRot(f);
+		this.setXRot(g);
+		this.setOldRot();
 	}
 
 	public void placePortalTicket(BlockPos blockPos) {
@@ -2694,7 +2759,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		return (bl || !this.isPassenger()) && this.isAlive();
 	}
 
-	public boolean canChangeDimensions(Level level, Level level2) {
+	public boolean canTeleport(Level level, Level level2) {
 		if (level.dimension() == Level.END && level2.dimension() == Level.OVERWORLD) {
 			for (Entity entity : this.getPassengers()) {
 				if (entity instanceof ServerPlayer serverPlayer && !serverPlayer.seenCredits) {
@@ -2806,7 +2871,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
 	public boolean teleportTo(ServerLevel serverLevel, double d, double e, double f, Set<Relative> set, float g, float h, boolean bl) {
 		float i = Mth.clamp(h, -90.0F, 90.0F);
-		Entity entity = this.changeDimension(new DimensionTransition(serverLevel, new Vec3(d, e, f), Vec3.ZERO, g, i, set, DimensionTransition.DO_NOTHING));
+		Entity entity = this.teleport(new TeleportTransition(serverLevel, new Vec3(d, e, f), Vec3.ZERO, g, i, set, TeleportTransition.DO_NOTHING));
 		return entity != null;
 	}
 
@@ -3472,6 +3537,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 
 		this.getPassengers().forEach(Entity::stopRiding);
 		this.levelCallback.onRemove(removalReason);
+		this.onRemoval(removalReason);
 	}
 
 	protected void unsetRemoved() {

@@ -88,6 +88,8 @@ public class RealmsCreateWorldFlow {
 						} else {
 							minecraft.forceSetScreen(screen);
 						}
+
+						RealmsMainScreen.refreshServerList();
 					}
 
 					return null;

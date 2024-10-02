@@ -82,6 +82,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -89,7 +90,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.PlayerDataStorage;
@@ -201,7 +202,10 @@ public abstract class PlayerList {
 		serverGamePacketListenerImpl.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
 		serverGamePacketListenerImpl.send(new ClientboundPlayerAbilitiesPacket(serverPlayer.getAbilities()));
 		serverGamePacketListenerImpl.send(new ClientboundSetHeldSlotPacket(serverPlayer.getInventory().selected));
-		serverGamePacketListenerImpl.send(new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getSynchronizedRecipes()));
+		RecipeManager recipeManager = this.server.getRecipeManager();
+		serverGamePacketListenerImpl.send(
+			new ClientboundUpdateRecipesPacket(recipeManager.getSynchronizedItemProperties(), recipeManager.getSynchronizedStonecutterRecipes())
+		);
 		this.sendPlayerPermissionLevel(serverPlayer);
 		serverPlayer.getStats().markAllDirty();
 		serverPlayer.getRecipeBook().sendInitialRecipeBook(serverPlayer);
@@ -407,14 +411,14 @@ public abstract class PlayerList {
 	public ServerPlayer respawn(ServerPlayer serverPlayer, boolean bl, Entity.RemovalReason removalReason) {
 		this.players.remove(serverPlayer);
 		serverPlayer.serverLevel().removePlayerImmediately(serverPlayer, removalReason);
-		DimensionTransition dimensionTransition = serverPlayer.findRespawnPositionAndUseSpawnBlock(!bl, DimensionTransition.DO_NOTHING);
-		ServerLevel serverLevel = dimensionTransition.newLevel();
+		TeleportTransition teleportTransition = serverPlayer.findRespawnPositionAndUseSpawnBlock(!bl, TeleportTransition.DO_NOTHING);
+		ServerLevel serverLevel = teleportTransition.newLevel();
 		ServerPlayer serverPlayer2 = new ServerPlayer(this.server, serverLevel, serverPlayer.getGameProfile(), serverPlayer.clientInformation());
 		serverPlayer2.connection = serverPlayer.connection;
 		serverPlayer2.restoreFrom(serverPlayer, bl);
 		serverPlayer2.setId(serverPlayer.getId());
 		serverPlayer2.setMainArm(serverPlayer.getMainArm());
-		if (!dimensionTransition.missingRespawnBlock()) {
+		if (!teleportTransition.missingRespawnBlock()) {
 			serverPlayer2.copyRespawnPosition(serverPlayer);
 		}
 
@@ -422,9 +426,9 @@ public abstract class PlayerList {
 			serverPlayer2.addTag(string);
 		}
 
-		Vec3 vec3 = dimensionTransition.position();
-		serverPlayer2.moveTo(vec3.x, vec3.y, vec3.z, dimensionTransition.yRot(), dimensionTransition.xRot());
-		if (dimensionTransition.missingRespawnBlock()) {
+		Vec3 vec3 = teleportTransition.position();
+		serverPlayer2.moveTo(vec3.x, vec3.y, vec3.z, teleportTransition.yRot(), teleportTransition.xRot());
+		if (teleportTransition.missingRespawnBlock()) {
 			serverPlayer2.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
 		}
 
@@ -844,7 +848,10 @@ public abstract class PlayerList {
 		}
 
 		this.broadcastAll(new ClientboundUpdateTagsPacket(TagNetworkSerialization.serializeTagsToNetwork(this.registries)));
-		ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket = new ClientboundUpdateRecipesPacket(this.server.getRecipeManager().getSynchronizedRecipes());
+		RecipeManager recipeManager = this.server.getRecipeManager();
+		ClientboundUpdateRecipesPacket clientboundUpdateRecipesPacket = new ClientboundUpdateRecipesPacket(
+			recipeManager.getSynchronizedItemProperties(), recipeManager.getSynchronizedStonecutterRecipes()
+		);
 
 		for (ServerPlayer serverPlayer : this.players) {
 			serverPlayer.connection.send(clientboundUpdateRecipesPacket);

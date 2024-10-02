@@ -50,8 +50,12 @@ import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CrafterBlock;
+import net.minecraft.world.level.block.CreakingHeartBlock;
+import net.minecraft.world.level.block.HangingMossBlock;
 import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.MangrovePropaguleBlock;
+import net.minecraft.world.level.block.MossyCarpetBlock;
+import net.minecraft.world.level.block.MultifaceBlock;
 import net.minecraft.world.level.block.PitcherCropBlock;
 import net.minecraft.world.level.block.SnifferEggBlock;
 import net.minecraft.world.level.block.VaultBlock;
@@ -64,6 +68,7 @@ import net.minecraft.world.level.block.state.properties.ComparatorMode;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.DripstoneThickness;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.PistonType;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -139,38 +144,38 @@ public class BlockModelGenerators {
 		.put(BlockFamily.Variant.TRAPDOOR, BlockModelGenerators.BlockFamilyProvider::trapdoor)
 		.put(BlockFamily.Variant.WALL, BlockModelGenerators.BlockFamilyProvider::wall)
 		.build();
-	public static final List<Pair<BooleanProperty, Function<ResourceLocation, Variant>>> MULTIFACE_GENERATOR = List.of(
-		Pair.of(BlockStateProperties.NORTH, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation)),
+	public static final List<Pair<Direction, Function<ResourceLocation, Variant>>> MULTIFACE_GENERATOR = List.of(
+		Pair.of(Direction.NORTH, resourceLocation -> Variant.variant().with(VariantProperties.MODEL, resourceLocation)),
 		Pair.of(
-			BlockStateProperties.EAST,
+			Direction.EAST,
 			resourceLocation -> Variant.variant()
 					.with(VariantProperties.MODEL, resourceLocation)
 					.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
 					.with(VariantProperties.UV_LOCK, true)
 		),
 		Pair.of(
-			BlockStateProperties.SOUTH,
+			Direction.SOUTH,
 			resourceLocation -> Variant.variant()
 					.with(VariantProperties.MODEL, resourceLocation)
 					.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R180)
 					.with(VariantProperties.UV_LOCK, true)
 		),
 		Pair.of(
-			BlockStateProperties.WEST,
+			Direction.WEST,
 			resourceLocation -> Variant.variant()
 					.with(VariantProperties.MODEL, resourceLocation)
 					.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R270)
 					.with(VariantProperties.UV_LOCK, true)
 		),
 		Pair.of(
-			BlockStateProperties.UP,
+			Direction.UP,
 			resourceLocation -> Variant.variant()
 					.with(VariantProperties.MODEL, resourceLocation)
 					.with(VariantProperties.X_ROT, VariantProperties.Rotation.R270)
 					.with(VariantProperties.UV_LOCK, true)
 		),
 		Pair.of(
-			BlockStateProperties.DOWN,
+			Direction.DOWN,
 			resourceLocation -> Variant.variant()
 					.with(VariantProperties.MODEL, resourceLocation)
 					.with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
@@ -1223,6 +1228,67 @@ public class BlockModelGenerators {
 		ResourceLocation resourceLocation = provider.create(block, this.modelOutput);
 		ResourceLocation resourceLocation2 = provider2.create(block, this.modelOutput);
 		this.blockStateOutput.accept(createRotatedPillarWithHorizontalVariant(block, resourceLocation, resourceLocation2));
+	}
+
+	private void createCreakingHeart(Block block) {
+		Function<TexturedModel.Provider, ResourceLocation> function = provider -> provider.updateTexture(
+					textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_active"))
+				)
+				.updateTexture(textureMapping -> textureMapping.put(TextureSlot.END, TextureMapping.getBlockTexture(block, "_top_active")))
+				.createWithSuffix(block, "_active", this.modelOutput);
+		ResourceLocation resourceLocation = TexturedModel.COLUMN_ALT.create(block, this.modelOutput);
+		ResourceLocation resourceLocation2 = TexturedModel.COLUMN_HORIZONTAL_ALT.create(block, this.modelOutput);
+		ResourceLocation resourceLocation3 = (ResourceLocation)function.apply(TexturedModel.COLUMN_ALT);
+		ResourceLocation resourceLocation4 = (ResourceLocation)function.apply(TexturedModel.COLUMN_HORIZONTAL_ALT);
+		this.blockStateOutput
+			.accept(
+				MultiVariantGenerator.multiVariant(block)
+					.with(
+						PropertyDispatch.properties(BlockStateProperties.AXIS, CreakingHeartBlock.CREAKING)
+							.select(Direction.Axis.Y, CreakingHeartBlock.CreakingHeartState.DISABLED, Variant.variant().with(VariantProperties.MODEL, resourceLocation))
+							.select(
+								Direction.Axis.Z,
+								CreakingHeartBlock.CreakingHeartState.DISABLED,
+								Variant.variant().with(VariantProperties.MODEL, resourceLocation2).with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+							)
+							.select(
+								Direction.Axis.X,
+								CreakingHeartBlock.CreakingHeartState.DISABLED,
+								Variant.variant()
+									.with(VariantProperties.MODEL, resourceLocation2)
+									.with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+									.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
+							)
+							.select(Direction.Axis.Y, CreakingHeartBlock.CreakingHeartState.DORMANT, Variant.variant().with(VariantProperties.MODEL, resourceLocation3))
+							.select(
+								Direction.Axis.Z,
+								CreakingHeartBlock.CreakingHeartState.DORMANT,
+								Variant.variant().with(VariantProperties.MODEL, resourceLocation4).with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+							)
+							.select(
+								Direction.Axis.X,
+								CreakingHeartBlock.CreakingHeartState.DORMANT,
+								Variant.variant()
+									.with(VariantProperties.MODEL, resourceLocation4)
+									.with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+									.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
+							)
+							.select(Direction.Axis.Y, CreakingHeartBlock.CreakingHeartState.ACTIVE, Variant.variant().with(VariantProperties.MODEL, resourceLocation3))
+							.select(
+								Direction.Axis.Z,
+								CreakingHeartBlock.CreakingHeartState.ACTIVE,
+								Variant.variant().with(VariantProperties.MODEL, resourceLocation4).with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+							)
+							.select(
+								Direction.Axis.X,
+								CreakingHeartBlock.CreakingHeartState.ACTIVE,
+								Variant.variant()
+									.with(VariantProperties.MODEL, resourceLocation4)
+									.with(VariantProperties.X_ROT, VariantProperties.Rotation.R90)
+									.with(VariantProperties.Y_ROT, VariantProperties.Rotation.R90)
+							)
+					)
+			);
 	}
 
 	private ResourceLocation createSuffixedVariant(Block block, String string, ModelTemplate modelTemplate, Function<ResourceLocation, TextureMapping> function) {
@@ -4006,15 +4072,16 @@ public class BlockModelGenerators {
 		ResourceLocation resourceLocation = ModelLocationUtils.getModelLocation(block);
 		MultiPartGenerator multiPartGenerator = MultiPartGenerator.multiPart(block);
 		Condition.TerminalCondition terminalCondition = Util.make(
-			Condition.condition(), terminalConditionx -> MULTIFACE_GENERATOR.stream().map(Pair::getFirst).forEach(booleanPropertyx -> {
+			Condition.condition(),
+			terminalConditionx -> MULTIFACE_GENERATOR.stream().map(Pair::getFirst).map(MultifaceBlock::getFaceProperty).forEach(booleanPropertyx -> {
 					if (block.defaultBlockState().hasProperty(booleanPropertyx)) {
 						terminalConditionx.term(booleanPropertyx, false);
 					}
 				})
 		);
 
-		for (Pair<BooleanProperty, Function<ResourceLocation, Variant>> pair : MULTIFACE_GENERATOR) {
-			BooleanProperty booleanProperty = pair.getFirst();
+		for (Pair<Direction, Function<ResourceLocation, Variant>> pair : MULTIFACE_GENERATOR) {
+			BooleanProperty booleanProperty = MultifaceBlock.getFaceProperty(pair.getFirst());
 			Function<ResourceLocation, Variant> function = pair.getSecond();
 			if (block.defaultBlockState().hasProperty(booleanProperty)) {
 				multiPartGenerator.with(Condition.condition().term(booleanProperty, true), (Variant)function.apply(resourceLocation));
@@ -4023,6 +4090,52 @@ public class BlockModelGenerators {
 		}
 
 		this.blockStateOutput.accept(multiPartGenerator);
+	}
+
+	private void createMossyCarpet(Block block) {
+		ResourceLocation resourceLocation = TexturedModel.CARPET.create(block, this.modelOutput);
+		ResourceLocation resourceLocation2 = TexturedModel.MOSSY_CARPET_SIDE
+			.get(block)
+			.updateTextures(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_side_tall")))
+			.createWithSuffix(block, "_side_tall", this.modelOutput);
+		ResourceLocation resourceLocation3 = TexturedModel.MOSSY_CARPET_SIDE
+			.get(block)
+			.updateTextures(textureMapping -> textureMapping.put(TextureSlot.SIDE, TextureMapping.getBlockTexture(block, "_side_small")))
+			.createWithSuffix(block, "_side_small", this.modelOutput);
+		MultiPartGenerator multiPartGenerator = MultiPartGenerator.multiPart(block);
+		Condition.TerminalCondition terminalCondition = Condition.condition().term(MossyCarpetBlock.BASE, false);
+		multiPartGenerator.with(Condition.condition().term(MossyCarpetBlock.BASE, true), Variant.variant().with(VariantProperties.MODEL, resourceLocation));
+		multiPartGenerator.with(terminalCondition, Variant.variant().with(VariantProperties.MODEL, resourceLocation));
+		MULTIFACE_GENERATOR.stream().map(Pair::getFirst).forEach(directionx -> {
+			EnumProperty<WallSide> enumPropertyx = MossyCarpetBlock.getPropertyForFace(directionx);
+			if (enumPropertyx != null && block.defaultBlockState().hasProperty(enumPropertyx)) {
+				terminalCondition.term(enumPropertyx, WallSide.NONE);
+			}
+		});
+
+		for (Pair<Direction, Function<ResourceLocation, Variant>> pair : MULTIFACE_GENERATOR) {
+			Direction direction = pair.getFirst();
+			EnumProperty<WallSide> enumProperty = MossyCarpetBlock.getPropertyForFace(direction);
+			if (enumProperty != null) {
+				Function<ResourceLocation, Variant> function = pair.getSecond();
+				multiPartGenerator.with(Condition.condition().term(enumProperty, WallSide.TALL), (Variant)function.apply(resourceLocation2));
+				multiPartGenerator.with(Condition.condition().term(enumProperty, WallSide.LOW), (Variant)function.apply(resourceLocation3));
+				multiPartGenerator.with(terminalCondition, (Variant)function.apply(resourceLocation2));
+			}
+		}
+
+		this.blockStateOutput.accept(multiPartGenerator);
+	}
+
+	private void createHangingMoss(Block block) {
+		PropertyDispatch propertyDispatch = PropertyDispatch.property(HangingMossBlock.TIP).generate(boolean_ -> {
+			String string = boolean_ ? "_tip" : "";
+			TextureMapping textureMapping = TextureMapping.cross(TextureMapping.getBlockTexture(block, string));
+			ResourceLocation resourceLocation = BlockModelGenerators.TintState.NOT_TINTED.getCross().createWithSuffix(block, string, textureMapping, this.modelOutput);
+			return Variant.variant().with(VariantProperties.MODEL, resourceLocation);
+		});
+		this.createSimpleFlatItemModel(block, "_tip");
+		this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block).with(propertyDispatch));
 	}
 
 	private void createSculkCatalyst() {
@@ -4321,6 +4434,9 @@ public class BlockModelGenerators {
 		this.createPottedAzalea(Blocks.POTTED_FLOWERING_AZALEA);
 		this.createCaveVines();
 		this.createFullAndCarpetBlocks(Blocks.MOSS_BLOCK, Blocks.MOSS_CARPET);
+		this.createMossyCarpet(Blocks.PALE_MOSS_CARPET);
+		this.createHangingMoss(Blocks.PALE_HANGING_MOSS);
+		this.createTrivialCube(Blocks.PALE_MOSS_BLOCK);
 		this.createFlowerBed(Blocks.PINK_PETALS);
 		this.createAirLikeBlock(Blocks.BARRIER, Items.BARRIER);
 		this.createSimpleFlatItemModel(Items.BARRIER);
@@ -4378,6 +4494,7 @@ public class BlockModelGenerators {
 		this.createTrivialCube(Blocks.SOUL_SAND);
 		this.createTrivialCube(Blocks.SOUL_SOIL);
 		this.createTrivialBlock(Blocks.SPAWNER, TexturedModel.CUBE_INNER_FACES);
+		this.createCreakingHeart(Blocks.CREAKING_HEART);
 		this.createTrivialCube(Blocks.SPONGE);
 		this.createTrivialBlock(Blocks.SEAGRASS, TexturedModel.SEAGRASS);
 		this.createSimpleFlatItemModel(Items.SEAGRASS);
@@ -4898,6 +5015,11 @@ public class BlockModelGenerators {
 		this.createHangingSign(Blocks.STRIPPED_DARK_OAK_LOG, Blocks.DARK_OAK_HANGING_SIGN, Blocks.DARK_OAK_WALL_HANGING_SIGN);
 		this.createPlant(Blocks.DARK_OAK_SAPLING, Blocks.POTTED_DARK_OAK_SAPLING, BlockModelGenerators.TintState.NOT_TINTED);
 		this.createTrivialBlock(Blocks.DARK_OAK_LEAVES, TexturedModel.LEAVES);
+		this.woodProvider(Blocks.PALE_OAK_LOG).logWithHorizontal(Blocks.PALE_OAK_LOG).wood(Blocks.PALE_OAK_WOOD);
+		this.woodProvider(Blocks.STRIPPED_PALE_OAK_LOG).logWithHorizontal(Blocks.STRIPPED_PALE_OAK_LOG).wood(Blocks.STRIPPED_PALE_OAK_WOOD);
+		this.createHangingSign(Blocks.STRIPPED_PALE_OAK_LOG, Blocks.PALE_OAK_HANGING_SIGN, Blocks.PALE_OAK_WALL_HANGING_SIGN);
+		this.createPlant(Blocks.PALE_OAK_SAPLING, Blocks.POTTED_PALE_OAK_SAPLING, BlockModelGenerators.TintState.NOT_TINTED);
+		this.createTrivialBlock(Blocks.PALE_OAK_LEAVES, TexturedModel.LEAVES);
 		this.woodProvider(Blocks.JUNGLE_LOG).logWithHorizontal(Blocks.JUNGLE_LOG).wood(Blocks.JUNGLE_WOOD);
 		this.woodProvider(Blocks.STRIPPED_JUNGLE_LOG).logWithHorizontal(Blocks.STRIPPED_JUNGLE_LOG).wood(Blocks.STRIPPED_JUNGLE_WOOD);
 		this.createHangingSign(Blocks.STRIPPED_JUNGLE_LOG, Blocks.JUNGLE_HANGING_SIGN, Blocks.JUNGLE_WALL_HANGING_SIGN);

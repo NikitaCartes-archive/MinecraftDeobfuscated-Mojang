@@ -80,7 +80,7 @@ public class MapRenderer {
 					poseStack.scale(g, g, 1.0F);
 					poseStack.translate(0.0F, 0.0F, -0.1F);
 					font.drawInBatch(
-						mapDecorationRenderState.name, 0.0F, 0.0F, -1, false, poseStack.last().pose(), multiBufferSource, Font.DisplayMode.NORMAL, Integer.MIN_VALUE, i
+						mapDecorationRenderState.name, 0.0F, 0.0F, -1, false, poseStack.last().pose(), multiBufferSource, Font.DisplayMode.SEE_THROUGH, Integer.MIN_VALUE, i
 					);
 					poseStack.popPose();
 				}

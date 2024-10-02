@@ -43,7 +43,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -363,11 +363,11 @@ public class FallingBlockEntity extends Entity {
 
 	@Nullable
 	@Override
-	public Entity changeDimension(DimensionTransition dimensionTransition) {
-		ResourceKey<Level> resourceKey = dimensionTransition.newLevel().dimension();
+	public Entity teleport(TeleportTransition teleportTransition) {
+		ResourceKey<Level> resourceKey = teleportTransition.newLevel().dimension();
 		ResourceKey<Level> resourceKey2 = this.level().dimension();
 		boolean bl = (resourceKey2 == Level.END || resourceKey == Level.END) && resourceKey2 != resourceKey;
-		Entity entity = super.changeDimension(dimensionTransition);
+		Entity entity = super.teleport(teleportTransition);
 		this.forceTickAfterTeleportToDuplicate = entity != null && bl;
 		return entity;
 	}

@@ -8,8 +8,8 @@ import java.util.Collections;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.commands.arguments.ResourceKeyArgument;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -27,13 +27,12 @@ public class RecipeCommand {
 						.then(
 							Commands.argument("targets", EntityArgument.players())
 								.then(
-									Commands.argument("recipe", ResourceLocationArgument.id())
-										.suggests(SuggestionProviders.ALL_RECIPES)
+									Commands.argument("recipe", ResourceKeyArgument.key(Registries.RECIPE))
 										.executes(
 											commandContext -> giveRecipes(
 													commandContext.getSource(),
 													EntityArgument.getPlayers(commandContext, "targets"),
-													Collections.singleton(ResourceLocationArgument.getRecipe(commandContext, "recipe"))
+													Collections.singleton(ResourceKeyArgument.getRecipe(commandContext, "recipe"))
 												)
 										)
 								)
@@ -54,13 +53,12 @@ public class RecipeCommand {
 						.then(
 							Commands.argument("targets", EntityArgument.players())
 								.then(
-									Commands.argument("recipe", ResourceLocationArgument.id())
-										.suggests(SuggestionProviders.ALL_RECIPES)
+									Commands.argument("recipe", ResourceKeyArgument.key(Registries.RECIPE))
 										.executes(
 											commandContext -> takeRecipes(
 													commandContext.getSource(),
 													EntityArgument.getPlayers(commandContext, "targets"),
-													Collections.singleton(ResourceLocationArgument.getRecipe(commandContext, "recipe"))
+													Collections.singleton(ResourceKeyArgument.getRecipe(commandContext, "recipe"))
 												)
 										)
 								)

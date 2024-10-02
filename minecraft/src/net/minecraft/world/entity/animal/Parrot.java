@@ -107,6 +107,8 @@ public class Parrot extends ShoulderRidingEntity implements VariantHolder<Parrot
 		hashMap.put(EntityType.WITHER, SoundEvents.PARROT_IMITATE_WITHER);
 		hashMap.put(EntityType.WITHER_SKELETON, SoundEvents.PARROT_IMITATE_WITHER_SKELETON);
 		hashMap.put(EntityType.ZOGLIN, SoundEvents.PARROT_IMITATE_ZOGLIN);
+		hashMap.put(EntityType.CREAKING, SoundEvents.PARROT_IMITATE_CREAKING);
+		hashMap.put(EntityType.CREAKING_TRANSIENT, SoundEvents.PARROT_IMITATE_CREAKING);
 		hashMap.put(EntityType.ZOMBIE, SoundEvents.PARROT_IMITATE_ZOMBIE);
 		hashMap.put(EntityType.ZOMBIE_VILLAGER, SoundEvents.PARROT_IMITATE_ZOMBIE_VILLAGER);
 	});

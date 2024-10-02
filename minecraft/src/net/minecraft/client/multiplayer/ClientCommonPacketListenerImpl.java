@@ -290,6 +290,7 @@ public abstract class ClientCommonPacketListenerImpl implements ClientCommonPack
 
 	@Override
 	public void fillListenerSpecificCrashDetails(CrashReport crashReport, CrashReportCategory crashReportCategory) {
+		crashReportCategory.setDetail("Is Local", (CrashReportDetail<String>)(() -> String.valueOf(this.connection.isMemoryConnection())));
 		crashReportCategory.setDetail("Server type", (CrashReportDetail<String>)(() -> this.serverData != null ? this.serverData.type().toString() : "<none>"));
 		crashReportCategory.setDetail("Server brand", (CrashReportDetail<String>)(() -> this.serverBrand));
 		if (!this.customReportDetails.isEmpty()) {

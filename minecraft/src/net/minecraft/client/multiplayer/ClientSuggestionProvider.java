@@ -86,11 +86,6 @@ public class ClientSuggestionProvider implements SharedSuggestionProvider {
 	}
 
 	@Override
-	public Stream<ResourceLocation> getRecipeNames() {
-		return this.connection.getRecipeManager().getRecipeIds();
-	}
-
-	@Override
 	public boolean hasPermission(int i) {
 		LocalPlayer localPlayer = this.minecraft.player;
 		return localPlayer != null ? localPlayer.hasPermissions(i) : i == 0;

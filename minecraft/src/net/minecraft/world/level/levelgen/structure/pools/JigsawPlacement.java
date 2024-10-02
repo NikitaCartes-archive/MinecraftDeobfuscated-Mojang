@@ -3,7 +3,6 @@ package net.minecraft.world.level.levelgen.structure.pools;
 import com.google.common.collect.Lists;
 import com.mojang.logging.LogUtils;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -13,7 +12,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.Pools;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -165,20 +163,15 @@ public class JigsawPlacement {
 		StructureTemplateManager structureTemplateManager,
 		WorldgenRandom worldgenRandom
 	) {
-		List<StructureTemplate.StructureBlockInfo> list = structurePoolElement.getShuffledJigsawBlocks(structureTemplateManager, blockPos, rotation, worldgenRandom);
-		Optional<BlockPos> optional = Optional.empty();
-
-		for (StructureTemplate.StructureBlockInfo structureBlockInfo : list) {
-			ResourceLocation resourceLocation2 = ResourceLocation.tryParse(
-				((CompoundTag)Objects.requireNonNull(structureBlockInfo.nbt(), () -> structureBlockInfo + " nbt was null")).getString("name")
-			);
-			if (resourceLocation.equals(resourceLocation2)) {
-				optional = Optional.of(structureBlockInfo.pos());
-				break;
+		for (StructureTemplate.JigsawBlockInfo jigsawBlockInfo : structurePoolElement.getShuffledJigsawBlocks(
+			structureTemplateManager, blockPos, rotation, worldgenRandom
+		)) {
+			if (resourceLocation.equals(jigsawBlockInfo.name())) {
+				return Optional.of(jigsawBlockInfo.info().pos());
 			}
 		}
 
-		return optional;
+		return Optional.empty();
 	}
 
 	private static void addPieces(
@@ -300,16 +293,17 @@ public class JigsawPlacement {
 			BoundingBox boundingBox = poolElementStructurePiece.getBoundingBox();
 			int j = boundingBox.minY();
 
-			label134:
-			for (StructureTemplate.StructureBlockInfo structureBlockInfo : structurePoolElement.getShuffledJigsawBlocks(
+			label129:
+			for (StructureTemplate.JigsawBlockInfo jigsawBlockInfo : structurePoolElement.getShuffledJigsawBlocks(
 				this.structureTemplateManager, blockPos, rotation, this.random
 			)) {
+				StructureTemplate.StructureBlockInfo structureBlockInfo = jigsawBlockInfo.info();
 				Direction direction = JigsawBlock.getFrontFacing(structureBlockInfo.state());
 				BlockPos blockPos2 = structureBlockInfo.pos();
 				BlockPos blockPos3 = blockPos2.relative(direction);
 				int k = blockPos2.getY() - j;
 				int l = Integer.MIN_VALUE;
-				ResourceKey<StructureTemplatePool> resourceKey = readPoolKey(structureBlockInfo, poolAliasLookup);
+				ResourceKey<StructureTemplatePool> resourceKey = readPoolKey(jigsawBlockInfo, poolAliasLookup);
 				Optional<? extends Holder<StructureTemplatePool>> optional = this.pools.get(resourceKey);
 				if (optional.isEmpty()) {
 					JigsawPlacement.LOGGER.warn("Empty or non-existent pool: {}", resourceKey.location());
@@ -340,7 +334,7 @@ public class JigsawPlacement {
 							}
 
 							list.addAll(holder2.value().getShuffledTemplates(this.random));
-							int m = structureBlockInfo.nbt() != null ? structureBlockInfo.nbt().getInt("placement_priority") : 0;
+							int m = jigsawBlockInfo.placementPriority();
 
 							for (StructurePoolElement structurePoolElement2 : list) {
 								if (structurePoolElement2 == EmptyPoolElement.INSTANCE) {
@@ -348,17 +342,18 @@ public class JigsawPlacement {
 								}
 
 								for (Rotation rotation2 : Rotation.getShuffled(this.random)) {
-									List<StructureTemplate.StructureBlockInfo> list2 = structurePoolElement2.getShuffledJigsawBlocks(
+									List<StructureTemplate.JigsawBlockInfo> list2 = structurePoolElement2.getShuffledJigsawBlocks(
 										this.structureTemplateManager, BlockPos.ZERO, rotation2, this.random
 									);
 									BoundingBox boundingBox2 = structurePoolElement2.getBoundingBox(this.structureTemplateManager, BlockPos.ZERO, rotation2);
 									int n;
 									if (bl && boundingBox2.getYSpan() <= 16) {
-										n = list2.stream().mapToInt(structureBlockInfox -> {
+										n = list2.stream().mapToInt(jigsawBlockInfox -> {
+											StructureTemplate.StructureBlockInfo structureBlockInfox = jigsawBlockInfox.info();
 											if (!boundingBox2.isInside(structureBlockInfox.pos().relative(JigsawBlock.getFrontFacing(structureBlockInfox.state())))) {
 												return 0;
 											} else {
-												ResourceKey<StructureTemplatePool> resourceKeyx = readPoolKey(structureBlockInfox, poolAliasLookup);
+												ResourceKey<StructureTemplatePool> resourceKeyx = readPoolKey(jigsawBlockInfox, poolAliasLookup);
 												Optional<? extends Holder<StructureTemplatePool>> optionalx = this.pools.get(resourceKeyx);
 												Optional<Holder<StructureTemplatePool>> optional2 = optionalx.map(holderx -> ((StructureTemplatePool)holderx.value()).getFallback());
 												int ix = (Integer)optionalx.map(holderx -> ((StructureTemplatePool)holderx.value()).getMaxSize(this.structureTemplateManager)).orElse(0);
@@ -370,9 +365,9 @@ public class JigsawPlacement {
 										n = 0;
 									}
 
-									for (StructureTemplate.StructureBlockInfo structureBlockInfo2 : list2) {
-										if (JigsawBlock.canAttach(structureBlockInfo, structureBlockInfo2)) {
-											BlockPos blockPos4 = structureBlockInfo2.pos();
+									for (StructureTemplate.JigsawBlockInfo jigsawBlockInfo2 : list2) {
+										if (JigsawBlock.canAttach(jigsawBlockInfo, jigsawBlockInfo2)) {
+											BlockPos blockPos4 = jigsawBlockInfo2.info().pos();
 											BlockPos blockPos5 = blockPos3.subtract(blockPos4);
 											BoundingBox boundingBox3 = structurePoolElement2.getBoundingBox(this.structureTemplateManager, blockPos5, rotation2);
 											int o = boundingBox3.minY();
@@ -433,7 +428,7 @@ public class JigsawPlacement {
 													JigsawPlacement.PieceState pieceState = new JigsawPlacement.PieceState(poolElementStructurePiece2, mutableObject3, i + 1);
 													this.placing.add(pieceState, m);
 												}
-												continue label134;
+												continue label129;
 											}
 										}
 									}
@@ -445,10 +440,8 @@ public class JigsawPlacement {
 			}
 		}
 
-		private static ResourceKey<StructureTemplatePool> readPoolKey(StructureTemplate.StructureBlockInfo structureBlockInfo, PoolAliasLookup poolAliasLookup) {
-			CompoundTag compoundTag = (CompoundTag)Objects.requireNonNull(structureBlockInfo.nbt(), () -> structureBlockInfo + " nbt was null");
-			ResourceKey<StructureTemplatePool> resourceKey = Pools.parseKey(compoundTag.getString("pool"));
-			return poolAliasLookup.lookup(resourceKey);
+		private static ResourceKey<StructureTemplatePool> readPoolKey(StructureTemplate.JigsawBlockInfo jigsawBlockInfo, PoolAliasLookup poolAliasLookup) {
+			return poolAliasLookup.lookup(Pools.createKey(jigsawBlockInfo.pool()));
 		}
 	}
 }

@@ -1,6 +1,5 @@
 package net.minecraft.world.level.levelgen.structure.pools;
 
-import com.google.common.collect.Lists;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
@@ -54,18 +53,18 @@ public class FeaturePoolElement extends StructurePoolElement {
 	}
 
 	@Override
-	public List<StructureTemplate.StructureBlockInfo> getShuffledJigsawBlocks(
+	public List<StructureTemplate.JigsawBlockInfo> getShuffledJigsawBlocks(
 		StructureTemplateManager structureTemplateManager, BlockPos blockPos, Rotation rotation, RandomSource randomSource
 	) {
-		List<StructureTemplate.StructureBlockInfo> list = Lists.<StructureTemplate.StructureBlockInfo>newArrayList();
-		list.add(
-			new StructureTemplate.StructureBlockInfo(
-				blockPos,
-				Blocks.JIGSAW.defaultBlockState().setValue(JigsawBlock.ORIENTATION, FrontAndTop.fromFrontAndTop(Direction.DOWN, Direction.SOUTH)),
-				this.defaultJigsawNBT
+		return List.of(
+			StructureTemplate.JigsawBlockInfo.of(
+				new StructureTemplate.StructureBlockInfo(
+					blockPos,
+					Blocks.JIGSAW.defaultBlockState().setValue(JigsawBlock.ORIENTATION, FrontAndTop.fromFrontAndTop(Direction.DOWN, Direction.SOUTH)),
+					this.defaultJigsawNBT
+				)
 			)
 		);
-		return list;
 	}
 
 	@Override

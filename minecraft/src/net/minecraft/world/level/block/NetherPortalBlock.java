@@ -32,8 +32,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.level.portal.PortalShape;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -129,7 +129,7 @@ public class NetherPortalBlock extends Block implements Portal {
 
 	@Nullable
 	@Override
-	public DimensionTransition getPortalDestination(ServerLevel serverLevel, Entity entity, BlockPos blockPos) {
+	public TeleportTransition getPortalDestination(ServerLevel serverLevel, Entity entity, BlockPos blockPos) {
 		ResourceKey<Level> resourceKey = serverLevel.dimension() == Level.NETHER ? Level.OVERWORLD : Level.NETHER;
 		ServerLevel serverLevel2 = serverLevel.getServer().getLevel(resourceKey);
 		if (serverLevel2 == null) {
@@ -144,10 +144,10 @@ public class NetherPortalBlock extends Block implements Portal {
 	}
 
 	@Nullable
-	private DimensionTransition getExitPortal(ServerLevel serverLevel, Entity entity, BlockPos blockPos, BlockPos blockPos2, boolean bl, WorldBorder worldBorder) {
+	private TeleportTransition getExitPortal(ServerLevel serverLevel, Entity entity, BlockPos blockPos, BlockPos blockPos2, boolean bl, WorldBorder worldBorder) {
 		Optional<BlockPos> optional = serverLevel.getPortalForcer().findClosestPortalPosition(blockPos2, bl, worldBorder);
 		BlockUtil.FoundRectangle foundRectangle;
-		DimensionTransition.PostDimensionTransition postDimensionTransition;
+		TeleportTransition.PostTeleportTransition postTeleportTransition;
 		if (optional.isPresent()) {
 			BlockPos blockPos3 = (BlockPos)optional.get();
 			BlockState blockState = serverLevel.getBlockState(blockPos3);
@@ -159,7 +159,7 @@ public class NetherPortalBlock extends Block implements Portal {
 				21,
 				blockPosx -> serverLevel.getBlockState(blockPosx) == blockState
 			);
-			postDimensionTransition = DimensionTransition.PLAY_PORTAL_SOUND.then(entityx -> entityx.placePortalTicket(blockPos3));
+			postTeleportTransition = TeleportTransition.PLAY_PORTAL_SOUND.then(entityx -> entityx.placePortalTicket(blockPos3));
 		} else {
 			Direction.Axis axis = (Direction.Axis)entity.level().getBlockState(blockPos).getOptionalValue(AXIS).orElse(Direction.Axis.X);
 			Optional<BlockUtil.FoundRectangle> optional2 = serverLevel.getPortalForcer().createPortal(blockPos2, axis);
@@ -169,18 +169,18 @@ public class NetherPortalBlock extends Block implements Portal {
 			}
 
 			foundRectangle = (BlockUtil.FoundRectangle)optional2.get();
-			postDimensionTransition = DimensionTransition.PLAY_PORTAL_SOUND.then(DimensionTransition.PLACE_PORTAL_TICKET);
+			postTeleportTransition = TeleportTransition.PLAY_PORTAL_SOUND.then(TeleportTransition.PLACE_PORTAL_TICKET);
 		}
 
-		return getDimensionTransitionFromExit(entity, blockPos, foundRectangle, serverLevel, postDimensionTransition);
+		return getDimensionTransitionFromExit(entity, blockPos, foundRectangle, serverLevel, postTeleportTransition);
 	}
 
-	private static DimensionTransition getDimensionTransitionFromExit(
+	private static TeleportTransition getDimensionTransitionFromExit(
 		Entity entity,
 		BlockPos blockPos,
 		BlockUtil.FoundRectangle foundRectangle,
 		ServerLevel serverLevel,
-		DimensionTransition.PostDimensionTransition postDimensionTransition
+		TeleportTransition.PostTeleportTransition postTeleportTransition
 	) {
 		BlockState blockState = entity.level().getBlockState(blockPos);
 		Direction.Axis axis;
@@ -196,16 +196,16 @@ public class NetherPortalBlock extends Block implements Portal {
 			vec3 = new Vec3(0.5, 0.0, 0.0);
 		}
 
-		return createDimensionTransition(serverLevel, foundRectangle, axis, vec3, entity, postDimensionTransition);
+		return createDimensionTransition(serverLevel, foundRectangle, axis, vec3, entity, postTeleportTransition);
 	}
 
-	private static DimensionTransition createDimensionTransition(
+	private static TeleportTransition createDimensionTransition(
 		ServerLevel serverLevel,
 		BlockUtil.FoundRectangle foundRectangle,
 		Direction.Axis axis,
 		Vec3 vec3,
 		Entity entity,
-		DimensionTransition.PostDimensionTransition postDimensionTransition
+		TeleportTransition.PostTeleportTransition postTeleportTransition
 	) {
 		BlockPos blockPos = foundRectangle.minCorner;
 		BlockState blockState = serverLevel.getBlockState(blockPos);
@@ -220,7 +220,7 @@ public class NetherPortalBlock extends Block implements Portal {
 		boolean bl = axis2 == Direction.Axis.X;
 		Vec3 vec32 = new Vec3((double)blockPos.getX() + (bl ? f : h), (double)blockPos.getY() + g, (double)blockPos.getZ() + (bl ? h : f));
 		Vec3 vec33 = PortalShape.findCollisionFreePosition(vec32, serverLevel, entity, entityDimensions);
-		return new DimensionTransition(serverLevel, vec33, Vec3.ZERO, (float)i, 0.0F, Relative.union(Relative.DELTA, Relative.ROTATION), postDimensionTransition);
+		return new TeleportTransition(serverLevel, vec33, Vec3.ZERO, (float)i, 0.0F, Relative.union(Relative.DELTA, Relative.ROTATION), postTeleportTransition);
 	}
 
 	@Override

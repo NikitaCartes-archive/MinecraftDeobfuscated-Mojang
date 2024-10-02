@@ -30,6 +30,7 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.monster.creaking.Creaking;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -199,13 +200,18 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
 	}
 
 	@Override
+	public void cancelLerp() {
+		this.lerpSteps = 0;
+	}
+
+	@Override
 	public void lerpTo(double d, double e, double f, float g, float h, int i) {
 		this.lerpX = d;
 		this.lerpY = e;
 		this.lerpZ = f;
 		this.lerpYRot = (double)g;
 		this.lerpXRot = (double)h;
-		this.lerpSteps = 10;
+		this.lerpSteps = i;
 	}
 
 	@Override
@@ -279,6 +285,7 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
 		}
 
 		this.applyEffectsFromBlocks();
+		this.applyEffectsFromBlocks();
 		this.tickBubbleColumn();
 
 		for (int i = 0; i <= 1; i++) {
@@ -314,7 +321,8 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
 						&& this.hasEnoughSpaceFor(entity)
 						&& entity instanceof LivingEntity
 						&& !(entity instanceof WaterAnimal)
-						&& !(entity instanceof Player)) {
+						&& !(entity instanceof Player)
+						&& !(entity instanceof Creaking)) {
 						entity.startRiding(this);
 					} else {
 						this.push(entity);
@@ -377,11 +385,6 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
 	}
 
 	private void tickLerp() {
-		if (this.isControlledByLocalInstance()) {
-			this.lerpSteps = 0;
-			this.syncPacketPositionCodec(this.getX(), this.getY(), this.getZ());
-		}
-
 		if (this.lerpSteps > 0) {
 			this.lerpPositionAndRotationStep(this.lerpSteps, this.lerpX, this.lerpY, this.lerpZ, this.lerpYRot, this.lerpXRot);
 			this.lerpSteps--;
