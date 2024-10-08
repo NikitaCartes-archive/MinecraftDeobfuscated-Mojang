@@ -136,7 +136,7 @@ public abstract class AbstractFurnaceBlockEntity extends BaseContainerBlockEntit
 		compoundTag.putShort("CookTimeTotal", (short)this.cookingTotalTime);
 		ContainerHelper.saveAllItems(compoundTag, this.items, provider);
 		CompoundTag compoundTag2 = new CompoundTag();
-		this.recipesUsed.forEach((resourceKey, integer) -> compoundTag2.putInt(resourceKey.toString(), integer));
+		this.recipesUsed.forEach((resourceKey, integer) -> compoundTag2.putInt(resourceKey.location().toString(), integer));
 		compoundTag.put("RecipesUsed", compoundTag2);
 	}
 

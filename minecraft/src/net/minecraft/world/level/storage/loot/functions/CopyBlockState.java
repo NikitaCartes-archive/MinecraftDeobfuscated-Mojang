@@ -11,13 +11,13 @@ import java.util.stream.Collectors;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.BlockItemStateProperties;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
@@ -53,13 +53,13 @@ public class CopyBlockState extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return ImmutableSet.of(LootContextParams.BLOCK_STATE);
+	public Set<ContextKey<?>> getReferencedContextParams() {
+		return Set.of(LootContextParams.BLOCK_STATE);
 	}
 
 	@Override
 	protected ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		BlockState blockState = lootContext.getParamOrNull(LootContextParams.BLOCK_STATE);
+		BlockState blockState = lootContext.getOptionalParameter(LootContextParams.BLOCK_STATE);
 		if (blockState != null) {
 			itemStack.update(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY, blockItemStateProperties -> {
 				for (Property<?> property : this.properties) {

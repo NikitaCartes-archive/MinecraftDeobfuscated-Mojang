@@ -20,10 +20,11 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
@@ -61,19 +62,17 @@ public class SessionSearchTrees {
 				RegistryAccess registryAccess = level.registryAccess();
 				Registry<Item> registry = registryAccess.lookupOrThrow(Registries.ITEM);
 				Item.TooltipContext tooltipContext = Item.TooltipContext.of(registryAccess);
-				SlotDisplay.ResolutionContext resolutionContext = SlotDisplay.ResolutionContext.forLevel(level);
+				ContextMap contextMap = SlotDisplayContext.fromLevel(level);
 				TooltipFlag tooltipFlag = TooltipFlag.Default.NORMAL;
 				CompletableFuture<?> completableFuture = this.recipeSearch;
 				this.recipeSearch = CompletableFuture.supplyAsync(
 					() -> new FullTextSearchTree(
 							recipeCollection -> getTooltipLines(
-									recipeCollection.getRecipes().stream().flatMap(recipeDisplayEntry -> recipeDisplayEntry.resultItems(resolutionContext).stream()),
-									tooltipContext,
-									tooltipFlag
+									recipeCollection.getRecipes().stream().flatMap(recipeDisplayEntry -> recipeDisplayEntry.resultItems(contextMap).stream()), tooltipContext, tooltipFlag
 								),
 							recipeCollection -> recipeCollection.getRecipes()
 									.stream()
-									.flatMap(recipeDisplayEntry -> recipeDisplayEntry.resultItems(resolutionContext).stream())
+									.flatMap(recipeDisplayEntry -> recipeDisplayEntry.resultItems(contextMap).stream())
 									.map(itemStack -> registry.getKey(itemStack.getItem())),
 							list
 						),

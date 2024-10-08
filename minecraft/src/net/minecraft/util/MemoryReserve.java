@@ -4,13 +4,22 @@ import javax.annotation.Nullable;
 
 public class MemoryReserve {
 	@Nullable
-	private static byte[] reserve = null;
+	private static byte[] reserve;
 
 	public static void allocate() {
 		reserve = new byte[10485760];
 	}
 
 	public static void release() {
-		reserve = new byte[0];
+		if (reserve != null) {
+			reserve = null;
+
+			try {
+				System.gc();
+				System.gc();
+				System.gc();
+			} catch (Throwable var1) {
+			}
+		}
 	}
 }

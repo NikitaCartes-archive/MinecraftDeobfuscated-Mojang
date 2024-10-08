@@ -888,9 +888,9 @@ public class ServerGamePacketListenerImpl
 									q = 1;
 								}
 
-								if (!this.player.isChangingDimension() && (!this.player.serverLevel().getGameRules().getBoolean(GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK) || !bl)) {
+								if (this.shouldCheckPlayerMovement(bl)) {
 									float r = bl ? 300.0F : 100.0F;
-									if (p - o > (double)(r * (float)q) && !this.isSingleplayerOwner()) {
+									if (p - o > (double)(r * (float)q)) {
 										LOGGER.warn("{} moved too quickly! {},{},{}", this.player.getName().getString(), l, m, n);
 										this.teleport(this.player.getX(), this.player.getY(), this.player.getZ(), this.player.getYRot(), this.player.getXRot());
 										return;
@@ -970,6 +970,19 @@ public class ServerGamePacketListenerImpl
 					}
 				}
 			}
+		}
+	}
+
+	private boolean shouldCheckPlayerMovement(boolean bl) {
+		if (this.isSingleplayerOwner()) {
+			return false;
+		} else if (this.player.isChangingDimension()) {
+			return false;
+		} else {
+			GameRules gameRules = this.player.serverLevel().getGameRules();
+			return gameRules.getBoolean(GameRules.RULE_DISABLE_PLAYER_MOVEMENT_CHECK)
+				? false
+				: !bl || !gameRules.getBoolean(GameRules.RULE_DISABLE_ELYTRA_MOVEMENT_CHECK);
 		}
 	}
 
@@ -1695,6 +1708,7 @@ public class ServerGamePacketListenerImpl
 		if (this.player.gameMode.isCreative()) {
 			boolean bl = serverboundSetCreativeModeSlotPacket.slotNum() < 0;
 			ItemStack itemStack = serverboundSetCreativeModeSlotPacket.itemStack();
+			ItemStack itemStack2 = itemStack.copy();
 			if (!itemStack.isItemEnabled(this.player.level().enabledFeatures())) {
 				return;
 			}
@@ -1714,7 +1728,7 @@ public class ServerGamePacketListenerImpl
 			boolean bl3 = itemStack.isEmpty() || itemStack.getCount() <= itemStack.getMaxStackSize();
 			if (bl2 && bl3) {
 				this.player.inventoryMenu.getSlot(serverboundSetCreativeModeSlotPacket.slotNum()).setByPlayer(itemStack);
-				this.player.inventoryMenu.setRemoteSlot(serverboundSetCreativeModeSlotPacket.slotNum(), itemStack);
+				this.player.inventoryMenu.setRemoteSlot(serverboundSetCreativeModeSlotPacket.slotNum(), itemStack2);
 				this.player.inventoryMenu.broadcastChanges();
 			} else if (bl && bl3) {
 				if (this.dropSpamThrottler.isUnderThreshold()) {

@@ -8,9 +8,13 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketType;
 import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 
-public record ClientboundRecipeBookAddPacket(List<ClientboundRecipeBookAddPacket.Entry> entries) implements Packet<ClientGamePacketListener> {
+public record ClientboundRecipeBookAddPacket(List<ClientboundRecipeBookAddPacket.Entry> entries, boolean replace) implements Packet<ClientGamePacketListener> {
 	public static final StreamCodec<RegistryFriendlyByteBuf, ClientboundRecipeBookAddPacket> STREAM_CODEC = StreamCodec.composite(
-		ClientboundRecipeBookAddPacket.Entry.STREAM_CODEC.apply(ByteBufCodecs.list()), ClientboundRecipeBookAddPacket::entries, ClientboundRecipeBookAddPacket::new
+		ClientboundRecipeBookAddPacket.Entry.STREAM_CODEC.apply(ByteBufCodecs.list()),
+		ClientboundRecipeBookAddPacket::entries,
+		ByteBufCodecs.BOOL,
+		ClientboundRecipeBookAddPacket::replace,
+		ClientboundRecipeBookAddPacket::new
 	);
 
 	@Override

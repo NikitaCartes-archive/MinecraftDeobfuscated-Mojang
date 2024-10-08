@@ -4,8 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Set;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public record EnchantmentActiveCheck(boolean active) implements LootItemCondition {
@@ -14,7 +14,7 @@ public record EnchantmentActiveCheck(boolean active) implements LootItemConditio
 	);
 
 	public boolean test(LootContext lootContext) {
-		return lootContext.getParam(LootContextParams.ENCHANTMENT_ACTIVE) == this.active;
+		return lootContext.getParameter(LootContextParams.ENCHANTMENT_ACTIVE) == this.active;
 	}
 
 	@Override
@@ -23,7 +23,7 @@ public record EnchantmentActiveCheck(boolean active) implements LootItemConditio
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
+	public Set<ContextKey<?>> getReferencedContextParams() {
 		return Set.of(LootContextParams.ENCHANTMENT_ACTIVE);
 	}
 

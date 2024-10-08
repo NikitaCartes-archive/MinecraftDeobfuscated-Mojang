@@ -732,7 +732,7 @@ public abstract class RecipeProvider {
 							@Override
 							public void accept(ResourceKey<Recipe<?>> resourceKey, Recipe<?> recipe, @Nullable AdvancementHolder advancementHolder) {
 								if (!set.add(resourceKey)) {
-									throw new IllegalStateException("Duplicate recipe " + resourceKey);
+									throw new IllegalStateException("Duplicate recipe " + resourceKey.location());
 								} else {
 									this.saveRecipe(resourceKey, recipe);
 									if (advancementHolder != null) {

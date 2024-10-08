@@ -14,10 +14,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 import net.minecraft.world.item.crafting.display.RecipeDisplayId;
-import net.minecraft.world.item.crafting.display.SlotDisplay;
 
 @Environment(EnvType.CLIENT)
 public class RecipeButton extends AbstractWidget {
@@ -38,11 +38,11 @@ public class RecipeButton extends AbstractWidget {
 		this.slotSelectTime = slotSelectTime;
 	}
 
-	public void init(RecipeCollection recipeCollection, boolean bl, RecipeBookPage recipeBookPage, SlotDisplay.ResolutionContext resolutionContext) {
+	public void init(RecipeCollection recipeCollection, boolean bl, RecipeBookPage recipeBookPage, ContextMap contextMap) {
 		this.collection = recipeCollection;
 		List<RecipeDisplayEntry> list = recipeCollection.getSelectedRecipes(bl ? RecipeCollection.CraftableStatus.CRAFTABLE : RecipeCollection.CraftableStatus.ANY);
 		this.selectedEntries = list.stream()
-			.map(recipeDisplayEntry -> new RecipeButton.ResolvedEntry(recipeDisplayEntry.id(), recipeDisplayEntry.resultItems(resolutionContext)))
+			.map(recipeDisplayEntry -> new RecipeButton.ResolvedEntry(recipeDisplayEntry.id(), recipeDisplayEntry.resultItems(contextMap)))
 			.toList();
 		List<RecipeDisplayId> list2 = list.stream().map(RecipeDisplayEntry::id).filter(recipeBookPage.getRecipeBook()::willHighlight).toList();
 		if (!list2.isEmpty()) {

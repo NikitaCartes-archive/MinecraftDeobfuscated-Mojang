@@ -6,9 +6,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.level.storage.loot.IntRange;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 
 public record TimeCheck(Optional<Long> period, IntRange value) implements LootItemCondition {
 	public static final MapCodec<TimeCheck> CODEC = RecordCodecBuilder.mapCodec(
@@ -22,7 +22,7 @@ public record TimeCheck(Optional<Long> period, IntRange value) implements LootIt
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
+	public Set<ContextKey<?>> getReferencedContextParams() {
 		return this.value.getReferencedContextParams();
 	}
 

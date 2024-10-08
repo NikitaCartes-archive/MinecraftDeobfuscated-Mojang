@@ -25,7 +25,7 @@ public interface SmithingRecipe extends Recipe<SmithingRecipeInput> {
 	Optional<Ingredient> additionIngredient();
 
 	@Override
-	default BasicRecipeBookCategory recipeBookCategory() {
-		return BasicRecipeBookCategory.SMITHING;
+	default RecipeBookCategory recipeBookCategory() {
+		return RecipeBookCategories.SMITHING;
 	}
 }

@@ -17,26 +17,25 @@ public class RepairItemRecipe extends CustomRecipe {
 	}
 
 	@Nullable
-	private Pair<ItemStack, ItemStack> getItemsToCombine(CraftingInput craftingInput) {
-		ItemStack itemStack = null;
-		ItemStack itemStack2 = null;
+	private static Pair<ItemStack, ItemStack> getItemsToCombine(CraftingInput craftingInput) {
+		if (craftingInput.ingredientCount() != 2) {
+			return null;
+		} else {
+			ItemStack itemStack = null;
 
-		for (int i = 0; i < craftingInput.size(); i++) {
-			ItemStack itemStack3 = craftingInput.getItem(i);
-			if (!itemStack3.isEmpty()) {
-				if (itemStack == null) {
-					itemStack = itemStack3;
-				} else {
-					if (itemStack2 != null) {
-						return null;
+			for (int i = 0; i < craftingInput.size(); i++) {
+				ItemStack itemStack2 = craftingInput.getItem(i);
+				if (!itemStack2.isEmpty()) {
+					if (itemStack != null) {
+						return canCombine(itemStack, itemStack2) ? Pair.of(itemStack, itemStack2) : null;
 					}
 
-					itemStack2 = itemStack3;
+					itemStack = itemStack2;
 				}
 			}
-		}
 
-		return itemStack != null && itemStack2 != null && canCombine(itemStack, itemStack2) ? Pair.of(itemStack, itemStack2) : null;
+			return null;
+		}
 	}
 
 	private static boolean canCombine(ItemStack itemStack, ItemStack itemStack2) {
@@ -50,11 +49,11 @@ public class RepairItemRecipe extends CustomRecipe {
 	}
 
 	public boolean matches(CraftingInput craftingInput, Level level) {
-		return this.getItemsToCombine(craftingInput) != null;
+		return getItemsToCombine(craftingInput) != null;
 	}
 
 	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
-		Pair<ItemStack, ItemStack> pair = this.getItemsToCombine(craftingInput);
+		Pair<ItemStack, ItemStack> pair = getItemsToCombine(craftingInput);
 		if (pair == null) {
 			return ItemStack.EMPTY;
 		} else {

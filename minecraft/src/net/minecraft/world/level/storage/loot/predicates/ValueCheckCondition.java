@@ -4,9 +4,9 @@ import com.google.common.collect.Sets;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Set;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.level.storage.loot.IntRange;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
 
@@ -24,8 +24,8 @@ public record ValueCheckCondition(NumberProvider provider, IntRange range) imple
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return Sets.<LootContextParam<?>>union(this.provider.getReferencedContextParams(), this.range.getReferencedContextParams());
+	public Set<ContextKey<?>> getReferencedContextParams() {
+		return Sets.<ContextKey<?>>union(this.provider.getReferencedContextParams(), this.range.getReferencedContextParams());
 	}
 
 	public boolean test(LootContext lootContext) {

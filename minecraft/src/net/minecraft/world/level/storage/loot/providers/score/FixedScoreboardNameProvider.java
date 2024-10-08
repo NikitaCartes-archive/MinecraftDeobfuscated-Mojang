@@ -1,12 +1,11 @@
 package net.minecraft.world.level.storage.loot.providers.score;
 
-import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Set;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.scores.ScoreHolder;
 
 public record FixedScoreboardNameProvider(String name) implements ScoreboardNameProvider {
@@ -29,7 +28,7 @@ public record FixedScoreboardNameProvider(String name) implements ScoreboardName
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return ImmutableSet.of();
+	public Set<ContextKey<?>> getReferencedContextParams() {
+		return Set.of();
 	}
 }

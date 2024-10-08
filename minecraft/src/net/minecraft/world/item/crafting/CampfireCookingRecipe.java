@@ -25,7 +25,7 @@ public class CampfireCookingRecipe extends AbstractCookingRecipe {
 	}
 
 	@Override
-	public BasicRecipeBookCategory recipeBookCategory() {
-		return BasicRecipeBookCategory.CAMPFIRE;
+	public RecipeBookCategory recipeBookCategory() {
+		return RecipeBookCategories.CAMPFIRE;
 	}
 }

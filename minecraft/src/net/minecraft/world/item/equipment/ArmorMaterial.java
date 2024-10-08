@@ -44,9 +44,11 @@ public record ArmorMaterial(
 	}
 
 	public Item.Properties animalProperties(Item.Properties properties, SoundEvent soundEvent, boolean bl, HolderSet<EntityType<?>> holderSet) {
-		return properties.durability(ArmorType.BODY.getDurability(this.durability))
-			.attributes(this.createAttributes(ArmorType.BODY))
-			.repairable(this.repairIngredient)
+		if (bl) {
+			properties = properties.durability(ArmorType.BODY.getDurability(this.durability)).repairable(this.repairIngredient);
+		}
+
+		return properties.attributes(this.createAttributes(ArmorType.BODY))
 			.component(
 				DataComponents.EQUIPPABLE,
 				Equippable.builder(EquipmentSlot.BODY)

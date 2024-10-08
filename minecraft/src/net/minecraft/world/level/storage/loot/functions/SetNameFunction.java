@@ -17,10 +17,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import org.slf4j.Logger;
 
@@ -56,13 +56,13 @@ public class SetNameFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return (Set<LootContextParam<?>>)this.resolutionContext.map(entityTarget -> Set.of(entityTarget.getParam())).orElse(Set.of());
+	public Set<ContextKey<?>> getReferencedContextParams() {
+		return (Set<ContextKey<?>>)this.resolutionContext.map(entityTarget -> Set.of(entityTarget.getParam())).orElse(Set.of());
 	}
 
 	public static UnaryOperator<Component> createResolver(LootContext lootContext, @Nullable LootContext.EntityTarget entityTarget) {
 		if (entityTarget != null) {
-			Entity entity = lootContext.getParamOrNull(entityTarget.getParam());
+			Entity entity = lootContext.getOptionalParameter(entityTarget.getParam());
 			if (entity != null) {
 				CommandSourceStack commandSourceStack = entity.createCommandSourceStackForNameResolution(lootContext.getLevel()).withPermission(2);
 				return component -> {

@@ -27,6 +27,7 @@ public record Equippable(
 	EquipmentSlot slot,
 	Holder<SoundEvent> equipSound,
 	Optional<ResourceLocation> model,
+	Optional<ResourceLocation> cameraOverlay,
 	Optional<HolderSet<EntityType<?>>> allowedEntities,
 	boolean dispensable,
 	boolean swappable,
@@ -37,6 +38,7 @@ public record Equippable(
 					EquipmentSlot.CODEC.fieldOf("slot").forGetter(Equippable::slot),
 					SoundEvent.CODEC.optionalFieldOf("equip_sound", SoundEvents.ARMOR_EQUIP_GENERIC).forGetter(Equippable::equipSound),
 					ResourceLocation.CODEC.optionalFieldOf("model").forGetter(Equippable::model),
+					ResourceLocation.CODEC.optionalFieldOf("camera_overlay").forGetter(Equippable::cameraOverlay),
 					RegistryCodecs.homogeneousList(Registries.ENTITY_TYPE).optionalFieldOf("allowed_entities").forGetter(Equippable::allowedEntities),
 					Codec.BOOL.optionalFieldOf("dispensable", Boolean.valueOf(true)).forGetter(Equippable::dispensable),
 					Codec.BOOL.optionalFieldOf("swappable", Boolean.valueOf(true)).forGetter(Equippable::swappable),
@@ -51,6 +53,8 @@ public record Equippable(
 		Equippable::equipSound,
 		ResourceLocation.STREAM_CODEC.apply(ByteBufCodecs::optional),
 		Equippable::model,
+		ResourceLocation.STREAM_CODEC.apply(ByteBufCodecs::optional),
+		Equippable::cameraOverlay,
 		ByteBufCodecs.holderSet(Registries.ENTITY_TYPE).apply(ByteBufCodecs::optional),
 		Equippable::allowedEntities,
 		ByteBufCodecs.BOOL,
@@ -114,6 +118,7 @@ public record Equippable(
 		private final EquipmentSlot slot;
 		private Holder<SoundEvent> equipSound = SoundEvents.ARMOR_EQUIP_GENERIC;
 		private Optional<ResourceLocation> model = Optional.empty();
+		private Optional<ResourceLocation> cameraOverlay = Optional.empty();
 		private Optional<HolderSet<EntityType<?>>> allowedEntities = Optional.empty();
 		private boolean dispensable = true;
 		private boolean swappable = true;
@@ -130,6 +135,11 @@ public record Equippable(
 
 		public Equippable.Builder setModel(ResourceLocation resourceLocation) {
 			this.model = Optional.of(resourceLocation);
+			return this;
+		}
+
+		public Equippable.Builder setCameraOverlay(ResourceLocation resourceLocation) {
+			this.cameraOverlay = Optional.of(resourceLocation);
 			return this;
 		}
 
@@ -158,7 +168,7 @@ public record Equippable(
 		}
 
 		public Equippable build() {
-			return new Equippable(this.slot, this.equipSound, this.model, this.allowedEntities, this.dispensable, this.swappable, this.damageOnHurt);
+			return new Equippable(this.slot, this.equipSound, this.model, this.cameraOverlay, this.allowedEntities, this.dispensable, this.swappable, this.damageOnHurt);
 		}
 	}
 }

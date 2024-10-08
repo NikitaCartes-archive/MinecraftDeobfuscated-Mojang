@@ -15,29 +15,33 @@ public class BookCloningRecipe extends CustomRecipe {
 	}
 
 	public boolean matches(CraftingInput craftingInput, Level level) {
-		int i = 0;
-		ItemStack itemStack = ItemStack.EMPTY;
+		if (craftingInput.ingredientCount() < 2) {
+			return false;
+		} else {
+			boolean bl = false;
+			boolean bl2 = false;
 
-		for (int j = 0; j < craftingInput.size(); j++) {
-			ItemStack itemStack2 = craftingInput.getItem(j);
-			if (!itemStack2.isEmpty()) {
-				if (itemStack2.is(Items.WRITTEN_BOOK)) {
-					if (!itemStack.isEmpty()) {
-						return false;
+			for (int i = 0; i < craftingInput.size(); i++) {
+				ItemStack itemStack = craftingInput.getItem(i);
+				if (!itemStack.isEmpty()) {
+					if (itemStack.is(Items.WRITTEN_BOOK)) {
+						if (bl2) {
+							return false;
+						}
+
+						bl2 = true;
+					} else {
+						if (!itemStack.is(Items.WRITABLE_BOOK)) {
+							return false;
+						}
+
+						bl = true;
 					}
-
-					itemStack = itemStack2;
-				} else {
-					if (!itemStack2.is(Items.WRITABLE_BOOK)) {
-						return false;
-					}
-
-					i++;
 				}
 			}
-		}
 
-		return !itemStack.isEmpty() && i > 0;
+			return bl2 && bl;
+		}
 	}
 
 	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {

@@ -4,24 +4,24 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
+import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 public record TargetedConditionalEffect<T>(EnchantmentTarget enchanted, EnchantmentTarget affected, T effect, Optional<LootItemCondition> requirements) {
-	public static <S> Codec<TargetedConditionalEffect<S>> codec(Codec<S> codec, LootContextParamSet lootContextParamSet) {
+	public static <S> Codec<TargetedConditionalEffect<S>> codec(Codec<S> codec, ContextKeySet contextKeySet) {
 		return RecordCodecBuilder.create(
 			instance -> instance.group(
 						EnchantmentTarget.CODEC.fieldOf("enchanted").forGetter(TargetedConditionalEffect::enchanted),
 						EnchantmentTarget.CODEC.fieldOf("affected").forGetter(TargetedConditionalEffect::affected),
 						codec.fieldOf("effect").forGetter(TargetedConditionalEffect::effect),
-						ConditionalEffect.conditionCodec(lootContextParamSet).optionalFieldOf("requirements").forGetter(TargetedConditionalEffect::requirements)
+						ConditionalEffect.conditionCodec(contextKeySet).optionalFieldOf("requirements").forGetter(TargetedConditionalEffect::requirements)
 					)
 					.apply(instance, TargetedConditionalEffect::new)
 		);
 	}
 
-	public static <S> Codec<TargetedConditionalEffect<S>> equipmentDropsCodec(Codec<S> codec, LootContextParamSet lootContextParamSet) {
+	public static <S> Codec<TargetedConditionalEffect<S>> equipmentDropsCodec(Codec<S> codec, ContextKeySet contextKeySet) {
 		return RecordCodecBuilder.create(
 			instance -> instance.group(
 						EnchantmentTarget.CODEC
@@ -33,7 +33,7 @@ public record TargetedConditionalEffect<T>(EnchantmentTarget enchanted, Enchantm
 							.fieldOf("enchanted")
 							.forGetter(TargetedConditionalEffect::enchanted),
 						codec.fieldOf("effect").forGetter(TargetedConditionalEffect::effect),
-						ConditionalEffect.conditionCodec(lootContextParamSet).optionalFieldOf("requirements").forGetter(TargetedConditionalEffect::requirements)
+						ConditionalEffect.conditionCodec(contextKeySet).optionalFieldOf("requirements").forGetter(TargetedConditionalEffect::requirements)
 					)
 					.apply(instance, (enchantmentTarget, object, optional) -> new TargetedConditionalEffect<>(enchantmentTarget, EnchantmentTarget.VICTIM, object, optional))
 		);

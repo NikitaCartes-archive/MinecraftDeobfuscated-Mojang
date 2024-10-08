@@ -18,6 +18,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.recipebook.PlaceRecipeHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.display.FurnaceRecipeDisplay;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
@@ -49,7 +50,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 		this.isFurnaceMenu = bl;
 	}
 
-	public void init(RecipeCollection recipeCollection, SlotDisplay.ResolutionContext resolutionContext, boolean bl, int i, int j, int k, int l, float f) {
+	public void init(RecipeCollection recipeCollection, ContextMap contextMap, boolean bl, int i, int j, int k, int l, float f) {
 		this.collection = recipeCollection;
 		List<RecipeDisplayEntry> list = recipeCollection.getSelectedRecipes(RecipeCollection.CraftableStatus.CRAFTABLE);
 		List<RecipeDisplayEntry> list2 = bl ? Collections.emptyList() : recipeCollection.getSelectedRecipes(RecipeCollection.CraftableStatus.NOT_CRAFTABLE);
@@ -87,10 +88,10 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 			int w = this.y + 5 + 25 * (u / o);
 			if (this.isFurnaceMenu) {
 				this.recipeButtons
-					.add(new OverlayRecipeComponent.OverlaySmeltingRecipeButton(v, w, recipeDisplayEntry.id(), recipeDisplayEntry.display(), resolutionContext, bl2));
+					.add(new OverlayRecipeComponent.OverlaySmeltingRecipeButton(v, w, recipeDisplayEntry.id(), recipeDisplayEntry.display(), contextMap, bl2));
 			} else {
 				this.recipeButtons
-					.add(new OverlayRecipeComponent.OverlayCraftingRecipeButton(v, w, recipeDisplayEntry.id(), recipeDisplayEntry.display(), resolutionContext, bl2));
+					.add(new OverlayRecipeComponent.OverlayCraftingRecipeButton(v, w, recipeDisplayEntry.id(), recipeDisplayEntry.display(), contextMap, bl2));
 			}
 		}
 
@@ -173,26 +174,19 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 		private static final int GRID_HEIGHT = 3;
 
 		public OverlayCraftingRecipeButton(
-			final int i,
-			final int j,
-			final RecipeDisplayId recipeDisplayId,
-			final RecipeDisplay recipeDisplay,
-			final SlotDisplay.ResolutionContext resolutionContext,
-			final boolean bl
+			final int i, final int j, final RecipeDisplayId recipeDisplayId, final RecipeDisplay recipeDisplay, final ContextMap contextMap, final boolean bl
 		) {
-			super(i, j, recipeDisplayId, bl, calculateIngredientsPositions(recipeDisplay, resolutionContext));
+			super(i, j, recipeDisplayId, bl, calculateIngredientsPositions(recipeDisplay, contextMap));
 		}
 
-		private static List<OverlayRecipeComponent.OverlayRecipeButton.Pos> calculateIngredientsPositions(
-			RecipeDisplay recipeDisplay, SlotDisplay.ResolutionContext resolutionContext
-		) {
+		private static List<OverlayRecipeComponent.OverlayRecipeButton.Pos> calculateIngredientsPositions(RecipeDisplay recipeDisplay, ContextMap contextMap) {
 			List<OverlayRecipeComponent.OverlayRecipeButton.Pos> list = new ArrayList();
 			Objects.requireNonNull(recipeDisplay);
 			switch (recipeDisplay) {
 				case ShapedCraftingRecipeDisplay shapedCraftingRecipeDisplay:
 					PlaceRecipeHelper.placeRecipe(
 						3, 3, shapedCraftingRecipeDisplay.width(), shapedCraftingRecipeDisplay.height(), shapedCraftingRecipeDisplay.ingredients(), (slotDisplay, ix, j, k) -> {
-							List<ItemStack> list2x = slotDisplay.resolveForStacks(resolutionContext);
+							List<ItemStack> list2x = slotDisplay.resolveForStacks(contextMap);
 							if (!list2x.isEmpty()) {
 								list.add(createGridPos(j, k, list2x));
 							}
@@ -204,7 +198,7 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 						List<SlotDisplay> list2 = shapelessCraftingRecipeDisplay.ingredients();
 
 						for (int i = 0; i < list2.size(); i++) {
-							List<ItemStack> list3 = ((SlotDisplay)list2.get(i)).resolveForStacks(resolutionContext);
+							List<ItemStack> list3 = ((SlotDisplay)list2.get(i)).resolveForStacks(contextMap);
 							if (!list3.isEmpty()) {
 								list.add(createGridPos(i % 3, i / 3, list3));
 							}
@@ -296,21 +290,14 @@ public class OverlayRecipeComponent implements Renderable, GuiEventListener {
 		private static final ResourceLocation HIGHLIGHTED_DISABLED_SPRITE = ResourceLocation.withDefaultNamespace("recipe_book/furnace_overlay_disabled_highlighted");
 
 		public OverlaySmeltingRecipeButton(
-			final int i,
-			final int j,
-			final RecipeDisplayId recipeDisplayId,
-			final RecipeDisplay recipeDisplay,
-			final SlotDisplay.ResolutionContext resolutionContext,
-			final boolean bl
+			final int i, final int j, final RecipeDisplayId recipeDisplayId, final RecipeDisplay recipeDisplay, final ContextMap contextMap, final boolean bl
 		) {
-			super(i, j, recipeDisplayId, bl, calculateIngredientsPositions(recipeDisplay, resolutionContext));
+			super(i, j, recipeDisplayId, bl, calculateIngredientsPositions(recipeDisplay, contextMap));
 		}
 
-		private static List<OverlayRecipeComponent.OverlayRecipeButton.Pos> calculateIngredientsPositions(
-			RecipeDisplay recipeDisplay, SlotDisplay.ResolutionContext resolutionContext
-		) {
+		private static List<OverlayRecipeComponent.OverlayRecipeButton.Pos> calculateIngredientsPositions(RecipeDisplay recipeDisplay, ContextMap contextMap) {
 			if (recipeDisplay instanceof FurnaceRecipeDisplay furnaceRecipeDisplay) {
-				List<ItemStack> list = furnaceRecipeDisplay.ingredient().resolveForStacks(resolutionContext);
+				List<ItemStack> list = furnaceRecipeDisplay.ingredient().resolveForStacks(contextMap);
 				if (!list.isEmpty()) {
 					return List.of(createGridPos(1, 1, list));
 				}

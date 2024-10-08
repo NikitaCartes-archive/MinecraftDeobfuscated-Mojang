@@ -18,7 +18,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.CrashReportDetail;
-import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.NarratorStatus;
@@ -431,15 +430,9 @@ public abstract class Screen extends AbstractContainerEventHandler implements Re
 		this.repositionElements();
 	}
 
-	public static void wrapScreenError(Runnable runnable, String string, String string2) {
-		try {
-			runnable.run();
-		} catch (Throwable var6) {
-			CrashReport crashReport = CrashReport.forThrowable(var6, string);
-			CrashReportCategory crashReportCategory = crashReport.addCategory("Affected screen");
-			crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> string2));
-			throw new ReportedException(crashReport);
-		}
+	public void fillCrashDetails(CrashReport crashReport) {
+		CrashReportCategory crashReportCategory = crashReport.addCategory("Affected screen", 1);
+		crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.getClass().getCanonicalName()));
 	}
 
 	protected boolean isValidCharacterForName(String string, char c, int i) {

@@ -25,11 +25,11 @@ public class SmeltingRecipe extends AbstractCookingRecipe {
 	}
 
 	@Override
-	public BasicRecipeBookCategory recipeBookCategory() {
+	public RecipeBookCategory recipeBookCategory() {
 		return switch (this.category()) {
-			case BLOCKS -> BasicRecipeBookCategory.FURNACE_BLOCKS;
-			case FOOD -> BasicRecipeBookCategory.FURNACE_FOOD;
-			case MISC -> BasicRecipeBookCategory.FURNACE_MISC;
+			case BLOCKS -> RecipeBookCategories.FURNACE_BLOCKS;
+			case FOOD -> RecipeBookCategories.FURNACE_FOOD;
+			case MISC -> RecipeBookCategories.FURNACE_MISC;
 		};
 	}
 }

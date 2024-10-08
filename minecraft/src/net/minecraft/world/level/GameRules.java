@@ -93,6 +93,9 @@ public class GameRules {
 	public static final GameRules.Key<GameRules.IntegerValue> RULE_SPAWN_RADIUS = register(
 		"spawnRadius", GameRules.Category.PLAYER, GameRules.IntegerValue.create(10)
 	);
+	public static final GameRules.Key<GameRules.BooleanValue> RULE_DISABLE_PLAYER_MOVEMENT_CHECK = register(
+		"disablePlayerMovementCheck", GameRules.Category.PLAYER, GameRules.BooleanValue.create(false)
+	);
 	public static final GameRules.Key<GameRules.BooleanValue> RULE_DISABLE_ELYTRA_MOVEMENT_CHECK = register(
 		"disableElytraMovementCheck", GameRules.Category.PLAYER, GameRules.BooleanValue.create(false)
 	);

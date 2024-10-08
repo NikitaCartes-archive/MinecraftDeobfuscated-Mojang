@@ -5,8 +5,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Set;
 import net.minecraft.util.Mth;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 
 public record UniformGenerator(NumberProvider min, NumberProvider max) implements NumberProvider {
 	public static final MapCodec<UniformGenerator> CODEC = RecordCodecBuilder.mapCodec(
@@ -36,7 +36,7 @@ public record UniformGenerator(NumberProvider min, NumberProvider max) implement
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return Sets.<LootContextParam<?>>union(this.min.getReferencedContextParams(), this.max.getReferencedContextParams());
+	public Set<ContextKey<?>> getReferencedContextParams() {
+		return Sets.<ContextKey<?>>union(this.min.getReferencedContextParams(), this.max.getReferencedContextParams());
 	}
 }

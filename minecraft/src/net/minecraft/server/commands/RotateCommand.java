@@ -16,6 +16,7 @@ public class RotateCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> commandDispatcher) {
 		commandDispatcher.register(
 			Commands.literal("rotate")
+				.requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 				.then(
 					Commands.argument("target", EntityArgument.entity())
 						.then(

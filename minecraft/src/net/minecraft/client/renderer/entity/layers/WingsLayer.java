@@ -9,7 +9,6 @@ import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.entity.state.PlayerRenderState;
@@ -44,17 +43,7 @@ public class WingsLayer<S extends HumanoidRenderState, M extends EntityModel<S>>
 			poseStack.translate(0.0F, 0.0F, 0.125F);
 			elytraModel.setupAnim(humanoidRenderState);
 			this.equipmentRenderer
-				.renderLayers(
-					EquipmentModel.LayerType.WINGS,
-					resourceLocation2,
-					elytraModel,
-					itemStack,
-					RenderType::armorCutoutNoCull,
-					poseStack,
-					multiBufferSource,
-					i,
-					resourceLocation
-				);
+				.renderLayers(EquipmentModel.LayerType.WINGS, resourceLocation2, elytraModel, itemStack, poseStack, multiBufferSource, i, resourceLocation);
 			poseStack.popPose();
 		}
 	}

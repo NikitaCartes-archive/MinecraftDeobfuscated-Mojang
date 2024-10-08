@@ -892,6 +892,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	public void emergencySaveAndCrash(CrashReport crashReport) {
+		MemoryReserve.release();
 		CrashReport crashReport2 = this.fillReport(crashReport);
 		this.emergencySave();
 		crash(this, this.gameDirectory, crashReport2);
@@ -1362,13 +1363,9 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	}
 
 	private void emergencySave() {
-		try {
-			MemoryReserve.release();
-		} catch (Throwable var3) {
-		}
+		MemoryReserve.release();
 
 		try {
-			System.gc();
 			if (this.isLocalServer && this.singleplayerServer != null) {
 				this.singleplayerServer.halt(true);
 			}
@@ -1698,7 +1695,13 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 		}
 
 		if (this.screen != null) {
-			Screen.wrapScreenError(() -> this.screen.tick(), "Ticking screen", this.screen.getClass().getCanonicalName());
+			try {
+				this.screen.tick();
+			} catch (Throwable var5) {
+				CrashReport crashReport = CrashReport.forThrowable(var5, "Ticking screen");
+				this.screen.fillCrashDetails(crashReport);
+				throw new ReportedException(crashReport);
+			}
 		}
 
 		if (!this.getDebugOverlay().showDebugScreen()) {
@@ -1752,8 +1755,8 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 				try {
 					this.level.tick(() -> true);
-				} catch (Throwable var5) {
-					CrashReport crashReport = CrashReport.forThrowable(var5, "Exception in world tick");
+				} catch (Throwable var6) {
+					CrashReport crashReport = CrashReport.forThrowable(var6, "Exception in world tick");
 					if (this.level == null) {
 						CrashReportCategory crashReportCategory = crashReport.addCategory("Affected level");
 						crashReportCategory.setDetail("Problem", "Level is null!");
@@ -2258,17 +2261,23 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 
 	public CrashReport fillReport(CrashReport crashReport) {
 		SystemReport systemReport = crashReport.getSystemReport();
-		fillSystemReport(systemReport, this, this.languageManager, this.launchedVersion, this.options);
-		this.fillUptime(crashReport.addCategory("Uptime"));
-		if (this.level != null) {
-			this.level.fillReportDetails(crashReport);
+
+		try {
+			fillSystemReport(systemReport, this, this.languageManager, this.launchedVersion, this.options);
+			this.fillUptime(crashReport.addCategory("Uptime"));
+			if (this.level != null) {
+				this.level.fillReportDetails(crashReport);
+			}
+
+			if (this.singleplayerServer != null) {
+				this.singleplayerServer.fillSystemReport(systemReport);
+			}
+
+			this.reloadStateTracker.fillCrashReport(crashReport);
+		} catch (Throwable var4) {
+			LOGGER.error("Failed to collect details", var4);
 		}
 
-		if (this.singleplayerServer != null) {
-			this.singleplayerServer.fillSystemReport(systemReport);
-		}
-
-		this.reloadStateTracker.fillCrashReport(crashReport);
 		return crashReport;
 	}
 

@@ -38,6 +38,22 @@ import org.slf4j.Logger;
 
 public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> implements RecipeAccess {
 	private static final Logger LOGGER = LogUtils.getLogger();
+	private static final Map<ResourceKey<RecipePropertySet>, RecipeManager.IngredientExtractor> RECIPE_PROPERTY_SETS = Map.of(
+		RecipePropertySet.SMITHING_ADDITION,
+		(RecipeManager.IngredientExtractor)recipe -> recipe instanceof SmithingRecipe smithingRecipe ? smithingRecipe.additionIngredient() : Optional.empty(),
+		RecipePropertySet.SMITHING_BASE,
+		(RecipeManager.IngredientExtractor)recipe -> recipe instanceof SmithingRecipe smithingRecipe ? smithingRecipe.baseIngredient() : Optional.empty(),
+		RecipePropertySet.SMITHING_TEMPLATE,
+		(RecipeManager.IngredientExtractor)recipe -> recipe instanceof SmithingRecipe smithingRecipe ? smithingRecipe.templateIngredient() : Optional.empty(),
+		RecipePropertySet.FURNACE_INPUT,
+		forSingleInput(RecipeType.SMELTING),
+		RecipePropertySet.BLAST_FURNACE_INPUT,
+		forSingleInput(RecipeType.BLASTING),
+		RecipePropertySet.SMOKER_INPUT,
+		forSingleInput(RecipeType.SMOKING),
+		RecipePropertySet.CAMPFIRE_INPUT,
+		forSingleInput(RecipeType.CAMPFIRE_COOKING)
+	);
 	private final HolderLookup.Provider registries;
 	private RecipeMap recipes = RecipeMap.EMPTY;
 	private Map<ResourceKey<RecipePropertySet>, RecipePropertySet> propertySets = Map.of();
@@ -69,14 +85,11 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
 	}
 
 	public void finalizeRecipeLoading(FeatureFlagSet featureFlagSet) {
-		List<Ingredient> list = new ArrayList();
-		List<Ingredient> list2 = new ArrayList();
-		List<Ingredient> list3 = new ArrayList();
-		List<Ingredient> list4 = new ArrayList();
-		List<Ingredient> list5 = new ArrayList();
-		List<Ingredient> list6 = new ArrayList();
-		List<Ingredient> list7 = new ArrayList();
-		List<SelectableRecipe.SingleInputEntry<StonecutterRecipe>> list8 = new ArrayList();
+		List<SelectableRecipe.SingleInputEntry<StonecutterRecipe>> list = new ArrayList();
+		List<RecipeManager.IngredientCollector> list2 = RECIPE_PROPERTY_SETS.entrySet()
+			.stream()
+			.map(entry -> new RecipeManager.IngredientCollector((ResourceKey<RecipePropertySet>)entry.getKey(), (RecipeManager.IngredientExtractor)entry.getValue()))
+			.toList();
 		this.recipes
 			.values()
 			.forEach(
@@ -85,58 +98,29 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
 					if (!recipe.isSpecial() && recipe.placementInfo().isImpossibleToPlace()) {
 						LOGGER.warn("Recipe {} can't be placed due to empty ingredients and will be ignored", recipeHolder.id().location());
 					} else {
-						if (recipe instanceof SmithingRecipe smithingRecipe) {
-							smithingRecipe.additionIngredient().ifPresent(list3::add);
-							smithingRecipe.baseIngredient().ifPresent(list2::add);
-							smithingRecipe.templateIngredient().ifPresent(list::add);
-						}
-
-						if (recipe instanceof AbstractCookingRecipe abstractCookingRecipe) {
-							if (abstractCookingRecipe.getType() == RecipeType.SMELTING) {
-								list4.add(abstractCookingRecipe.input());
-							} else if (abstractCookingRecipe.getType() == RecipeType.BLASTING) {
-								list5.add(abstractCookingRecipe.input());
-							} else if (abstractCookingRecipe.getType() == RecipeType.SMOKING) {
-								list6.add(abstractCookingRecipe.input());
-							} else if (abstractCookingRecipe.getType() == RecipeType.CAMPFIRE_COOKING) {
-								list7.add(abstractCookingRecipe.input());
-							}
-						}
-
+						list2.forEach(ingredientCollector -> ingredientCollector.accept(recipe));
 						if (recipe instanceof StonecutterRecipe stonecutterRecipe
 							&& isIngredientEnabled(featureFlagSet, stonecutterRecipe.input())
 							&& stonecutterRecipe.resultDisplay().isEnabled(featureFlagSet)) {
-							list8.add(
+							list.add(
 								new SelectableRecipe.SingleInputEntry(stonecutterRecipe.input(), new SelectableRecipe(stonecutterRecipe.resultDisplay(), Optional.of(recipeHolder)))
 							);
 						}
 					}
 				}
 			);
-		this.propertySets = Map.of(
-			RecipePropertySet.SMITHING_ADDITION,
-			RecipePropertySet.create(filterDisabled(featureFlagSet, list3)),
-			RecipePropertySet.SMITHING_BASE,
-			RecipePropertySet.create(filterDisabled(featureFlagSet, list2)),
-			RecipePropertySet.SMITHING_TEMPLATE,
-			RecipePropertySet.create(filterDisabled(featureFlagSet, list)),
-			RecipePropertySet.FURNACE_INPUT,
-			RecipePropertySet.create(filterDisabled(featureFlagSet, list4)),
-			RecipePropertySet.BLAST_FURNACE_INPUT,
-			RecipePropertySet.create(filterDisabled(featureFlagSet, list5)),
-			RecipePropertySet.SMOKER_INPUT,
-			RecipePropertySet.create(filterDisabled(featureFlagSet, list6)),
-			RecipePropertySet.CAMPFIRE_INPUT,
-			RecipePropertySet.create(filterDisabled(featureFlagSet, list7))
-		);
-		this.stonecutterRecipes = new SelectableRecipe.SingleInputSet<>(list8);
+		this.propertySets = (Map<ResourceKey<RecipePropertySet>, RecipePropertySet>)list2.stream()
+			.collect(
+				Collectors.toUnmodifiableMap(ingredientCollector -> ingredientCollector.key, ingredientCollector -> ingredientCollector.asPropertySet(featureFlagSet))
+			);
+		this.stonecutterRecipes = new SelectableRecipe.SingleInputSet<>(list);
 		this.allDisplays = unpackRecipeInfo(this.recipes.values(), featureFlagSet);
 		this.recipeToDisplay = (Map<ResourceKey<Recipe<?>>, List<RecipeManager.ServerDisplayInfo>>)this.allDisplays
 			.stream()
 			.collect(Collectors.groupingBy(serverDisplayInfo -> serverDisplayInfo.parent.id(), IdentityHashMap::new, Collectors.toList()));
 	}
 
-	private static List<Ingredient> filterDisabled(FeatureFlagSet featureFlagSet, List<Ingredient> list) {
+	static List<Ingredient> filterDisabled(FeatureFlagSet featureFlagSet, List<Ingredient> list) {
 		list.removeIf(ingredient -> !isIngredientEnabled(featureFlagSet, ingredient));
 		return list;
 	}
@@ -202,7 +186,10 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
 	}
 
 	public void listDisplaysForRecipe(ResourceKey<Recipe<?>> resourceKey, Consumer<RecipeDisplayEntry> consumer) {
-		((List)this.recipeToDisplay.get(resourceKey)).forEach(serverDisplayInfo -> consumer.accept(serverDisplayInfo.display));
+		List<RecipeManager.ServerDisplayInfo> list = (List<RecipeManager.ServerDisplayInfo>)this.recipeToDisplay.get(resourceKey);
+		if (list != null) {
+			list.forEach(serverDisplayInfo -> consumer.accept(serverDisplayInfo.display));
+		}
 	}
 
 	@VisibleForTesting
@@ -264,8 +251,38 @@ public class RecipeManager extends SimplePreparableReloadListener<RecipeMap> imp
 		return list;
 	}
 
+	private static RecipeManager.IngredientExtractor forSingleInput(RecipeType<? extends SingleItemRecipe> recipeType) {
+		return recipe -> recipe.getType() == recipeType && recipe instanceof SingleItemRecipe singleItemRecipe
+				? Optional.of(singleItemRecipe.input())
+				: Optional.empty();
+	}
+
 	public interface CachedCheck<I extends RecipeInput, T extends Recipe<I>> {
 		Optional<RecipeHolder<T>> getRecipeFor(I recipeInput, ServerLevel serverLevel);
+	}
+
+	public static class IngredientCollector implements Consumer<Recipe<?>> {
+		final ResourceKey<RecipePropertySet> key;
+		private final RecipeManager.IngredientExtractor extractor;
+		private final List<Ingredient> ingredients = new ArrayList();
+
+		protected IngredientCollector(ResourceKey<RecipePropertySet> resourceKey, RecipeManager.IngredientExtractor ingredientExtractor) {
+			this.key = resourceKey;
+			this.extractor = ingredientExtractor;
+		}
+
+		public void accept(Recipe<?> recipe) {
+			this.extractor.apply(recipe).ifPresent(this.ingredients::add);
+		}
+
+		public RecipePropertySet asPropertySet(FeatureFlagSet featureFlagSet) {
+			return RecipePropertySet.create(RecipeManager.filterDisabled(featureFlagSet, this.ingredients));
+		}
+	}
+
+	@FunctionalInterface
+	public interface IngredientExtractor {
+		Optional<Ingredient> apply(Recipe<?> recipe);
 	}
 
 	public static record ServerDisplayInfo(RecipeDisplayEntry display, RecipeHolder<?> parent) {

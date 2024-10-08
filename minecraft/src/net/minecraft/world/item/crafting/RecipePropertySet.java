@@ -24,7 +24,7 @@ public class RecipePropertySet {
 	public static final ResourceKey<RecipePropertySet> SMITHING_ADDITION = registerVanilla("smithing_addition");
 	public static final ResourceKey<RecipePropertySet> FURNACE_INPUT = registerVanilla("furnace_input");
 	public static final ResourceKey<RecipePropertySet> BLAST_FURNACE_INPUT = registerVanilla("blast_furnace_input");
-	public static final ResourceKey<RecipePropertySet> SMOKER_INPUT = registerVanilla("smelter_input");
+	public static final ResourceKey<RecipePropertySet> SMOKER_INPUT = registerVanilla("smoker_input");
 	public static final ResourceKey<RecipePropertySet> CAMPFIRE_INPUT = registerVanilla("campfire_input");
 	public static final StreamCodec<RegistryFriendlyByteBuf, RecipePropertySet> STREAM_CODEC = ByteBufCodecs.holderRegistry(Registries.ITEM)
 		.apply(ByteBufCodecs.list())

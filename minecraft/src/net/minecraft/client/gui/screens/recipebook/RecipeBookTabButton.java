@@ -10,7 +10,7 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeBookCategory;
+import net.minecraft.world.item.crafting.ExtendedRecipeBookCategory;
 import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 
 @Environment(EnvType.CLIENT)
@@ -77,7 +77,7 @@ public class RecipeBookTabButton extends StateSwitchingButton {
 		}
 	}
 
-	public RecipeBookCategory getCategory() {
+	public ExtendedRecipeBookCategory getCategory() {
 		return this.tabInfo.category();
 	}
 

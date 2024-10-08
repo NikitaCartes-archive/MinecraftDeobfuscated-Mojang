@@ -7,6 +7,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -36,8 +37,8 @@ import net.minecraft.network.chat.numbers.NumberFormat;
 import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -48,6 +49,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PlayerRideableJumping;
@@ -55,6 +57,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -104,13 +107,13 @@ public class Gui {
 	private static final ResourceLocation FOOD_HALF_SPRITE = ResourceLocation.withDefaultNamespace("hud/food_half");
 	private static final ResourceLocation FOOD_FULL_SPRITE = ResourceLocation.withDefaultNamespace("hud/food_full");
 	private static final ResourceLocation AIR_SPRITE = ResourceLocation.withDefaultNamespace("hud/air");
-	private static final ResourceLocation AIR_BURSTING_SPRITE = ResourceLocation.withDefaultNamespace("hud/air_bursting");
+	private static final ResourceLocation AIR_POPPING_SPRITE = ResourceLocation.withDefaultNamespace("hud/air_bursting");
+	private static final ResourceLocation AIR_EMPTY_SPRITE = ResourceLocation.withDefaultNamespace("hud/air_empty");
 	private static final ResourceLocation HEART_VEHICLE_CONTAINER_SPRITE = ResourceLocation.withDefaultNamespace("hud/heart/vehicle_container");
 	private static final ResourceLocation HEART_VEHICLE_FULL_SPRITE = ResourceLocation.withDefaultNamespace("hud/heart/vehicle_full");
 	private static final ResourceLocation HEART_VEHICLE_HALF_SPRITE = ResourceLocation.withDefaultNamespace("hud/heart/vehicle_half");
 	private static final ResourceLocation VIGNETTE_LOCATION = ResourceLocation.withDefaultNamespace("textures/misc/vignette.png");
 	public static final ResourceLocation NAUSEA_LOCATION = ResourceLocation.withDefaultNamespace("textures/misc/nausea.png");
-	private static final ResourceLocation PUMPKIN_BLUR_LOCATION = ResourceLocation.withDefaultNamespace("textures/misc/pumpkinblur.png");
 	private static final ResourceLocation SPYGLASS_SCOPE_LOCATION = ResourceLocation.withDefaultNamespace("textures/misc/spyglass_scope.png");
 	private static final ResourceLocation POWDER_SNOW_OUTLINE_LOCATION = ResourceLocation.withDefaultNamespace("textures/misc/powder_snow_outline.png");
 	private static final Comparator<PlayerScoreEntry> SCORE_DISPLAY_ORDER = Comparator.comparing(PlayerScoreEntry::value)
@@ -125,6 +128,17 @@ public class Gui {
 	private static final float PORTAL_OVERLAY_ALPHA_MIN = 0.2F;
 	private static final int HEART_SIZE = 9;
 	private static final int HEART_SEPARATION = 8;
+	private static final int NUM_AIR_BUBBLES = 10;
+	private static final int AIR_BUBBLE_SIZE = 9;
+	private static final int AIR_BUBBLE_SEPERATION = 8;
+	private static final int AIR_BUBBLE_POPPING_DURATION = 2;
+	private static final int EMPTY_AIR_BUBBLE_DELAY_DURATION = 4;
+	private static final float AIR_BUBBLE_POP_SOUND_VOLUME_BASE = 0.5F;
+	private static final float AIR_BUBBLE_POP_SOUND_VOLUME_INCREMENT = 0.1F;
+	private static final float AIR_BUBBLE_POP_SOUND_PITCH_BASE = 1.0F;
+	private static final float AIR_BUBBLE_POP_SOUND_PITCH_INCREMENT = 0.1F;
+	private static final int NUM_AIR_BUBBLE_POPPED_BEFORE_SOUND_VOLUME_INCREASE = 3;
+	private static final int NUM_AIR_BUBBLE_POPPED_BEFORE_SOUND_PITCH_INCREASE = 5;
 	private static final float AUTOSAVE_FADE_SPEED_FACTOR = 0.2F;
 	private static final int SAVING_INDICATOR_WIDTH_PADDING_RIGHT = 5;
 	private static final int SAVING_INDICATOR_HEIGHT_PADDING_BOTTOM = 5;
@@ -157,6 +171,7 @@ public class Gui {
 	private int displayHealth;
 	private long lastHealthTime;
 	private long healthBlinkTime;
+	private int lastBubblePopSoundPlayed;
 	private float autosaveIndicatorValue;
 	private float lastAutosaveIndicatorValue;
 	private final LayeredDraw layers = new LayeredDraw();
@@ -216,9 +231,15 @@ public class Gui {
 				this.renderSpyglassOverlay(guiGraphics, this.scopeScale);
 			} else {
 				this.scopeScale = 0.5F;
-				ItemStack itemStack = this.minecraft.player.getInventory().getArmor(3);
-				if (itemStack.is(ItemTags.GAZE_DISGUISE_EQUIPMENT)) {
-					this.renderTextureOverlay(guiGraphics, PUMPKIN_BLUR_LOCATION, 1.0F);
+
+				for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+					ItemStack itemStack = this.minecraft.player.getItemBySlot(equipmentSlot);
+					Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
+					if (equippable != null && equippable.slot() == equipmentSlot && equippable.cameraOverlay().isPresent()) {
+						this.renderTextureOverlay(
+							guiGraphics, ((ResourceLocation)equippable.cameraOverlay().get()).withPath((UnaryOperator<String>)(string -> "textures/" + string + ".png")), 1.0F
+						);
+					}
 				}
 			}
 		}
@@ -800,23 +821,7 @@ public class Gui {
 			}
 
 			Profiler.get().popPush("air");
-			int u = player.getMaxAirSupply();
-			int v = Math.min(player.getAirSupply(), u);
-			if (player.isEyeInFluid(FluidTags.WATER) || v < u) {
-				int w = this.getVisibleVehicleHeartRows(t) - 1;
-				r -= w * 10;
-				int x = Mth.ceil((double)(v - 2) * 10.0 / (double)u);
-				int y = Mth.ceil((double)v * 10.0 / (double)u) - x;
-
-				for (int z = 0; z < x + y; z++) {
-					if (z < x) {
-						guiGraphics.blitSprite(RenderType::guiTextured, AIR_SPRITE, m - z * 8 - 9, r, 9, 9);
-					} else {
-						guiGraphics.blitSprite(RenderType::guiTextured, AIR_BURSTING_SPRITE, m - z * 8 - 9, r, 9, 9);
-					}
-				}
-			}
-
+			this.renderAirBubbles(guiGraphics, player, t, r, m);
 			Profiler.get().pop();
 		}
 	}
@@ -888,6 +893,57 @@ public class Gui {
 
 	private void renderHeart(GuiGraphics guiGraphics, Gui.HeartType heartType, int i, int j, boolean bl, boolean bl2, boolean bl3) {
 		guiGraphics.blitSprite(RenderType::guiTextured, heartType.getSprite(bl, bl3, bl2), i, j, 9, 9);
+	}
+
+	private void renderAirBubbles(GuiGraphics guiGraphics, Player player, int i, int j, int k) {
+		int l = player.getMaxAirSupply();
+		int m = Math.clamp((long)player.getAirSupply(), 0, l);
+		boolean bl = player.isEyeInFluid(FluidTags.WATER);
+		if (bl || m < l) {
+			j = this.getAirBubbleYLine(i, j);
+			int n = getCurrentAirSupplyBubble(m, l, -2);
+			int o = getCurrentAirSupplyBubble(m, l, 0);
+			int p = 10 - getCurrentAirSupplyBubble(m, l, getEmptyBubbleDelayDuration(m, bl));
+			boolean bl2 = n != o;
+			if (!bl) {
+				this.lastBubblePopSoundPlayed = 0;
+			}
+
+			for (int q = 1; q <= 10; q++) {
+				int r = k - (q - 1) * 8 - 9;
+				if (q <= n) {
+					guiGraphics.blitSprite(RenderType::guiTextured, AIR_SPRITE, r, j, 9, 9);
+				} else if (bl2 && q == o && bl) {
+					guiGraphics.blitSprite(RenderType::guiTextured, AIR_POPPING_SPRITE, r, j, 9, 9);
+					this.playAirBubblePoppedSound(q, player, p);
+				} else if (q > 10 - p) {
+					int s = p == 10 && this.tickCount % 2 == 0 ? this.random.nextInt(2) : 0;
+					guiGraphics.blitSprite(RenderType::guiTextured, AIR_EMPTY_SPRITE, r, j + s, 9, 9);
+				}
+			}
+		}
+	}
+
+	private int getAirBubbleYLine(int i, int j) {
+		int k = this.getVisibleVehicleHeartRows(i) - 1;
+		return j - k * 10;
+	}
+
+	private static int getCurrentAirSupplyBubble(int i, int j, int k) {
+		return Mth.ceil((float)((i + k) * 10) / (float)j);
+	}
+
+	private static int getEmptyBubbleDelayDuration(int i, boolean bl) {
+		return i != 0 && bl ? 4 : 0;
+	}
+
+	private void playAirBubblePoppedSound(int i, Player player, int j) {
+		if (this.lastBubblePopSoundPlayed != i) {
+			float f = 0.5F + 0.1F * (float)Math.max(0, j - 3 + 1);
+			float g = 1.0F + 0.1F * (float)Math.max(0, j - 5 + 1);
+			player.playSound(SoundEvents.BUBBLE_POP, f, g);
+			this.lastBubblePopSoundPlayed = i;
+		}
 	}
 
 	private void renderFood(GuiGraphics guiGraphics, Player player, int i, int j) {

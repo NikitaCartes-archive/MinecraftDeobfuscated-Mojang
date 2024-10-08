@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.FurnaceMenu;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.BasicRecipeBookCategory;
+import net.minecraft.world.item.crafting.RecipeBookCategories;
 
 @Environment(EnvType.CLIENT)
 public class FurnaceScreen extends AbstractFurnaceScreen<FurnaceMenu> {
@@ -20,9 +20,9 @@ public class FurnaceScreen extends AbstractFurnaceScreen<FurnaceMenu> {
 	private static final Component FILTER_NAME = Component.translatable("gui.recipebook.toggleRecipes.smeltable");
 	private static final List<RecipeBookComponent.TabInfo> TABS = List.of(
 		new RecipeBookComponent.TabInfo(SearchRecipeBookCategory.FURNACE),
-		new RecipeBookComponent.TabInfo(Items.PORKCHOP, BasicRecipeBookCategory.FURNACE_FOOD),
-		new RecipeBookComponent.TabInfo(Items.STONE, BasicRecipeBookCategory.FURNACE_BLOCKS),
-		new RecipeBookComponent.TabInfo(Items.LAVA_BUCKET, Items.EMERALD, BasicRecipeBookCategory.FURNACE_MISC)
+		new RecipeBookComponent.TabInfo(Items.PORKCHOP, RecipeBookCategories.FURNACE_FOOD),
+		new RecipeBookComponent.TabInfo(Items.STONE, RecipeBookCategories.FURNACE_BLOCKS),
+		new RecipeBookComponent.TabInfo(Items.LAVA_BUCKET, Items.EMERALD, RecipeBookCategories.FURNACE_MISC)
 	);
 
 	public FurnaceScreen(FurnaceMenu furnaceMenu, Inventory inventory, Component component) {

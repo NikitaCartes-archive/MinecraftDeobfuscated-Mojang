@@ -79,7 +79,7 @@ public class ServerRecipeBook extends RecipeBook {
 		}
 
 		if (!list.isEmpty()) {
-			serverPlayer.connection.send(new ClientboundRecipeBookAddPacket(list));
+			serverPlayer.connection.send(new ClientboundRecipeBookAddPacket(list, false));
 		}
 
 		return list.size();
@@ -159,7 +159,7 @@ public class ServerRecipeBook extends RecipeBook {
 				);
 		}
 
-		serverPlayer.connection.send(new ClientboundRecipeBookAddPacket(list));
+		serverPlayer.connection.send(new ClientboundRecipeBookAddPacket(list, true));
 	}
 
 	public void copyOverData(ServerRecipeBook serverRecipeBook) {

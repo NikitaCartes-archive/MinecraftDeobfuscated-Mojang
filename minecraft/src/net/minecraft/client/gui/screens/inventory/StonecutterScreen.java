@@ -10,11 +10,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.StonecutterMenu;
 import net.minecraft.world.item.crafting.SelectableRecipe;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 
 @Environment(EnvType.CLIENT)
 public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> {
@@ -79,9 +81,9 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 				int p = k + o % 4 * 16;
 				int q = l + o / 4 * 18 + 2;
 				if (i >= p && i < p + 16 && j >= q && j < q + 18) {
-					SlotDisplay.ResolutionContext resolutionContext = SlotDisplay.ResolutionContext.forLevel(this.minecraft.level);
+					ContextMap contextMap = SlotDisplayContext.fromLevel(this.minecraft.level);
 					SlotDisplay slotDisplay = ((SelectableRecipe.SingleInputEntry)singleInputSet.entries().get(n)).recipe().optionDisplay();
-					guiGraphics.renderTooltip(this.font, slotDisplay.resolveForFirstStack(resolutionContext), i, j);
+					guiGraphics.renderTooltip(this.font, slotDisplay.resolveForFirstStack(contextMap), i, j);
 				}
 			}
 		}
@@ -108,7 +110,7 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 
 	private void renderRecipes(GuiGraphics guiGraphics, int i, int j, int k) {
 		SelectableRecipe.SingleInputSet<StonecutterRecipe> singleInputSet = this.menu.getVisibleRecipes();
-		SlotDisplay.ResolutionContext resolutionContext = SlotDisplay.ResolutionContext.forLevel(this.minecraft.level);
+		ContextMap contextMap = SlotDisplayContext.fromLevel(this.minecraft.level);
 
 		for (int l = this.startIndex; l < k && l < singleInputSet.size(); l++) {
 			int m = l - this.startIndex;
@@ -116,7 +118,7 @@ public class StonecutterScreen extends AbstractContainerScreen<StonecutterMenu> 
 			int o = m / 4;
 			int p = j + o * 18 + 2;
 			SlotDisplay slotDisplay = ((SelectableRecipe.SingleInputEntry)singleInputSet.entries().get(l)).recipe().optionDisplay();
-			guiGraphics.renderItem(slotDisplay.resolveForFirstStack(resolutionContext), n, p);
+			guiGraphics.renderItem(slotDisplay.resolveForFirstStack(contextMap), n, p);
 		}
 	}
 

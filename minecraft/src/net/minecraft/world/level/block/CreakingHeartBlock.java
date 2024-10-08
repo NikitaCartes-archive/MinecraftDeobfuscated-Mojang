@@ -68,14 +68,7 @@ public class CreakingHeartBlock extends BaseEntityBlock {
 			if (blockState.getValue(CREAKING) != CreakingHeartBlock.CreakingHeartState.DISABLED) {
 				if (randomSource.nextInt(16) == 0 && isSurroundedByLogs(level, blockPos)) {
 					level.playLocalSound(
-						(double)(blockPos.getX() + level.random.nextIntBetweenInclusive(-16, 16)),
-						(double)(blockPos.getY() + level.random.nextIntBetweenInclusive(-14, 2)),
-						(double)(blockPos.getZ() + level.random.nextIntBetweenInclusive(-16, 16)),
-						SoundEvents.CREAKING_HEART_IDLE,
-						SoundSource.BLOCKS,
-						1.0F,
-						1.0F,
-						false
+						(double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), SoundEvents.CREAKING_HEART_IDLE, SoundSource.BLOCKS, 1.0F, 1.0F, false
 					);
 				}
 			}
@@ -122,7 +115,7 @@ public class CreakingHeartBlock extends BaseEntityBlock {
 		for (Direction direction : Direction.values()) {
 			BlockPos blockPos2 = blockPos.relative(direction);
 			BlockState blockState = levelAccessor.getBlockState(blockPos2);
-			if (!blockState.is(BlockTags.LOGS)) {
+			if (!blockState.is(BlockTags.PALE_OAK_LOGS)) {
 				return false;
 			}
 		}
@@ -169,6 +162,20 @@ public class CreakingHeartBlock extends BaseEntityBlock {
 		}
 
 		return super.playerWillDestroy(level, blockPos, blockState, player);
+	}
+
+	@Override
+	protected boolean hasAnalogOutputSignal(BlockState blockState) {
+		return true;
+	}
+
+	@Override
+	protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos blockPos) {
+		if (blockState.getValue(CREAKING) != CreakingHeartBlock.CreakingHeartState.ACTIVE) {
+			return 0;
+		} else {
+			return level.getBlockEntity(blockPos) instanceof CreakingHeartBlockEntity creakingHeartBlockEntity ? creakingHeartBlockEntity.getAnalogOutputSignal() : 0;
+		}
 	}
 
 	public static enum CreakingHeartState implements StringRepresentable {

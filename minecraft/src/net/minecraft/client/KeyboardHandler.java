@@ -18,7 +18,6 @@ import net.minecraft.ReportedException;
 import net.minecraft.Util;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.debug.GameModeSwitcherScreen;
@@ -422,34 +421,42 @@ public class KeyboardHandler {
 			}
 
 			if (screen != null) {
-				boolean[] bls = new boolean[]{false};
-				Screen.wrapScreenError(() -> {
-					if (k == 1 || k == 2) {
+				try {
+					if (k != 1 && k != 2) {
+						if (k == 0 && screen.keyReleased(i, j, m)) {
+							return;
+						}
+					} else {
 						screen.afterKeyboardAction();
-						bls[0] = screen.keyPressed(i, j, m);
-					} else if (k == 0) {
-						bls[0] = screen.keyReleased(i, j, m);
+						if (screen.keyPressed(i, j, m)) {
+							return;
+						}
 					}
-				}, "keyPressed event handler", screen.getClass().getCanonicalName());
-				if (bls[0]) {
-					return;
+				} catch (Throwable var14) {
+					CrashReport crashReport = CrashReport.forThrowable(var14, "keyPressed event handler");
+					screen.fillCrashDetails(crashReport);
+					CrashReportCategory crashReportCategory = crashReport.addCategory("Key");
+					crashReportCategory.setDetail("Key", i);
+					crashReportCategory.setDetail("Scancode", j);
+					crashReportCategory.setDetail("Mods", m);
+					throw new ReportedException(crashReport);
 				}
 			}
 
 			InputConstants.Key key;
 			boolean bl3;
 			boolean var10000;
-			label180: {
+			label197: {
 				key = InputConstants.getKey(i, j);
 				bl3 = this.minecraft.screen == null;
-				label141:
+				label153:
 				if (!bl3) {
 					if (this.minecraft.screen instanceof PauseScreen pauseScreen && !pauseScreen.showsPauseMenu()) {
-						break label141;
+						break label153;
 					}
 
 					var10000 = false;
-					break label180;
+					break label197;
 				}
 
 				var10000 = true;
@@ -502,14 +509,22 @@ public class KeyboardHandler {
 
 	private void charTyped(long l, int i, int j) {
 		if (l == this.minecraft.getWindow().getWindow()) {
-			GuiEventListener guiEventListener = this.minecraft.screen;
-			if (guiEventListener != null && this.minecraft.getOverlay() == null) {
-				if (Character.charCount(i) == 1) {
-					Screen.wrapScreenError(() -> guiEventListener.charTyped((char)i, j), "charTyped event handler", guiEventListener.getClass().getCanonicalName());
-				} else {
-					for (char c : Character.toChars(i)) {
-						Screen.wrapScreenError(() -> guiEventListener.charTyped(c, j), "charTyped event handler", guiEventListener.getClass().getCanonicalName());
+			Screen screen = this.minecraft.screen;
+			if (screen != null && this.minecraft.getOverlay() == null) {
+				try {
+					if (Character.isBmpCodePoint(i)) {
+						screen.charTyped((char)i, j);
+					} else if (Character.isValidCodePoint(i)) {
+						screen.charTyped(Character.highSurrogate(i), j);
+						screen.charTyped(Character.lowSurrogate(i), j);
 					}
+				} catch (Throwable var9) {
+					CrashReport crashReport = CrashReport.forThrowable(var9, "charTyped event handler");
+					screen.fillCrashDetails(crashReport);
+					CrashReportCategory crashReportCategory = crashReport.addCategory("Key");
+					crashReportCategory.setDetail("Codepoint", i);
+					crashReportCategory.setDetail("Mods", j);
+					throw new ReportedException(crashReport);
 				}
 			}
 		}

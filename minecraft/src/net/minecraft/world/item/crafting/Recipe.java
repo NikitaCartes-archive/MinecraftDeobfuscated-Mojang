@@ -43,5 +43,5 @@ public interface Recipe<T extends RecipeInput> {
 		return List.of();
 	}
 
-	BasicRecipeBookCategory recipeBookCategory();
+	RecipeBookCategory recipeBookCategory();
 }

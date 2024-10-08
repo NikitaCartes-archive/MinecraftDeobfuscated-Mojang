@@ -34,7 +34,7 @@ public record LootDataType<T>(ResourceKey<Registry<T>> registryKey, Codec<T> cod
 
 	private static LootDataType.Validator<LootTable> createLootTableValidator() {
 		return (validationContext, resourceKey, lootTable) -> lootTable.validate(
-				validationContext.setParams(lootTable.getParamSet()).enterElement("{" + resourceKey.registry() + "/" + resourceKey.location() + "}", resourceKey)
+				validationContext.setContextKeySet(lootTable.getParamSet()).enterElement("{" + resourceKey.registry() + "/" + resourceKey.location() + "}", resourceKey)
 			);
 	}
 

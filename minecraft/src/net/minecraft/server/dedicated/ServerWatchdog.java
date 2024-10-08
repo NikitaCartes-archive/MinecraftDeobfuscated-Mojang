@@ -54,7 +54,7 @@ public class ServerWatchdog implements Runnable {
 				crashReportCategory.setDetail(
 					"Level stats",
 					(CrashReportDetail<String>)(() -> (String)Streams.stream(this.server.getAllLevels())
-							.map(serverLevel -> serverLevel.dimension() + ": " + serverLevel.getWatchdogStats())
+							.map(serverLevel -> serverLevel.dimension().location() + ": " + serverLevel.getWatchdogStats())
 							.collect(Collectors.joining(",\n")))
 				);
 				Bootstrap.realStdoutPrintln("Crash report:\n" + crashReport.getFriendlyReport(ReportType.CRASH));

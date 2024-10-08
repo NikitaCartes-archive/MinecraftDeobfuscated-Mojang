@@ -1,11 +1,10 @@
 package net.minecraft.world.level.storage.loot.predicates;
 
-import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.MapCodec;
 import java.util.Set;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class ExplosionCondition implements LootItemCondition {
@@ -21,12 +20,12 @@ public class ExplosionCondition implements LootItemCondition {
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return ImmutableSet.of(LootContextParams.EXPLOSION_RADIUS);
+	public Set<ContextKey<?>> getReferencedContextParams() {
+		return Set.of(LootContextParams.EXPLOSION_RADIUS);
 	}
 
 	public boolean test(LootContext lootContext) {
-		Float float_ = lootContext.getParamOrNull(LootContextParams.EXPLOSION_RADIUS);
+		Float float_ = lootContext.getOptionalParameter(LootContextParams.EXPLOSION_RADIUS);
 		if (float_ != null) {
 			RandomSource randomSource = lootContext.getRandom();
 			float f = 1.0F / float_;

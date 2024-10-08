@@ -1636,6 +1636,9 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	public void handleRecipeBookAdd(ClientboundRecipeBookAddPacket clientboundRecipeBookAddPacket) {
 		PacketUtils.ensureRunningOnSameThread(clientboundRecipeBookAddPacket, this, this.minecraft);
 		ClientRecipeBook clientRecipeBook = this.minecraft.player.getRecipeBook();
+		if (clientboundRecipeBookAddPacket.replace()) {
+			clientRecipeBook.clear();
+		}
 
 		for (ClientboundRecipeBookAddPacket.Entry entry : clientboundRecipeBookAddPacket.entries()) {
 			clientRecipeBook.add(entry.contents());

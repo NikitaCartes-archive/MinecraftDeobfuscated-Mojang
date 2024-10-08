@@ -24,7 +24,7 @@ public class StonecutterRecipe extends SingleItemRecipe {
 
 	@Override
 	public List<RecipeDisplay> display() {
-		return List.of(new StonecutterRecipeDisplay(this.resultDisplay(), new SlotDisplay.ItemSlotDisplay(Items.STONECUTTER)));
+		return List.of(new StonecutterRecipeDisplay(this.input().display(), this.resultDisplay(), new SlotDisplay.ItemSlotDisplay(Items.STONECUTTER)));
 	}
 
 	public SlotDisplay resultDisplay() {
@@ -32,7 +32,7 @@ public class StonecutterRecipe extends SingleItemRecipe {
 	}
 
 	@Override
-	public BasicRecipeBookCategory recipeBookCategory() {
-		return BasicRecipeBookCategory.STONECUTTER;
+	public RecipeBookCategory recipeBookCategory() {
+		return RecipeBookCategories.STONECUTTER;
 	}
 }

@@ -46,46 +46,48 @@ public class PaleMossDecorator extends TreeDecorator {
 		RandomSource randomSource = context.random();
 		WorldGenLevel worldGenLevel = (WorldGenLevel)context.level();
 		List<BlockPos> list = Util.shuffledCopy(context.logs(), randomSource);
-		Mutable<BlockPos> mutable = new MutableObject<>((BlockPos)list.getFirst());
-		list.forEach(blockPosx -> {
-			if (blockPosx.getY() < mutable.getValue().getY()) {
-				mutable.setValue(blockPosx);
+		if (!list.isEmpty()) {
+			Mutable<BlockPos> mutable = new MutableObject<>((BlockPos)list.getFirst());
+			list.forEach(blockPosx -> {
+				if (blockPosx.getY() < mutable.getValue().getY()) {
+					mutable.setValue(blockPosx);
+				}
+			});
+			BlockPos blockPos = mutable.getValue();
+			if (randomSource.nextFloat() < this.groundProbability) {
+				worldGenLevel.registryAccess()
+					.lookup(Registries.CONFIGURED_FEATURE)
+					.flatMap(registry -> registry.get(VegetationFeatures.PALE_MOSS_PATCH_BONEMEAL))
+					.ifPresent(
+						reference -> ((ConfiguredFeature)reference.value())
+								.place(worldGenLevel, worldGenLevel.getLevel().getChunkSource().getGenerator(), randomSource, blockPos.above())
+					);
 			}
-		});
-		BlockPos blockPos = mutable.getValue();
-		if (randomSource.nextFloat() < this.groundProbability) {
-			worldGenLevel.registryAccess()
-				.lookup(Registries.CONFIGURED_FEATURE)
-				.flatMap(registry -> registry.get(VegetationFeatures.PALE_MOSS_PATCH_BONEMEAL))
-				.ifPresent(
-					reference -> ((ConfiguredFeature)reference.value())
-							.place(worldGenLevel, worldGenLevel.getLevel().getChunkSource().getGenerator(), randomSource, blockPos.above())
-				);
+
+			context.logs().forEach(blockPosx -> {
+				if (randomSource.nextFloat() < this.trunkProbability) {
+					BlockPos blockPos2 = blockPosx.below();
+					if (context.isAir(blockPos2)) {
+						addMossHanger(blockPos2, context);
+					}
+				}
+
+				if (randomSource.nextFloat() < this.trunkProbability) {
+					BlockPos blockPos2 = blockPosx.above();
+					if (context.isAir(blockPos2)) {
+						MossyCarpetBlock.placeAt((WorldGenLevel)context.level(), blockPos2, context.random(), 3);
+					}
+				}
+			});
+			context.leaves().forEach(blockPosx -> {
+				if (randomSource.nextFloat() < this.leavesProbability) {
+					BlockPos blockPos2 = blockPosx.below();
+					if (context.isAir(blockPos2)) {
+						addMossHanger(blockPos2, context);
+					}
+				}
+			});
 		}
-
-		context.logs().forEach(blockPosx -> {
-			if (randomSource.nextFloat() < this.trunkProbability) {
-				BlockPos blockPos2 = blockPosx.below();
-				if (context.isAir(blockPos2)) {
-					addMossHanger(blockPos2, context);
-				}
-			}
-
-			if (randomSource.nextFloat() < this.trunkProbability) {
-				BlockPos blockPos2 = blockPosx.above();
-				if (context.isAir(blockPos2)) {
-					MossyCarpetBlock.placeAt((WorldGenLevel)context.level(), blockPos2, context.random(), 3);
-				}
-			}
-		});
-		context.leaves().forEach(blockPosx -> {
-			if (randomSource.nextFloat() < this.leavesProbability) {
-				BlockPos blockPos2 = blockPosx.below();
-				if (context.isAir(blockPos2)) {
-					addMossHanger(blockPos2, context);
-				}
-			}
-		});
 	}
 
 	private static void addMossHanger(BlockPos blockPos, TreeDecorator.Context context) {

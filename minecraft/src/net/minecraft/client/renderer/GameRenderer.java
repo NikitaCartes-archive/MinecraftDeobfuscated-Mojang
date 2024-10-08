@@ -466,11 +466,13 @@ public class GameRenderer implements AutoCloseable {
 					0.0F, (float)((double)window.getWidth() / window.getGuiScale()), (float)((double)window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F
 				);
 			RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
+			float f = 1000.0F;
 			Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
 			matrix4fStack.pushMatrix();
-			matrix4fStack.translation(0.0F, 0.0F, -11000.0F);
+			matrix4fStack.translation(0.0F, 0.0F, -10000.0F);
 			Lighting.setupFor3DItems();
 			GuiGraphics guiGraphics = new GuiGraphics(this.minecraft, this.renderBuffers.bufferSource());
+			guiGraphics.pose().translate(0.0F, 0.0F, -1000.0F);
 			if (bl2 && bl && this.minecraft.level != null) {
 				profilerFiller.popPush("gui");
 				if (!this.minecraft.options.hideGui) {
@@ -486,8 +488,8 @@ public class GameRenderer implements AutoCloseable {
 			if (this.minecraft.getOverlay() != null) {
 				try {
 					this.minecraft.getOverlay().render(guiGraphics, i, j, deltaTracker.getGameTimeDeltaTicks());
-				} catch (Throwable var17) {
-					CrashReport crashReport = CrashReport.forThrowable(var17, "Rendering overlay");
+				} catch (Throwable var18) {
+					CrashReport crashReport = CrashReport.forThrowable(var18, "Rendering overlay");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
 					crashReportCategory.setDetail("Overlay name", (CrashReportDetail<String>)(() -> this.minecraft.getOverlay().getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
@@ -495,8 +497,8 @@ public class GameRenderer implements AutoCloseable {
 			} else if (bl2 && this.minecraft.screen != null) {
 				try {
 					this.minecraft.screen.renderWithTooltip(guiGraphics, i, j, deltaTracker.getGameTimeDeltaTicks());
-				} catch (Throwable var16) {
-					CrashReport crashReport = CrashReport.forThrowable(var16, "Rendering screen");
+				} catch (Throwable var17) {
+					CrashReport crashReport = CrashReport.forThrowable(var17, "Rendering screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen render details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					crashReportCategory.setDetail(
@@ -524,8 +526,8 @@ public class GameRenderer implements AutoCloseable {
 					if (this.minecraft.screen != null) {
 						this.minecraft.screen.handleDelayedNarration();
 					}
-				} catch (Throwable var15) {
-					CrashReport crashReport = CrashReport.forThrowable(var15, "Narrating screen");
+				} catch (Throwable var16) {
+					CrashReport crashReport = CrashReport.forThrowable(var16, "Narrating screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);

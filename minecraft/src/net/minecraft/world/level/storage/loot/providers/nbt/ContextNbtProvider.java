@@ -1,6 +1,5 @@
 package net.minecraft.world.level.storage.loot.providers.nbt;
 
-import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -8,10 +7,10 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.critereon.NbtPredicate;
 import net.minecraft.nbt.Tag;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 public class ContextNbtProvider implements NbtProvider {
@@ -19,7 +18,7 @@ public class ContextNbtProvider implements NbtProvider {
 	private static final ContextNbtProvider.Getter BLOCK_ENTITY_PROVIDER = new ContextNbtProvider.Getter() {
 		@Override
 		public Tag get(LootContext lootContext) {
-			BlockEntity blockEntity = lootContext.getParamOrNull(LootContextParams.BLOCK_ENTITY);
+			BlockEntity blockEntity = lootContext.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
 			return blockEntity != null ? blockEntity.saveWithFullMetadata(blockEntity.getLevel().registryAccess()) : null;
 		}
 
@@ -29,8 +28,8 @@ public class ContextNbtProvider implements NbtProvider {
 		}
 
 		@Override
-		public Set<LootContextParam<?>> getReferencedContextParams() {
-			return ImmutableSet.of(LootContextParams.BLOCK_ENTITY);
+		public Set<ContextKey<?>> getReferencedContextParams() {
+			return Set.of(LootContextParams.BLOCK_ENTITY);
 		}
 	};
 	public static final ContextNbtProvider BLOCK_ENTITY = new ContextNbtProvider(BLOCK_ENTITY_PROVIDER);
@@ -54,7 +53,7 @@ public class ContextNbtProvider implements NbtProvider {
 			@Nullable
 			@Override
 			public Tag get(LootContext lootContext) {
-				Entity entity = lootContext.getParamOrNull(entityTarget.getParam());
+				Entity entity = lootContext.getOptionalParameter(entityTarget.getParam());
 				return entity != null ? NbtPredicate.getEntityTagToCompare(entity) : null;
 			}
 
@@ -64,8 +63,8 @@ public class ContextNbtProvider implements NbtProvider {
 			}
 
 			@Override
-			public Set<LootContextParam<?>> getReferencedContextParams() {
-				return ImmutableSet.of(entityTarget.getParam());
+			public Set<ContextKey<?>> getReferencedContextParams() {
+				return Set.of(entityTarget.getParam());
 			}
 		};
 	}
@@ -86,7 +85,7 @@ public class ContextNbtProvider implements NbtProvider {
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
+	public Set<ContextKey<?>> getReferencedContextParams() {
 		return this.getter.getReferencedContextParams();
 	}
 
@@ -100,6 +99,6 @@ public class ContextNbtProvider implements NbtProvider {
 
 		String getId();
 
-		Set<LootContextParam<?>> getReferencedContextParams();
+		Set<ContextKey<?>> getReferencedContextParams();
 	}
 }

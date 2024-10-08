@@ -4134,7 +4134,7 @@ public class BlockModelGenerators {
 			ResourceLocation resourceLocation = BlockModelGenerators.TintState.NOT_TINTED.getCross().createWithSuffix(block, string, textureMapping, this.modelOutput);
 			return Variant.variant().with(VariantProperties.MODEL, resourceLocation);
 		});
-		this.createSimpleFlatItemModel(block, "_tip");
+		this.createSimpleFlatItemModel(block);
 		this.blockStateOutput.accept(MultiVariantGenerator.multiVariant(block).with(propertyDispatch));
 	}
 

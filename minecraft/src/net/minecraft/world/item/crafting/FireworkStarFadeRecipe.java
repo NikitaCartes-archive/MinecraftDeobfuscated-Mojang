@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.DyeItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.FireworkExplosion;
@@ -19,29 +18,33 @@ public class FireworkStarFadeRecipe extends CustomRecipe {
 	}
 
 	public boolean matches(CraftingInput craftingInput, Level level) {
-		boolean bl = false;
-		boolean bl2 = false;
+		if (craftingInput.ingredientCount() < 2) {
+			return false;
+		} else {
+			boolean bl = false;
+			boolean bl2 = false;
 
-		for (int i = 0; i < craftingInput.size(); i++) {
-			ItemStack itemStack = craftingInput.getItem(i);
-			if (!itemStack.isEmpty()) {
-				if (itemStack.getItem() instanceof DyeItem) {
-					bl = true;
-				} else {
-					if (!STAR_INGREDIENT.test(itemStack)) {
-						return false;
+			for (int i = 0; i < craftingInput.size(); i++) {
+				ItemStack itemStack = craftingInput.getItem(i);
+				if (!itemStack.isEmpty()) {
+					if (itemStack.getItem() instanceof DyeItem) {
+						bl = true;
+					} else {
+						if (!STAR_INGREDIENT.test(itemStack)) {
+							return false;
+						}
+
+						if (bl2) {
+							return false;
+						}
+
+						bl2 = true;
 					}
-
-					if (bl2) {
-						return false;
-					}
-
-					bl2 = true;
 				}
 			}
-		}
 
-		return bl2 && bl;
+			return bl2 && bl;
+		}
 	}
 
 	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
@@ -50,9 +53,8 @@ public class FireworkStarFadeRecipe extends CustomRecipe {
 
 		for (int i = 0; i < craftingInput.size(); i++) {
 			ItemStack itemStack2 = craftingInput.getItem(i);
-			Item item = itemStack2.getItem();
-			if (item instanceof DyeItem) {
-				intList.add(((DyeItem)item).getDyeColor().getFireworkColor());
+			if (itemStack2.getItem() instanceof DyeItem dyeItem) {
+				intList.add(dyeItem.getDyeColor().getFireworkColor());
 			} else if (STAR_INGREDIENT.test(itemStack2)) {
 				itemStack = itemStack2.copyWithCount(1);
 			}

@@ -1,6 +1,5 @@
 package net.minecraft.world.level.storage.loot.functions;
 
-import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -8,10 +7,10 @@ import java.util.List;
 import java.util.Set;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
@@ -34,13 +33,13 @@ public class CopyNameFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return ImmutableSet.of(this.source.param);
+	public Set<ContextKey<?>> getReferencedContextParams() {
+		return Set.of(this.source.param);
 	}
 
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		if (lootContext.getParamOrNull(this.source.param) instanceof Nameable nameable) {
+		if (lootContext.getOptionalParameter(this.source.param) instanceof Nameable nameable) {
 			itemStack.set(DataComponents.CUSTOM_NAME, nameable.getCustomName());
 		}
 
@@ -59,11 +58,11 @@ public class CopyNameFunction extends LootItemConditionalFunction {
 
 		public static final Codec<CopyNameFunction.NameSource> CODEC = StringRepresentable.fromEnum(CopyNameFunction.NameSource::values);
 		private final String name;
-		final LootContextParam<?> param;
+		final ContextKey<?> param;
 
-		private NameSource(final String string2, final LootContextParam<?> lootContextParam) {
+		private NameSource(final String string2, final ContextKey<?> contextKey) {
 			this.name = string2;
-			this.param = lootContextParam;
+			this.param = contextKey;
 		}
 
 		@Override

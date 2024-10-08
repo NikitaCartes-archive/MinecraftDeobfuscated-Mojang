@@ -16,9 +16,10 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.display.RecipeDisplayId;
-import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 
 @Environment(EnvType.CLIENT)
 public class RecipeBookPage {
@@ -83,13 +84,13 @@ public class RecipeBookPage {
 
 	private void updateButtonsForPage() {
 		int i = 20 * this.currentPage;
-		SlotDisplay.ResolutionContext resolutionContext = SlotDisplay.ResolutionContext.forLevel(this.minecraft.level);
+		ContextMap contextMap = SlotDisplayContext.fromLevel(this.minecraft.level);
 
 		for (int j = 0; j < this.buttons.size(); j++) {
 			RecipeButton recipeButton = (RecipeButton)this.buttons.get(j);
 			if (i + j < this.recipeCollections.size()) {
 				RecipeCollection recipeCollection = (RecipeCollection)this.recipeCollections.get(i + j);
-				recipeButton.init(recipeCollection, this.isFiltering, this, resolutionContext);
+				recipeButton.init(recipeCollection, this.isFiltering, this, contextMap);
 				recipeButton.visible = true;
 			} else {
 				recipeButton.visible = false;
@@ -168,7 +169,7 @@ public class RecipeBookPage {
 			this.updateButtonsForPage();
 			return true;
 		} else {
-			SlotDisplay.ResolutionContext resolutionContext = SlotDisplay.ResolutionContext.forLevel(this.minecraft.level);
+			ContextMap contextMap = SlotDisplayContext.fromLevel(this.minecraft.level);
 
 			for (RecipeButton recipeButton : this.buttons) {
 				if (recipeButton.mouseClicked(d, e, i)) {
@@ -179,7 +180,7 @@ public class RecipeBookPage {
 						this.overlay
 							.init(
 								recipeButton.getCollection(),
-								resolutionContext,
+								contextMap,
 								this.isFiltering,
 								recipeButton.getX(),
 								recipeButton.getY(),

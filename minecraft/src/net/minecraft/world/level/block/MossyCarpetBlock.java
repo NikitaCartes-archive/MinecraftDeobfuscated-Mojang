@@ -70,7 +70,7 @@ public class MossyCarpetBlock extends Block implements BonemealableBlock {
 		this.registerDefaultState(
 			this.stateDefinition
 				.any()
-				.setValue(BASE, Boolean.valueOf(false))
+				.setValue(BASE, Boolean.valueOf(true))
 				.setValue(NORTH, WallSide.NONE)
 				.setValue(EAST, WallSide.NONE)
 				.setValue(SOUTH, WallSide.NONE)
@@ -137,7 +137,8 @@ public class MossyCarpetBlock extends Block implements BonemealableBlock {
 
 	@Override
 	protected boolean canSurvive(BlockState blockState, LevelReader levelReader, BlockPos blockPos) {
-		return !levelReader.isEmptyBlock(blockPos.below());
+		BlockState blockState2 = levelReader.getBlockState(blockPos.below());
+		return blockState.getValue(BASE) ? !blockState2.isAir() : blockState2.is(this) && (Boolean)blockState2.getValue(BASE);
 	}
 
 	private static boolean hasFaces(BlockState blockState) {
@@ -200,11 +201,11 @@ public class MossyCarpetBlock extends Block implements BonemealableBlock {
 	@Nullable
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext blockPlaceContext) {
-		return getUpdatedState(this.defaultBlockState().setValue(BASE, Boolean.valueOf(true)), blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos(), true);
+		return getUpdatedState(this.defaultBlockState(), blockPlaceContext.getLevel(), blockPlaceContext.getClickedPos(), true);
 	}
 
 	public static void placeAt(LevelAccessor levelAccessor, BlockPos blockPos, RandomSource randomSource, int i) {
-		BlockState blockState = Blocks.PALE_MOSS_CARPET.defaultBlockState().setValue(BASE, Boolean.valueOf(true));
+		BlockState blockState = Blocks.PALE_MOSS_CARPET.defaultBlockState();
 		BlockState blockState2 = getUpdatedState(blockState, levelAccessor, blockPos, true);
 		levelAccessor.setBlock(blockPos, blockState2, 3);
 		BlockState blockState3 = createTopperWithSideChance(levelAccessor, blockPos, randomSource::nextBoolean);
@@ -229,7 +230,7 @@ public class MossyCarpetBlock extends Block implements BonemealableBlock {
 		BlockState blockState = blockGetter.getBlockState(blockPos2);
 		boolean bl = blockState.is(Blocks.PALE_MOSS_CARPET);
 		if ((!bl || !(Boolean)blockState.getValue(BASE)) && (bl || blockState.canBeReplaced())) {
-			BlockState blockState2 = Blocks.PALE_MOSS_CARPET.defaultBlockState();
+			BlockState blockState2 = Blocks.PALE_MOSS_CARPET.defaultBlockState().setValue(BASE, Boolean.valueOf(false));
 			BlockState blockState3 = getUpdatedState(blockState2, blockGetter, blockPos.above(), true);
 
 			for (Direction direction : Direction.Plane.HORIZONTAL) {

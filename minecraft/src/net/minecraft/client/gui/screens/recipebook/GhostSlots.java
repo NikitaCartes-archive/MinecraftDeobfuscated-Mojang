@@ -11,6 +11,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.display.SlotDisplay;
@@ -28,19 +29,19 @@ public class GhostSlots {
 		this.ingredients.clear();
 	}
 
-	private void setSlot(Slot slot, SlotDisplay.ResolutionContext resolutionContext, SlotDisplay slotDisplay, boolean bl) {
-		List<ItemStack> list = slotDisplay.resolveForStacks(resolutionContext);
+	private void setSlot(Slot slot, ContextMap contextMap, SlotDisplay slotDisplay, boolean bl) {
+		List<ItemStack> list = slotDisplay.resolveForStacks(contextMap);
 		if (!list.isEmpty()) {
 			this.ingredients.put(slot, new GhostSlots.GhostSlot(list, bl));
 		}
 	}
 
-	protected void setInput(Slot slot, SlotDisplay.ResolutionContext resolutionContext, SlotDisplay slotDisplay) {
-		this.setSlot(slot, resolutionContext, slotDisplay, false);
+	protected void setInput(Slot slot, ContextMap contextMap, SlotDisplay slotDisplay) {
+		this.setSlot(slot, contextMap, slotDisplay, false);
 	}
 
-	protected void setResult(Slot slot, SlotDisplay.ResolutionContext resolutionContext, SlotDisplay slotDisplay) {
-		this.setSlot(slot, resolutionContext, slotDisplay, true);
+	protected void setResult(Slot slot, ContextMap contextMap, SlotDisplay slotDisplay) {
+		this.setSlot(slot, contextMap, slotDisplay, true);
 	}
 
 	public void render(GuiGraphics guiGraphics, Minecraft minecraft, boolean bl) {

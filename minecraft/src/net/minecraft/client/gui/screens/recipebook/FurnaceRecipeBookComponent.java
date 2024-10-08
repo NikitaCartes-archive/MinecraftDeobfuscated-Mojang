@@ -6,12 +6,12 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.inventory.AbstractFurnaceMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.crafting.display.FurnaceRecipeDisplay;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
-import net.minecraft.world.item.crafting.display.SlotDisplay;
 
 @Environment(EnvType.CLIENT)
 public class FurnaceRecipeBookComponent extends RecipeBookComponent<AbstractFurnaceMenu> {
@@ -42,13 +42,13 @@ public class FurnaceRecipeBookComponent extends RecipeBookComponent<AbstractFurn
 	}
 
 	@Override
-	protected void fillGhostRecipe(GhostSlots ghostSlots, RecipeDisplay recipeDisplay, SlotDisplay.ResolutionContext resolutionContext) {
-		ghostSlots.setResult(this.menu.getResultSlot(), resolutionContext, recipeDisplay.result());
+	protected void fillGhostRecipe(GhostSlots ghostSlots, RecipeDisplay recipeDisplay, ContextMap contextMap) {
+		ghostSlots.setResult(this.menu.getResultSlot(), contextMap, recipeDisplay.result());
 		if (recipeDisplay instanceof FurnaceRecipeDisplay furnaceRecipeDisplay) {
-			ghostSlots.setInput(this.menu.slots.get(0), resolutionContext, furnaceRecipeDisplay.ingredient());
+			ghostSlots.setInput(this.menu.slots.get(0), contextMap, furnaceRecipeDisplay.ingredient());
 			Slot slot = this.menu.slots.get(1);
 			if (slot.getItem().isEmpty()) {
-				ghostSlots.setInput(slot, resolutionContext, furnaceRecipeDisplay.fuel());
+				ghostSlots.setInput(slot, contextMap, furnaceRecipeDisplay.fuel());
 			}
 		}
 	}

@@ -12,12 +12,12 @@ import java.util.Set;
 import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.SuspiciousStewEffects;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
@@ -52,8 +52,8 @@ public class SetStewEffectFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return (Set<LootContextParam<?>>)this.effects
+	public Set<ContextKey<?>> getReferencedContextParams() {
+		return (Set<ContextKey<?>>)this.effects
 			.stream()
 			.flatMap(effectEntry -> effectEntry.duration().getReferencedContextParams().stream())
 			.collect(ImmutableSet.toImmutableSet());

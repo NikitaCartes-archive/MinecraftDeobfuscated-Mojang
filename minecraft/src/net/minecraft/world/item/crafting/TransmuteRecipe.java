@@ -38,25 +38,29 @@ public class TransmuteRecipe implements CraftingRecipe {
 	}
 
 	public boolean matches(CraftingInput craftingInput, Level level) {
-		boolean bl = false;
-		boolean bl2 = false;
+		if (craftingInput.ingredientCount() != 2) {
+			return false;
+		} else {
+			boolean bl = false;
+			boolean bl2 = false;
 
-		for (int i = 0; i < craftingInput.size(); i++) {
-			ItemStack itemStack = craftingInput.getItem(i);
-			if (!itemStack.isEmpty()) {
-				if (!bl && this.input.test(itemStack) && itemStack.getItem() != this.result.value()) {
-					bl = true;
-				} else {
-					if (bl2 || !this.material.test(itemStack)) {
-						return false;
+			for (int i = 0; i < craftingInput.size(); i++) {
+				ItemStack itemStack = craftingInput.getItem(i);
+				if (!itemStack.isEmpty()) {
+					if (!bl && this.input.test(itemStack) && itemStack.getItem() != this.result.value()) {
+						bl = true;
+					} else {
+						if (bl2 || !this.material.test(itemStack)) {
+							return false;
+						}
+
+						bl2 = true;
 					}
-
-					bl2 = true;
 				}
 			}
-		}
 
-		return bl && bl2;
+			return bl && bl2;
+		}
 	}
 
 	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {

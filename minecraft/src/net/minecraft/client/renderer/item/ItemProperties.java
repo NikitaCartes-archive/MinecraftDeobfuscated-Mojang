@@ -121,7 +121,13 @@ public class ItemProperties {
 			ResourceLocation.withDefaultNamespace("pulling"),
 			(itemStack, clientLevel, livingEntity, i) -> livingEntity != null && livingEntity.isUsingItem() && livingEntity.getUseItem() == itemStack ? 1.0F : 0.0F
 		);
-		register(Items.BUNDLE, ResourceLocation.withDefaultNamespace("filled"), (itemStack, clientLevel, livingEntity, i) -> BundleItem.getFullnessDisplay(itemStack));
+
+		for (BundleItem bundleItem : BundleItem.getAllBundleItemColors()) {
+			register(
+				bundleItem.asItem(), ResourceLocation.withDefaultNamespace("filled"), (itemStack, clientLevel, livingEntity, i) -> BundleItem.getFullnessDisplay(itemStack)
+			);
+		}
+
 		register(Items.CLOCK, ResourceLocation.withDefaultNamespace("time"), new ClampedItemPropertyFunction() {
 			private double rotation;
 			private double rota;

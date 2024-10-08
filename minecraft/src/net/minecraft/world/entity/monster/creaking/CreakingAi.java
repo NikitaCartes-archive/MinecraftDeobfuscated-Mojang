@@ -55,7 +55,7 @@ public class CreakingAi {
 			10,
 			ImmutableList.of(
 				StartAttacking.create(
-					(serverLevel, creaking) -> creaking.isActive() && creaking.canMove(),
+					(serverLevel, creaking) -> creaking.isActive(),
 					(serverLevel, creaking) -> creaking.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER)
 				),
 				SetEntityLookTargetSometimes.create(8.0F, UniformInt.of(30, 60)),

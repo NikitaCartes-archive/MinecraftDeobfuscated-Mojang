@@ -50,12 +50,11 @@ public class EquipmentLayerRenderer {
 		ResourceLocation resourceLocation,
 		Model model,
 		ItemStack itemStack,
-		Function<ResourceLocation, RenderType> function,
 		PoseStack poseStack,
 		MultiBufferSource multiBufferSource,
 		int i
 	) {
-		this.renderLayers(layerType, resourceLocation, model, itemStack, function, poseStack, multiBufferSource, i, null);
+		this.renderLayers(layerType, resourceLocation, model, itemStack, poseStack, multiBufferSource, i, null);
 	}
 
 	public void renderLayers(
@@ -63,7 +62,6 @@ public class EquipmentLayerRenderer {
 		ResourceLocation resourceLocation,
 		Model model,
 		ItemStack itemStack,
-		Function<ResourceLocation, RenderType> function,
 		PoseStack poseStack,
 		MultiBufferSource multiBufferSource,
 		int i,
@@ -80,7 +78,7 @@ public class EquipmentLayerRenderer {
 					ResourceLocation resourceLocation3 = layer.usePlayerTexture() && resourceLocation2 != null
 						? resourceLocation2
 						: (ResourceLocation)this.layerTextureLookup.apply(new EquipmentLayerRenderer.LayerTextureKey(layerType, layer));
-					VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(multiBufferSource, (RenderType)function.apply(resourceLocation3), bl);
+					VertexConsumer vertexConsumer = ItemRenderer.getArmorFoilBuffer(multiBufferSource, RenderType.armorCutoutNoCull(resourceLocation3), bl);
 					model.renderToBuffer(poseStack, vertexConsumer, i, OverlayTexture.NO_OVERLAY, k);
 					bl = false;
 				}

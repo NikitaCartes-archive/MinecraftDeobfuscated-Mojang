@@ -17,7 +17,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.recipebook.RecipeCollection;
 import net.minecraft.client.gui.screens.recipebook.SearchRecipeBookCategory;
 import net.minecraft.stats.RecipeBook;
-import net.minecraft.world.item.crafting.BasicRecipeBookCategory;
+import net.minecraft.world.item.crafting.ExtendedRecipeBookCategory;
 import net.minecraft.world.item.crafting.RecipeBookCategory;
 import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
 import net.minecraft.world.item.crafting.display.RecipeDisplayId;
@@ -26,7 +26,7 @@ import net.minecraft.world.item.crafting.display.RecipeDisplayId;
 public class ClientRecipeBook extends RecipeBook {
 	private final Map<RecipeDisplayId, RecipeDisplayEntry> known = new HashMap();
 	private final Set<RecipeDisplayId> highlight = new HashSet();
-	private Map<RecipeBookCategory, List<RecipeCollection>> collectionsByTab = Map.of();
+	private Map<ExtendedRecipeBookCategory, List<RecipeCollection>> collectionsByTab = Map.of();
 	private List<RecipeCollection> allCollections = List.of();
 
 	public void add(RecipeDisplayEntry recipeDisplayEntry) {
@@ -36,6 +36,11 @@ public class ClientRecipeBook extends RecipeBook {
 	public void remove(RecipeDisplayId recipeDisplayId) {
 		this.known.remove(recipeDisplayId);
 		this.highlight.remove(recipeDisplayId);
+	}
+
+	public void clear() {
+		this.known.clear();
+		this.highlight.clear();
 	}
 
 	public boolean willHighlight(RecipeDisplayId recipeDisplayId) {
@@ -51,12 +56,12 @@ public class ClientRecipeBook extends RecipeBook {
 	}
 
 	public void rebuildCollections() {
-		Map<BasicRecipeBookCategory, List<List<RecipeDisplayEntry>>> map = categorizeAndGroupRecipes(this.known.values());
-		Map<RecipeBookCategory, List<RecipeCollection>> map2 = new HashMap();
+		Map<RecipeBookCategory, List<List<RecipeDisplayEntry>>> map = categorizeAndGroupRecipes(this.known.values());
+		Map<ExtendedRecipeBookCategory, List<RecipeCollection>> map2 = new HashMap();
 		Builder<RecipeCollection> builder = ImmutableList.builder();
 		map.forEach(
-			(basicRecipeBookCategory, list) -> map2.put(
-					basicRecipeBookCategory, (List)list.stream().map(RecipeCollection::new).peek(builder::add).collect(ImmutableList.toImmutableList())
+			(recipeBookCategory, list) -> map2.put(
+					recipeBookCategory, (List)list.stream().map(RecipeCollection::new).peek(builder::add).collect(ImmutableList.toImmutableList())
 				)
 		);
 
@@ -65,7 +70,7 @@ public class ClientRecipeBook extends RecipeBook {
 				searchRecipeBookCategory,
 				(List)searchRecipeBookCategory.includedCategories()
 					.stream()
-					.flatMap(basicRecipeBookCategory -> ((List)map2.getOrDefault(basicRecipeBookCategory, List.of())).stream())
+					.flatMap(recipeBookCategory -> ((List)map2.getOrDefault(recipeBookCategory, List.of())).stream())
 					.collect(ImmutableList.toImmutableList())
 			);
 		}
@@ -74,21 +79,21 @@ public class ClientRecipeBook extends RecipeBook {
 		this.allCollections = builder.build();
 	}
 
-	private static Map<BasicRecipeBookCategory, List<List<RecipeDisplayEntry>>> categorizeAndGroupRecipes(Iterable<RecipeDisplayEntry> iterable) {
-		Map<BasicRecipeBookCategory, List<List<RecipeDisplayEntry>>> map = new HashMap();
-		Table<BasicRecipeBookCategory, Integer, List<RecipeDisplayEntry>> table = HashBasedTable.create();
+	private static Map<RecipeBookCategory, List<List<RecipeDisplayEntry>>> categorizeAndGroupRecipes(Iterable<RecipeDisplayEntry> iterable) {
+		Map<RecipeBookCategory, List<List<RecipeDisplayEntry>>> map = new HashMap();
+		Table<RecipeBookCategory, Integer, List<RecipeDisplayEntry>> table = HashBasedTable.create();
 
 		for (RecipeDisplayEntry recipeDisplayEntry : iterable) {
-			BasicRecipeBookCategory basicRecipeBookCategory = recipeDisplayEntry.category();
+			RecipeBookCategory recipeBookCategory = recipeDisplayEntry.category();
 			OptionalInt optionalInt = recipeDisplayEntry.group();
 			if (optionalInt.isEmpty()) {
-				((List)map.computeIfAbsent(basicRecipeBookCategory, basicRecipeBookCategoryx -> new ArrayList())).add(List.of(recipeDisplayEntry));
+				((List)map.computeIfAbsent(recipeBookCategory, recipeBookCategoryx -> new ArrayList())).add(List.of(recipeDisplayEntry));
 			} else {
-				List<RecipeDisplayEntry> list = table.get(basicRecipeBookCategory, optionalInt.getAsInt());
+				List<RecipeDisplayEntry> list = table.get(recipeBookCategory, optionalInt.getAsInt());
 				if (list == null) {
 					list = new ArrayList();
-					table.put(basicRecipeBookCategory, optionalInt.getAsInt(), list);
-					((List)map.computeIfAbsent(basicRecipeBookCategory, basicRecipeBookCategoryx -> new ArrayList())).add(list);
+					table.put(recipeBookCategory, optionalInt.getAsInt(), list);
+					((List)map.computeIfAbsent(recipeBookCategory, recipeBookCategoryx -> new ArrayList())).add(list);
 				}
 
 				list.add(recipeDisplayEntry);
@@ -102,7 +107,7 @@ public class ClientRecipeBook extends RecipeBook {
 		return this.allCollections;
 	}
 
-	public List<RecipeCollection> getCollection(RecipeBookCategory recipeBookCategory) {
-		return (List<RecipeCollection>)this.collectionsByTab.getOrDefault(recipeBookCategory, Collections.emptyList());
+	public List<RecipeCollection> getCollection(ExtendedRecipeBookCategory extendedRecipeBookCategory) {
+		return (List<RecipeCollection>)this.collectionsByTab.getOrDefault(extendedRecipeBookCategory, Collections.emptyList());
 	}
 }

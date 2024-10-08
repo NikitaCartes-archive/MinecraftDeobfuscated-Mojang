@@ -10,6 +10,7 @@ import java.util.Set;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -17,7 +18,6 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
@@ -53,8 +53,8 @@ public class EnchantedCountIncreaseFunction extends LootItemConditionalFunction 
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return Sets.<LootContextParam<?>>union(ImmutableSet.of(LootContextParams.ATTACKING_ENTITY), this.value.getReferencedContextParams());
+	public Set<ContextKey<?>> getReferencedContextParams() {
+		return Sets.<ContextKey<?>>union(ImmutableSet.of(LootContextParams.ATTACKING_ENTITY), this.value.getReferencedContextParams());
 	}
 
 	private boolean hasLimit() {
@@ -63,7 +63,7 @@ public class EnchantedCountIncreaseFunction extends LootItemConditionalFunction 
 
 	@Override
 	public ItemStack run(ItemStack itemStack, LootContext lootContext) {
-		Entity entity = lootContext.getParamOrNull(LootContextParams.ATTACKING_ENTITY);
+		Entity entity = lootContext.getOptionalParameter(LootContextParams.ATTACKING_ENTITY);
 		if (entity instanceof LivingEntity livingEntity) {
 			int i = EnchantmentHelper.getEnchantmentLevel(this.enchantment, livingEntity);
 			if (i == 0) {

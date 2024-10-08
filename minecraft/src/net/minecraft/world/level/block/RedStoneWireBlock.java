@@ -38,7 +38,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import org.joml.Vector3f;
 
 public class RedStoneWireBlock extends Block {
 	public static final MapCodec<RedStoneWireBlock> CODEC = simpleCodec(RedStoneWireBlock::new);
@@ -81,13 +80,13 @@ public class RedStoneWireBlock extends Block {
 		)
 	);
 	private static final Map<BlockState, VoxelShape> SHAPES_CACHE = Maps.<BlockState, VoxelShape>newHashMap();
-	private static final Vector3f[] COLORS = Util.make(new Vector3f[16], vector3fs -> {
+	private static final int[] COLORS = Util.make(new int[16], is -> {
 		for (int i = 0; i <= 15; i++) {
 			float f = (float)i / 15.0F;
 			float g = f * 0.6F + (f > 0.0F ? 0.4F : 0.3F);
 			float h = Mth.clamp(f * f * 0.7F - 0.5F, 0.0F, 1.0F);
 			float j = Mth.clamp(f * f * 0.6F - 0.7F, 0.0F, 1.0F);
-			vector3fs[i] = new Vector3f(g, h, j);
+			is[i] = ARGB.colorFromFloat(1.0F, g, h, j);
 		}
 	});
 	private static final float PARTICLE_DENSITY = 0.2F;
@@ -425,23 +424,20 @@ public class RedStoneWireBlock extends Block {
 	}
 
 	public static int getColorForPower(int i) {
-		Vector3f vector3f = COLORS[i];
-		return ARGB.colorFromFloat(0.0F, vector3f.x(), vector3f.y(), vector3f.z());
+		return COLORS[i];
 	}
 
-	private void spawnParticlesAlongLine(
-		Level level, RandomSource randomSource, BlockPos blockPos, Vector3f vector3f, Direction direction, Direction direction2, float f, float g
+	private static void spawnParticlesAlongLine(
+		Level level, RandomSource randomSource, BlockPos blockPos, int i, Direction direction, Direction direction2, float f, float g
 	) {
 		float h = g - f;
 		if (!(randomSource.nextFloat() >= 0.2F * h)) {
-			float i = 0.4375F;
-			float j = f + h * randomSource.nextFloat();
-			double d = 0.5 + (double)(0.4375F * (float)direction.getStepX()) + (double)(j * (float)direction2.getStepX());
-			double e = 0.5 + (double)(0.4375F * (float)direction.getStepY()) + (double)(j * (float)direction2.getStepY());
-			double k = 0.5 + (double)(0.4375F * (float)direction.getStepZ()) + (double)(j * (float)direction2.getStepZ());
-			level.addParticle(
-				new DustParticleOptions(vector3f, 1.0F), (double)blockPos.getX() + d, (double)blockPos.getY() + e, (double)blockPos.getZ() + k, 0.0, 0.0, 0.0
-			);
+			float j = 0.4375F;
+			float k = f + h * randomSource.nextFloat();
+			double d = 0.5 + (double)(0.4375F * (float)direction.getStepX()) + (double)(k * (float)direction2.getStepX());
+			double e = 0.5 + (double)(0.4375F * (float)direction.getStepY()) + (double)(k * (float)direction2.getStepY());
+			double l = 0.5 + (double)(0.4375F * (float)direction.getStepZ()) + (double)(k * (float)direction2.getStepZ());
+			level.addParticle(new DustParticleOptions(i, 1.0F), (double)blockPos.getX() + d, (double)blockPos.getY() + e, (double)blockPos.getZ() + l, 0.0, 0.0, 0.0);
 		}
 	}
 
@@ -453,13 +449,13 @@ public class RedStoneWireBlock extends Block {
 				RedstoneSide redstoneSide = blockState.getValue((Property<RedstoneSide>)PROPERTY_BY_DIRECTION.get(direction));
 				switch (redstoneSide) {
 					case UP:
-						this.spawnParticlesAlongLine(level, randomSource, blockPos, COLORS[i], direction, Direction.UP, -0.5F, 0.5F);
+						spawnParticlesAlongLine(level, randomSource, blockPos, COLORS[i], direction, Direction.UP, -0.5F, 0.5F);
 					case SIDE:
-						this.spawnParticlesAlongLine(level, randomSource, blockPos, COLORS[i], Direction.DOWN, direction, 0.0F, 0.5F);
+						spawnParticlesAlongLine(level, randomSource, blockPos, COLORS[i], Direction.DOWN, direction, 0.0F, 0.5F);
 						break;
 					case NONE:
 					default:
-						this.spawnParticlesAlongLine(level, randomSource, blockPos, COLORS[i], Direction.DOWN, direction, 0.0F, 0.3F);
+						spawnParticlesAlongLine(level, randomSource, blockPos, COLORS[i], Direction.DOWN, direction, 0.0F, 0.3F);
 				}
 			}
 		}

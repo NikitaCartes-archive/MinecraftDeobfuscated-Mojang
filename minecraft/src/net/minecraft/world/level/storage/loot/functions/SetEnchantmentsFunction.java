@@ -10,12 +10,12 @@ import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.Holder;
 import net.minecraft.util.Mth;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
@@ -48,8 +48,8 @@ public class SetEnchantmentsFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return (Set<LootContextParam<?>>)this.enchantments
+	public Set<ContextKey<?>> getReferencedContextParams() {
+		return (Set<ContextKey<?>>)this.enchantments
 			.values()
 			.stream()
 			.flatMap(numberProvider -> numberProvider.getReferencedContextParams().stream())

@@ -1,6 +1,8 @@
 package net.minecraft.world.item;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -33,7 +35,7 @@ public class BundleItem extends Item {
 	private static final int BAR_COLOR = ARGB.colorFromFloat(1.0F, 0.44F, 0.53F, 1.0F);
 	private static final int TICKS_AFTER_FIRST_THROW = 10;
 	private static final int TICKS_BETWEEN_THROWS = 2;
-	private static final int TICKS_MAX_THROW_DURATION = 60;
+	private static final int TICKS_MAX_THROW_DURATION = 200;
 	private final ResourceLocation openFrontModel;
 	private final ResourceLocation openBackModel;
 
@@ -239,7 +241,7 @@ public class BundleItem extends Item {
 
 	@Override
 	public int getUseDuration(ItemStack itemStack, LivingEntity livingEntity) {
-		return 60;
+		return 200;
 	}
 
 	@Override
@@ -256,6 +258,30 @@ public class BundleItem extends Item {
 			itemEntity.getItem().set(DataComponents.BUNDLE_CONTENTS, BundleContents.EMPTY);
 			ItemUtils.onContainerDestroyed(itemEntity, bundleContents.itemsCopy());
 		}
+	}
+
+	public static List<BundleItem> getAllBundleItemColors() {
+		return Stream.of(
+				Items.BUNDLE,
+				Items.WHITE_BUNDLE,
+				Items.ORANGE_BUNDLE,
+				Items.MAGENTA_BUNDLE,
+				Items.LIGHT_BLUE_BUNDLE,
+				Items.YELLOW_BUNDLE,
+				Items.LIME_BUNDLE,
+				Items.PINK_BUNDLE,
+				Items.GRAY_BUNDLE,
+				Items.LIGHT_GRAY_BUNDLE,
+				Items.CYAN_BUNDLE,
+				Items.BLACK_BUNDLE,
+				Items.BROWN_BUNDLE,
+				Items.GREEN_BUNDLE,
+				Items.RED_BUNDLE,
+				Items.BLUE_BUNDLE,
+				Items.PURPLE_BUNDLE
+			)
+			.map(item -> (BundleItem)item)
+			.toList();
 	}
 
 	public static Item getByColor(DyeColor dyeColor) {

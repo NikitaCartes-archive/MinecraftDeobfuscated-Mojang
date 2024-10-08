@@ -193,9 +193,8 @@ public class RealmsServer extends ValueObject {
 	}
 
 	private static boolean readBoolean(JsonObject jsonObject, String string, boolean bl) {
-		JsonElement jsonElement = jsonObject.get("name");
-		JsonElement jsonElement2 = jsonObject.get("value");
-		return jsonElement != null && jsonElement2 != null && jsonElement.getAsString().equals(string) ? jsonElement2.getAsBoolean() : bl;
+		String string2 = JsonUtils.getStringOr("name", jsonObject, null);
+		return string2 != null && string2.equals(string) ? JsonUtils.getBooleanOr("value", jsonObject, bl) : bl;
 	}
 
 	private static Map<Integer, RealmsWorldOptions> createEmptySlots() {

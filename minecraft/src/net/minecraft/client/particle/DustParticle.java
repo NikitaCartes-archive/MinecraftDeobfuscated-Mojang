@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.DustParticleOptions;
+import org.joml.Vector3f;
 
 @Environment(EnvType.CLIENT)
 public class DustParticle extends DustParticleBase<DustParticleOptions> {
@@ -12,9 +13,10 @@ public class DustParticle extends DustParticleBase<DustParticleOptions> {
 	) {
 		super(clientLevel, d, e, f, g, h, i, dustParticleOptions, spriteSet);
 		float j = this.random.nextFloat() * 0.4F + 0.6F;
-		this.rCol = this.randomizeColor(dustParticleOptions.getColor().x(), j);
-		this.gCol = this.randomizeColor(dustParticleOptions.getColor().y(), j);
-		this.bCol = this.randomizeColor(dustParticleOptions.getColor().z(), j);
+		Vector3f vector3f = dustParticleOptions.getColor();
+		this.rCol = this.randomizeColor(vector3f.x(), j);
+		this.gCol = this.randomizeColor(vector3f.y(), j);
+		this.bCol = this.randomizeColor(vector3f.z(), j);
 	}
 
 	@Environment(EnvType.CLIENT)

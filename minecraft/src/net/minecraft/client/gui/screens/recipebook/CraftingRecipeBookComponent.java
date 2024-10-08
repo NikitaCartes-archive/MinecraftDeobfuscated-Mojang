@@ -8,11 +8,12 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.network.chat.Component;
 import net.minecraft.recipebook.PlaceRecipeHelper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.inventory.AbstractCraftingMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.BasicRecipeBookCategory;
+import net.minecraft.world.item.crafting.RecipeBookCategories;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.ShapedCraftingRecipeDisplay;
 import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
@@ -29,10 +30,10 @@ public class CraftingRecipeBookComponent extends RecipeBookComponent<AbstractCra
 	private static final Component ONLY_CRAFTABLES_TOOLTIP = Component.translatable("gui.recipebook.toggleRecipes.craftable");
 	private static final List<RecipeBookComponent.TabInfo> TABS = List.of(
 		new RecipeBookComponent.TabInfo(SearchRecipeBookCategory.CRAFTING),
-		new RecipeBookComponent.TabInfo(Items.IRON_AXE, Items.GOLDEN_SWORD, BasicRecipeBookCategory.CRAFTING_EQUIPMENT),
-		new RecipeBookComponent.TabInfo(Items.BRICKS, BasicRecipeBookCategory.CRAFTING_BUILDING_BLOCKS),
-		new RecipeBookComponent.TabInfo(Items.LAVA_BUCKET, Items.APPLE, BasicRecipeBookCategory.CRAFTING_MISC),
-		new RecipeBookComponent.TabInfo(Items.REDSTONE, BasicRecipeBookCategory.CRAFTING_REDSTONE)
+		new RecipeBookComponent.TabInfo(Items.IRON_AXE, Items.GOLDEN_SWORD, RecipeBookCategories.CRAFTING_EQUIPMENT),
+		new RecipeBookComponent.TabInfo(Items.BRICKS, RecipeBookCategories.CRAFTING_BUILDING_BLOCKS),
+		new RecipeBookComponent.TabInfo(Items.LAVA_BUCKET, Items.APPLE, RecipeBookCategories.CRAFTING_MISC),
+		new RecipeBookComponent.TabInfo(Items.REDSTONE, RecipeBookCategories.CRAFTING_REDSTONE)
 	);
 
 	public CraftingRecipeBookComponent(AbstractCraftingMenu abstractCraftingMenu) {
@@ -57,8 +58,8 @@ public class CraftingRecipeBookComponent extends RecipeBookComponent<AbstractCra
 	}
 
 	@Override
-	protected void fillGhostRecipe(GhostSlots ghostSlots, RecipeDisplay recipeDisplay, SlotDisplay.ResolutionContext resolutionContext) {
-		ghostSlots.setResult(this.menu.getResultSlot(), resolutionContext, recipeDisplay.result());
+	protected void fillGhostRecipe(GhostSlots ghostSlots, RecipeDisplay recipeDisplay, ContextMap contextMap) {
+		ghostSlots.setResult(this.menu.getResultSlot(), contextMap, recipeDisplay.result());
 		Objects.requireNonNull(recipeDisplay);
 		switch (recipeDisplay) {
 			case ShapedCraftingRecipeDisplay shapedCraftingRecipeDisplay:
@@ -71,7 +72,7 @@ public class CraftingRecipeBookComponent extends RecipeBookComponent<AbstractCra
 					shapedCraftingRecipeDisplay.ingredients(),
 					(slotDisplay, ix, jx, k) -> {
 						Slot slot = (Slot)list.get(ix);
-						ghostSlots.setInput(slot, resolutionContext, slotDisplay);
+						ghostSlots.setInput(slot, contextMap, slotDisplay);
 					}
 				);
 				break;
@@ -81,7 +82,7 @@ public class CraftingRecipeBookComponent extends RecipeBookComponent<AbstractCra
 					int i = Math.min(shapelessCraftingRecipeDisplay.ingredients().size(), list2.size());
 
 					for (int j = 0; j < i; j++) {
-						ghostSlots.setInput((Slot)list2.get(j), resolutionContext, (SlotDisplay)shapelessCraftingRecipeDisplay.ingredients().get(j));
+						ghostSlots.setInput((Slot)list2.get(j), contextMap, (SlotDisplay)shapelessCraftingRecipeDisplay.ingredients().get(j));
 					}
 					break label15;
 				}

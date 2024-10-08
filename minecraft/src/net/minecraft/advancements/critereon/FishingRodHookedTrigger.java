@@ -53,7 +53,7 @@ public class FishingRodHookedTrigger extends SimpleCriterionTrigger<FishingRodHo
 			} else {
 				if (this.item.isPresent()) {
 					boolean bl = false;
-					Entity entity = lootContext.getParamOrNull(LootContextParams.THIS_ENTITY);
+					Entity entity = lootContext.getOptionalParameter(LootContextParams.THIS_ENTITY);
 					if (entity instanceof ItemEntity itemEntity && ((ItemPredicate)this.item.get()).test(itemEntity.getItem())) {
 						bl = true;
 					}

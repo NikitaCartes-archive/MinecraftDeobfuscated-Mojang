@@ -25,7 +25,7 @@ public class SmokingRecipe extends AbstractCookingRecipe {
 	}
 
 	@Override
-	public BasicRecipeBookCategory recipeBookCategory() {
-		return BasicRecipeBookCategory.SMOKER_FOOD;
+	public RecipeBookCategory recipeBookCategory() {
+		return RecipeBookCategories.SMOKER_FOOD;
 	}
 }

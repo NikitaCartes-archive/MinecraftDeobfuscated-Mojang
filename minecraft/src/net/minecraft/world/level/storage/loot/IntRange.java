@@ -12,7 +12,7 @@ import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProvider;
 import net.minecraft.world.level.storage.loot.providers.number.NumberProviders;
@@ -37,8 +37,8 @@ public class IntRange {
 	private final IntRange.IntLimiter limiter;
 	private final IntRange.IntChecker predicate;
 
-	public Set<LootContextParam<?>> getReferencedContextParams() {
-		Builder<LootContextParam<?>> builder = ImmutableSet.builder();
+	public Set<ContextKey<?>> getReferencedContextParams() {
+		Builder<ContextKey<?>> builder = ImmutableSet.builder();
 		if (this.min != null) {
 			builder.addAll(this.min.getReferencedContextParams());
 		}

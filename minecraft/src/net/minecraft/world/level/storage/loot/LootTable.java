@@ -19,19 +19,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.functions.FunctionUserBuilder;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import org.slf4j.Logger;
 
 public class LootTable {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final LootTable EMPTY = new LootTable(LootContextParamSets.EMPTY, Optional.empty(), List.of(), List.of());
-	public static final LootContextParamSet DEFAULT_PARAM_SET = LootContextParamSets.ALL_PARAMS;
+	public static final ContextKeySet DEFAULT_PARAM_SET = LootContextParamSets.ALL_PARAMS;
 	public static final long RANDOMIZE_SEED = 0L;
 	public static final Codec<LootTable> DIRECT_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
@@ -43,14 +43,14 @@ public class LootTable {
 				.apply(instance, LootTable::new)
 	);
 	public static final Codec<Holder<LootTable>> CODEC = RegistryFileCodec.create(Registries.LOOT_TABLE, DIRECT_CODEC);
-	private final LootContextParamSet paramSet;
+	private final ContextKeySet paramSet;
 	private final Optional<ResourceLocation> randomSequence;
 	private final List<LootPool> pools;
 	private final List<LootItemFunction> functions;
 	private final BiFunction<ItemStack, LootContext, ItemStack> compositeFunction;
 
-	LootTable(LootContextParamSet lootContextParamSet, Optional<ResourceLocation> optional, List<LootPool> list, List<LootItemFunction> list2) {
-		this.paramSet = lootContextParamSet;
+	LootTable(ContextKeySet contextKeySet, Optional<ResourceLocation> optional, List<LootPool> list, List<LootItemFunction> list2) {
+		this.paramSet = contextKeySet;
 		this.randomSequence = optional;
 		this.pools = list;
 		this.functions = list2;
@@ -126,7 +126,7 @@ public class LootTable {
 		return objectArrayList;
 	}
 
-	public LootContextParamSet getParamSet() {
+	public ContextKeySet getParamSet() {
 		return this.paramSet;
 	}
 
@@ -216,7 +216,7 @@ public class LootTable {
 	public static class Builder implements FunctionUserBuilder<LootTable.Builder> {
 		private final ImmutableList.Builder<LootPool> pools = ImmutableList.builder();
 		private final ImmutableList.Builder<LootItemFunction> functions = ImmutableList.builder();
-		private LootContextParamSet paramSet = LootTable.DEFAULT_PARAM_SET;
+		private ContextKeySet paramSet = LootTable.DEFAULT_PARAM_SET;
 		private Optional<ResourceLocation> randomSequence = Optional.empty();
 
 		public LootTable.Builder withPool(LootPool.Builder builder) {
@@ -224,8 +224,8 @@ public class LootTable {
 			return this;
 		}
 
-		public LootTable.Builder setParamSet(LootContextParamSet lootContextParamSet) {
-			this.paramSet = lootContextParamSet;
+		public LootTable.Builder setParamSet(ContextKeySet contextKeySet) {
+			this.paramSet = contextKeySet;
 			return this;
 		}
 

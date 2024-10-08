@@ -25,10 +25,10 @@ public class BlastingRecipe extends AbstractCookingRecipe {
 	}
 
 	@Override
-	public BasicRecipeBookCategory recipeBookCategory() {
+	public RecipeBookCategory recipeBookCategory() {
 		return switch (this.category()) {
-			case BLOCKS -> BasicRecipeBookCategory.BLAST_FURNACE_BLOCKS;
-			case FOOD, MISC -> BasicRecipeBookCategory.BLAST_FURNACE_MISC;
+			case BLOCKS -> RecipeBookCategories.BLAST_FURNACE_BLOCKS;
+			case FOOD, MISC -> RecipeBookCategories.BLAST_FURNACE_MISC;
 		};
 	}
 }

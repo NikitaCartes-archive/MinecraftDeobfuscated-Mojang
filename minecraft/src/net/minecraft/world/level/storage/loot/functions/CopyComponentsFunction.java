@@ -13,10 +13,10 @@ import net.minecraft.Util;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
@@ -59,7 +59,7 @@ public class CopyComponentsFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
+	public Set<ContextKey<?>> getReferencedContextParams() {
 		return this.source.getReferencedContextParams();
 	}
 
@@ -126,14 +126,14 @@ public class CopyComponentsFunction extends LootItemConditionalFunction {
 		public DataComponentMap get(LootContext lootContext) {
 			switch (this) {
 				case BLOCK_ENTITY:
-					BlockEntity blockEntity = lootContext.getParamOrNull(LootContextParams.BLOCK_ENTITY);
+					BlockEntity blockEntity = lootContext.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
 					return blockEntity != null ? blockEntity.collectComponents() : DataComponentMap.EMPTY;
 				default:
 					throw new MatchException(null, null);
 			}
 		}
 
-		public Set<LootContextParam<?>> getReferencedContextParams() {
+		public Set<ContextKey<?>> getReferencedContextParams() {
 			switch (this) {
 				case BLOCK_ENTITY:
 					return Set.of(LootContextParams.BLOCK_ENTITY);

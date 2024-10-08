@@ -5,7 +5,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.core.component.DataComponents;
@@ -76,7 +75,7 @@ public class HumanoidArmorLayer<S extends HumanoidRenderState, M extends Humanoi
 			this.setPartVisibility(humanoidModel, equipmentSlot);
 			ResourceLocation resourceLocation = (ResourceLocation)equippable.model().orElseThrow();
 			EquipmentModel.LayerType layerType = this.usesInnerModel(equipmentSlot) ? EquipmentModel.LayerType.HUMANOID_LEGGINGS : EquipmentModel.LayerType.HUMANOID;
-			this.equipmentRenderer.renderLayers(layerType, resourceLocation, humanoidModel, itemStack, RenderType::armorCutoutNoCull, poseStack, multiBufferSource, i);
+			this.equipmentRenderer.renderLayers(layerType, resourceLocation, humanoidModel, itemStack, poseStack, multiBufferSource, i);
 		}
 	}
 

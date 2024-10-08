@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.font.GlyphRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.network.chat.Style;
 import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
@@ -32,7 +33,19 @@ public class BakedGlyph {
 		this.down = m;
 	}
 
-	public void render(boolean bl, float f, float g, Matrix4f matrix4f, VertexConsumer vertexConsumer, int i, int j) {
+	public void renderChar(BakedGlyph.GlyphInstance glyphInstance, Matrix4f matrix4f, VertexConsumer vertexConsumer, int i) {
+		Style style = glyphInstance.style();
+		boolean bl = style.isItalic();
+		float f = glyphInstance.x();
+		float g = glyphInstance.y();
+		int j = glyphInstance.color();
+		this.render(bl, f, g, matrix4f, vertexConsumer, j, i);
+		if (style.isBold()) {
+			this.render(bl, f + glyphInstance.boldOffset(), g, matrix4f, vertexConsumer, j, i);
+		}
+	}
+
+	private void render(boolean bl, float f, float g, Matrix4f matrix4f, VertexConsumer vertexConsumer, int i, int j) {
 		float h = f + this.left;
 		float k = f + this.right;
 		float l = g + this.up;
@@ -57,21 +70,10 @@ public class BakedGlyph {
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static class Effect {
-		protected final float x0;
-		protected final float y0;
-		protected final float x1;
-		protected final float y1;
-		protected final float depth;
-		protected final int color;
+	public static record Effect(float x0, float y0, float x1, float y1, float depth, int color) {
+	}
 
-		public Effect(float f, float g, float h, float i, float j, int k) {
-			this.x0 = f;
-			this.y0 = g;
-			this.x1 = h;
-			this.y1 = i;
-			this.depth = j;
-			this.color = k;
-		}
+	@Environment(EnvType.CLIENT)
+	public static record GlyphInstance(float x, float y, int color, BakedGlyph glyph, Style style, float boldOffset) {
 	}
 }

@@ -25,11 +25,11 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ProblemReporter;
+import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.RandomSequence;
 import net.minecraft.world.level.levelgen.RandomSupport;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.ValidationContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import org.slf4j.Logger;
 
@@ -83,7 +83,9 @@ public class LootTableProvider implements DataProvider {
 		writableRegistry.listElements()
 			.forEach(
 				reference -> ((LootTable)reference.value())
-						.validate(validationContext.setParams(((LootTable)reference.value()).getParamSet()).enterElement("{" + reference.key().location() + "}", reference.key()))
+						.validate(
+							validationContext.setContextKeySet(((LootTable)reference.value()).getParamSet()).enterElement("{" + reference.key().location() + "}", reference.key())
+						)
 			);
 		Multimap<String, String> multimap = collector.get();
 		if (!multimap.isEmpty()) {
@@ -108,6 +110,6 @@ public class LootTableProvider implements DataProvider {
 		return "Loot Tables";
 	}
 
-	public static record SubProviderEntry(Function<HolderLookup.Provider, LootTableSubProvider> provider, LootContextParamSet paramSet) {
+	public static record SubProviderEntry(Function<HolderLookup.Provider, LootTableSubProvider> provider, ContextKeySet paramSet) {
 	}
 }

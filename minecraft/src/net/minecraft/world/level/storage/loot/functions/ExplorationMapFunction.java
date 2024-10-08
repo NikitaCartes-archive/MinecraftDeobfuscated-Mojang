@@ -1,6 +1,5 @@
 package net.minecraft.world.level.storage.loot.functions;
 
-import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -12,6 +11,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.StructureTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.MapItem;
@@ -20,7 +20,6 @@ import net.minecraft.world.level.saveddata.maps.MapDecorationType;
 import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
@@ -67,8 +66,8 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
-		return ImmutableSet.of(LootContextParams.ORIGIN);
+	public Set<ContextKey<?>> getReferencedContextParams() {
+		return Set.of(LootContextParams.ORIGIN);
 	}
 
 	@Override
@@ -76,7 +75,7 @@ public class ExplorationMapFunction extends LootItemConditionalFunction {
 		if (!itemStack.is(Items.MAP)) {
 			return itemStack;
 		} else {
-			Vec3 vec3 = lootContext.getParamOrNull(LootContextParams.ORIGIN);
+			Vec3 vec3 = lootContext.getOptionalParameter(LootContextParams.ORIGIN);
 			if (vec3 != null) {
 				ServerLevel serverLevel = lootContext.getLevel();
 				BlockPos blockPos = serverLevel.findNearestMapStructure(this.destination, BlockPos.containing(vec3), this.searchRadius, this.skipKnownStructures);

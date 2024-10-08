@@ -1,6 +1,7 @@
 package net.minecraft.util;
 
 import net.minecraft.world.phys.Vec3;
+import org.joml.Vector3f;
 
 public class ARGB {
 	public static int alpha(int i) {
@@ -92,6 +93,13 @@ public class ARGB {
 
 	public static int colorFromFloat(float f, float g, float h, float i) {
 		return color(as8BitChannel(f), as8BitChannel(g), as8BitChannel(h), as8BitChannel(i));
+	}
+
+	public static Vector3f vector3fFromRGB24(int i) {
+		float f = (float)red(i) / 255.0F;
+		float g = (float)green(i) / 255.0F;
+		float h = (float)blue(i) / 255.0F;
+		return new Vector3f(f, g, h);
 	}
 
 	public static int average(int i, int j) {

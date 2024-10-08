@@ -35,6 +35,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundRecipeBookChangeSettingsPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.inventory.AbstractFurnaceMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
@@ -43,11 +44,11 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.crafting.BasicRecipeBookCategory;
+import net.minecraft.world.item.crafting.ExtendedRecipeBookCategory;
 import net.minecraft.world.item.crafting.RecipeBookCategory;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.RecipeDisplayId;
-import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
@@ -257,8 +258,8 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 		int l = 0;
 
 		for (RecipeBookTabButton recipeBookTabButton : this.tabButtons) {
-			RecipeBookCategory recipeBookCategory = recipeBookTabButton.getCategory();
-			if (recipeBookCategory instanceof SearchRecipeBookCategory) {
+			ExtendedRecipeBookCategory extendedRecipeBookCategory = recipeBookTabButton.getCategory();
+			if (extendedRecipeBookCategory instanceof SearchRecipeBookCategory) {
 				recipeBookTabButton.visible = true;
 				recipeBookTabButton.setPosition(i, j + 27 * l++);
 			} else if (recipeBookTabButton.updateVisibility(this.book)) {
@@ -521,11 +522,11 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 
 	public void fillGhostRecipe(RecipeDisplay recipeDisplay) {
 		this.ghostSlots.clear();
-		SlotDisplay.ResolutionContext resolutionContext = SlotDisplay.ResolutionContext.forLevel((Level)Objects.requireNonNull(this.minecraft.level));
-		this.fillGhostRecipe(this.ghostSlots, recipeDisplay, resolutionContext);
+		ContextMap contextMap = SlotDisplayContext.fromLevel((Level)Objects.requireNonNull(this.minecraft.level));
+		this.fillGhostRecipe(this.ghostSlots, recipeDisplay, contextMap);
 	}
 
-	protected abstract void fillGhostRecipe(GhostSlots ghostSlots, RecipeDisplay recipeDisplay, SlotDisplay.ResolutionContext resolutionContext);
+	protected abstract void fillGhostRecipe(GhostSlots ghostSlots, RecipeDisplay recipeDisplay, ContextMap contextMap);
 
 	protected void sendUpdateSettings() {
 		if (this.minecraft.getConnection() != null) {
@@ -559,17 +560,17 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 	}
 
 	@Environment(EnvType.CLIENT)
-	public static record TabInfo(ItemStack primaryIcon, Optional<ItemStack> secondaryIcon, RecipeBookCategory category) {
+	public static record TabInfo(ItemStack primaryIcon, Optional<ItemStack> secondaryIcon, ExtendedRecipeBookCategory category) {
 		public TabInfo(SearchRecipeBookCategory searchRecipeBookCategory) {
 			this(new ItemStack(Items.COMPASS), Optional.empty(), searchRecipeBookCategory);
 		}
 
-		public TabInfo(Item item, BasicRecipeBookCategory basicRecipeBookCategory) {
-			this(new ItemStack(item), Optional.empty(), basicRecipeBookCategory);
+		public TabInfo(Item item, RecipeBookCategory recipeBookCategory) {
+			this(new ItemStack(item), Optional.empty(), recipeBookCategory);
 		}
 
-		public TabInfo(Item item, Item item2, BasicRecipeBookCategory basicRecipeBookCategory) {
-			this(new ItemStack(item), Optional.of(new ItemStack(item2)), basicRecipeBookCategory);
+		public TabInfo(Item item, Item item2, RecipeBookCategory recipeBookCategory) {
+			this(new ItemStack(item), Optional.of(new ItemStack(item2)), recipeBookCategory);
 		}
 	}
 }

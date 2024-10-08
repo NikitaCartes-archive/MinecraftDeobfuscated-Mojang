@@ -8,8 +8,8 @@ import java.util.Set;
 import net.minecraft.advancements.critereon.LocationPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 
@@ -35,7 +35,7 @@ public record LocationCheck(Optional<LocationPredicate> predicate, BlockPos offs
 	}
 
 	public boolean test(LootContext lootContext) {
-		Vec3 vec3 = lootContext.getParamOrNull(LootContextParams.ORIGIN);
+		Vec3 vec3 = lootContext.getOptionalParameter(LootContextParams.ORIGIN);
 		return vec3 != null
 			&& (
 				this.predicate.isEmpty()
@@ -45,7 +45,7 @@ public record LocationCheck(Optional<LocationPredicate> predicate, BlockPos offs
 	}
 
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams() {
+	public Set<ContextKey<?>> getReferencedContextParams() {
 		return Set.of(LootContextParams.ORIGIN);
 	}
 

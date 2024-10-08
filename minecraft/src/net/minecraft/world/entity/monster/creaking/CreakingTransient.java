@@ -45,19 +45,20 @@ public class CreakingTransient extends Creaking {
 			return super.hurtServer(serverLevel, damageSource, f);
 		} else if (damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			return super.hurtServer(serverLevel, damageSource, f);
-		} else if (!this.isInvulnerableTo(serverLevel, damageSource)
-			&& this.invulnerabilityAnimationRemainingTicks <= 0
-			&& damageSource.getEntity() instanceof Player) {
+		} else if (!this.isInvulnerableTo(serverLevel, damageSource) && this.invulnerabilityAnimationRemainingTicks <= 0) {
 			this.invulnerabilityAnimationRemainingTicks = 8;
 			this.level().broadcastEntityEvent(this, (byte)66);
 			if (this.level().getBlockEntity(this.homePos) instanceof CreakingHeartBlockEntity creakingHeartBlockEntity && creakingHeartBlockEntity.isProtector(this)) {
-				creakingHeartBlockEntity.creakingHurt();
+				if (damageSource.getEntity() instanceof Player) {
+					creakingHeartBlockEntity.creakingHurt();
+				}
+
 				this.playHurtSound(damageSource);
 			}
 
 			return true;
 		} else {
-			return true;
+			return false;
 		}
 	}
 
@@ -177,6 +178,8 @@ public class CreakingTransient extends Creaking {
 	}
 
 	class HomeNodeEvaluator extends WalkNodeEvaluator {
+		private static final int MAX_DISTANCE_TO_HOME_SQ = 1024;
+
 		@Override
 		public PathType getPathType(PathfindingContext pathfindingContext, int i, int j, int k) {
 			BlockPos blockPos = CreakingTransient.this.homePos;

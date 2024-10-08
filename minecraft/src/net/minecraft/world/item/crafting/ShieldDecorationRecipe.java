@@ -14,38 +14,42 @@ public class ShieldDecorationRecipe extends CustomRecipe {
 	}
 
 	public boolean matches(CraftingInput craftingInput, Level level) {
-		ItemStack itemStack = ItemStack.EMPTY;
-		ItemStack itemStack2 = ItemStack.EMPTY;
+		if (craftingInput.ingredientCount() != 2) {
+			return false;
+		} else {
+			boolean bl = false;
+			boolean bl2 = false;
 
-		for (int i = 0; i < craftingInput.size(); i++) {
-			ItemStack itemStack3 = craftingInput.getItem(i);
-			if (!itemStack3.isEmpty()) {
-				if (itemStack3.getItem() instanceof BannerItem) {
-					if (!itemStack2.isEmpty()) {
-						return false;
+			for (int i = 0; i < craftingInput.size(); i++) {
+				ItemStack itemStack = craftingInput.getItem(i);
+				if (!itemStack.isEmpty()) {
+					if (itemStack.getItem() instanceof BannerItem) {
+						if (bl2) {
+							return false;
+						}
+
+						bl2 = true;
+					} else {
+						if (!itemStack.is(Items.SHIELD)) {
+							return false;
+						}
+
+						if (bl) {
+							return false;
+						}
+
+						BannerPatternLayers bannerPatternLayers = itemStack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
+						if (!bannerPatternLayers.layers().isEmpty()) {
+							return false;
+						}
+
+						bl = true;
 					}
-
-					itemStack2 = itemStack3;
-				} else {
-					if (!itemStack3.is(Items.SHIELD)) {
-						return false;
-					}
-
-					if (!itemStack.isEmpty()) {
-						return false;
-					}
-
-					BannerPatternLayers bannerPatternLayers = itemStack3.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
-					if (!bannerPatternLayers.layers().isEmpty()) {
-						return false;
-					}
-
-					itemStack = itemStack3;
 				}
 			}
-		}
 
-		return !itemStack.isEmpty() && !itemStack2.isEmpty();
+			return bl && bl2;
+		}
 	}
 
 	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {

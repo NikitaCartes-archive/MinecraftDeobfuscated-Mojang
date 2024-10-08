@@ -218,6 +218,7 @@ public class SoundEvents {
 	public static final SoundEvent BUBBLE_COLUMN_UPWARDS_INSIDE = register("block.bubble_column.upwards_inside");
 	public static final SoundEvent BUBBLE_COLUMN_WHIRLPOOL_AMBIENT = register("block.bubble_column.whirlpool_ambient");
 	public static final SoundEvent BUBBLE_COLUMN_WHIRLPOOL_INSIDE = register("block.bubble_column.whirlpool_inside");
+	public static final SoundEvent BUBBLE_POP = register("ui.hud.bubble_pop");
 	public static final SoundEvent BUCKET_EMPTY = register("item.bucket.empty");
 	public static final SoundEvent BUCKET_EMPTY_AXOLOTL = register("item.bucket.empty_axolotl");
 	public static final SoundEvent BUCKET_EMPTY_FISH = register("item.bucket.empty_fish");

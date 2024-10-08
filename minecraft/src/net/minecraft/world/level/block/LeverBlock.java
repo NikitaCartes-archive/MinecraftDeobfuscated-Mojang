@@ -136,7 +136,7 @@ public class LeverBlock extends FaceAttachedHorizontalDirectionalBlock {
 		double d = (double)blockPos.getX() + 0.5 + 0.1 * (double)direction.getStepX() + 0.2 * (double)direction2.getStepX();
 		double e = (double)blockPos.getY() + 0.5 + 0.1 * (double)direction.getStepY() + 0.2 * (double)direction2.getStepY();
 		double g = (double)blockPos.getZ() + 0.5 + 0.1 * (double)direction.getStepZ() + 0.2 * (double)direction2.getStepZ();
-		levelAccessor.addParticle(new DustParticleOptions(DustParticleOptions.REDSTONE_PARTICLE_COLOR, f), d, e, g, 0.0, 0.0, 0.0);
+		levelAccessor.addParticle(new DustParticleOptions(16711680, f), d, e, g, 0.0, 0.0, 0.0);
 	}
 
 	@Override

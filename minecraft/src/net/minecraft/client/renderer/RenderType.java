@@ -354,7 +354,6 @@ public abstract class RenderType extends RenderStateShard {
 			.setCullState(NO_CULL)
 			.setDepthTestState(EQUAL_DEPTH_TEST)
 			.setTransparencyState(GLINT_TRANSPARENCY)
-			.setOutputState(ITEM_ENTITY_TARGET)
 			.setTexturingState(ENTITY_GLINT_TEXTURING)
 			.createCompositeState(false)
 	);

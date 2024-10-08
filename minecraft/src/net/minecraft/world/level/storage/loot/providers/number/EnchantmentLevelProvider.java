@@ -14,7 +14,7 @@ public record EnchantmentLevelProvider(LevelBasedValue amount) implements Number
 
 	@Override
 	public float getFloat(LootContext lootContext) {
-		int i = lootContext.getParam(LootContextParams.ENCHANTMENT_LEVEL);
+		int i = lootContext.getParameter(LootContextParams.ENCHANTMENT_LEVEL);
 		return this.amount.calculate(i);
 	}
 

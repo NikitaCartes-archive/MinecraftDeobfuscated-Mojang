@@ -16,47 +16,51 @@ public class BannerDuplicateRecipe extends CustomRecipe {
 	}
 
 	public boolean matches(CraftingInput craftingInput, Level level) {
-		DyeColor dyeColor = null;
-		ItemStack itemStack = null;
-		ItemStack itemStack2 = null;
+		if (craftingInput.ingredientCount() != 2) {
+			return false;
+		} else {
+			DyeColor dyeColor = null;
+			boolean bl = false;
+			boolean bl2 = false;
 
-		for (int i = 0; i < craftingInput.size(); i++) {
-			ItemStack itemStack3 = craftingInput.getItem(i);
-			if (!itemStack3.isEmpty()) {
-				Item item = itemStack3.getItem();
-				if (!(item instanceof BannerItem)) {
-					return false;
-				}
-
-				BannerItem bannerItem = (BannerItem)item;
-				if (dyeColor == null) {
-					dyeColor = bannerItem.getColor();
-				} else if (dyeColor != bannerItem.getColor()) {
-					return false;
-				}
-
-				int j = itemStack3.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY).layers().size();
-				if (j > 6) {
-					return false;
-				}
-
-				if (j > 0) {
-					if (itemStack != null) {
+			for (int i = 0; i < craftingInput.size(); i++) {
+				ItemStack itemStack = craftingInput.getItem(i);
+				if (!itemStack.isEmpty()) {
+					Item item = itemStack.getItem();
+					if (!(item instanceof BannerItem)) {
 						return false;
 					}
 
-					itemStack = itemStack3;
-				} else {
-					if (itemStack2 != null) {
+					BannerItem bannerItem = (BannerItem)item;
+					if (dyeColor == null) {
+						dyeColor = bannerItem.getColor();
+					} else if (dyeColor != bannerItem.getColor()) {
 						return false;
 					}
 
-					itemStack2 = itemStack3;
+					int j = itemStack.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY).layers().size();
+					if (j > 6) {
+						return false;
+					}
+
+					if (j > 0) {
+						if (bl2) {
+							return false;
+						}
+
+						bl2 = true;
+					} else {
+						if (bl) {
+							return false;
+						}
+
+						bl = true;
+					}
 				}
 			}
-		}
 
-		return itemStack != null && itemStack2 != null;
+			return bl2 && bl;
+		}
 	}
 
 	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {

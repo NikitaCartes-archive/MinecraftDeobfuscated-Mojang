@@ -31,12 +31,12 @@ public interface CraftingRecipe extends Recipe<CraftingInput> {
 	}
 
 	@Override
-	default BasicRecipeBookCategory recipeBookCategory() {
+	default RecipeBookCategory recipeBookCategory() {
 		return switch (this.category()) {
-			case BUILDING -> BasicRecipeBookCategory.CRAFTING_BUILDING_BLOCKS;
-			case EQUIPMENT -> BasicRecipeBookCategory.CRAFTING_EQUIPMENT;
-			case REDSTONE -> BasicRecipeBookCategory.CRAFTING_REDSTONE;
-			case MISC -> BasicRecipeBookCategory.CRAFTING_MISC;
+			case BUILDING -> RecipeBookCategories.CRAFTING_BUILDING_BLOCKS;
+			case EQUIPMENT -> RecipeBookCategories.CRAFTING_EQUIPMENT;
+			case REDSTONE -> RecipeBookCategories.CRAFTING_REDSTONE;
+			case MISC -> RecipeBookCategories.CRAFTING_MISC;
 		};
 	}
 }

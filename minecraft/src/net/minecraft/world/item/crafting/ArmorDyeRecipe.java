@@ -1,6 +1,6 @@
 package net.minecraft.world.item.crafting;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.tags.ItemTags;
@@ -15,33 +15,37 @@ public class ArmorDyeRecipe extends CustomRecipe {
 	}
 
 	public boolean matches(CraftingInput craftingInput, Level level) {
-		ItemStack itemStack = ItemStack.EMPTY;
-		List<ItemStack> list = Lists.<ItemStack>newArrayList();
+		if (craftingInput.ingredientCount() < 2) {
+			return false;
+		} else {
+			boolean bl = false;
+			boolean bl2 = false;
 
-		for (int i = 0; i < craftingInput.size(); i++) {
-			ItemStack itemStack2 = craftingInput.getItem(i);
-			if (!itemStack2.isEmpty()) {
-				if (itemStack2.is(ItemTags.DYEABLE)) {
-					if (!itemStack.isEmpty()) {
-						return false;
+			for (int i = 0; i < craftingInput.size(); i++) {
+				ItemStack itemStack = craftingInput.getItem(i);
+				if (!itemStack.isEmpty()) {
+					if (itemStack.is(ItemTags.DYEABLE)) {
+						if (bl) {
+							return false;
+						}
+
+						bl = true;
+					} else {
+						if (!(itemStack.getItem() instanceof DyeItem)) {
+							return false;
+						}
+
+						bl2 = true;
 					}
-
-					itemStack = itemStack2;
-				} else {
-					if (!(itemStack2.getItem() instanceof DyeItem)) {
-						return false;
-					}
-
-					list.add(itemStack2);
 				}
 			}
-		}
 
-		return !itemStack.isEmpty() && !list.isEmpty();
+			return bl2 && bl;
+		}
 	}
 
 	public ItemStack assemble(CraftingInput craftingInput, HolderLookup.Provider provider) {
-		List<DyeItem> list = Lists.<DyeItem>newArrayList();
+		List<DyeItem> list = new ArrayList();
 		ItemStack itemStack = ItemStack.EMPTY;
 
 		for (int i = 0; i < craftingInput.size(); i++) {

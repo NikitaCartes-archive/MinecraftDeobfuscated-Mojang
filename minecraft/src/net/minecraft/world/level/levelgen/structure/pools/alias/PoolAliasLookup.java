@@ -25,7 +25,7 @@ public interface PoolAliasLookup {
 			list.forEach(poolAliasBinding -> poolAliasBinding.forEachResolved(randomSource, builder::put));
 			Map<ResourceKey<StructureTemplatePool>, ResourceKey<StructureTemplatePool>> map = builder.build();
 			return resourceKey -> (ResourceKey<StructureTemplatePool>)Objects.requireNonNull(
-					(ResourceKey)map.getOrDefault(resourceKey, resourceKey), () -> "alias " + resourceKey + " was mapped to null value"
+					(ResourceKey)map.getOrDefault(resourceKey, resourceKey), () -> "alias " + resourceKey.location() + " was mapped to null value"
 				);
 		}
 	}

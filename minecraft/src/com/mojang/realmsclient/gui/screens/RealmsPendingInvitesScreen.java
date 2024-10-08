@@ -49,7 +49,6 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 	@Nullable
 	Component toolTip;
 	RealmsPendingInvitesScreen.PendingInvitationSelectionList pendingInvitationSelectionList;
-	int selectedInvite = -1;
 	private Button acceptButton;
 	private Button rejectButton;
 
@@ -70,17 +69,13 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 			}
 		}, this.screenExecutor);
 		this.addRenderableWidget(this.pendingInvitationSelectionList);
-		this.acceptButton = this.addRenderableWidget(Button.builder(ACCEPT_INVITE, button -> {
-			this.handleInvitation(this.selectedInvite, true);
-			this.selectedInvite = -1;
-			this.updateButtonStates();
-		}).bounds(this.width / 2 - 174, this.height - 32, 100, 20).build());
+		this.acceptButton = this.addRenderableWidget(
+			Button.builder(ACCEPT_INVITE, button -> this.handleInvitation(true)).bounds(this.width / 2 - 174, this.height - 32, 100, 20).build()
+		);
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, button -> this.onClose()).bounds(this.width / 2 - 50, this.height - 32, 100, 20).build());
-		this.rejectButton = this.addRenderableWidget(Button.builder(REJECT_INVITE, button -> {
-			this.handleInvitation(this.selectedInvite, false);
-			this.selectedInvite = -1;
-			this.updateButtonStates();
-		}).bounds(this.width / 2 + 74, this.height - 32, 100, 20).build());
+		this.rejectButton = this.addRenderableWidget(
+			Button.builder(REJECT_INVITE, button -> this.handleInvitation(false)).bounds(this.width / 2 + 74, this.height - 32, 100, 20).build()
+		);
 		this.updateButtonStates();
 	}
 
@@ -89,39 +84,42 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 		this.minecraft.setScreen(this.lastScreen);
 	}
 
-	void handleInvitation(int i, boolean bl) {
-		String string = ((RealmsPendingInvitesScreen.Entry)this.pendingInvitationSelectionList.children().get(i)).pendingInvite.invitationId;
-		CompletableFuture.supplyAsync(() -> {
-			try {
-				RealmsClient realmsClient = RealmsClient.create();
-				if (bl) {
-					realmsClient.acceptInvitation(string);
-				} else {
-					realmsClient.rejectInvitation(string);
-				}
+	void handleInvitation(boolean bl) {
+		if (this.pendingInvitationSelectionList.getSelected() instanceof RealmsPendingInvitesScreen.Entry entry) {
+			String string = entry.pendingInvite.invitationId;
+			CompletableFuture.supplyAsync(() -> {
+				try {
+					RealmsClient realmsClient = RealmsClient.create();
+					if (bl) {
+						realmsClient.acceptInvitation(string);
+					} else {
+						realmsClient.rejectInvitation(string);
+					}
 
-				return true;
-			} catch (RealmsServiceException var3x) {
-				LOGGER.error("Couldn't handle invite", (Throwable)var3x);
-				return false;
-			}
-		}, Util.ioPool()).thenAcceptAsync(boolean_ -> {
-			if (boolean_) {
-				this.pendingInvitationSelectionList.removeAtIndex(i);
-				RealmsDataFetcher realmsDataFetcher = this.minecraft.realmsDataFetcher();
-				if (bl) {
-					realmsDataFetcher.serverListUpdateTask.reset();
+					return true;
+				} catch (RealmsServiceException var3) {
+					LOGGER.error("Couldn't handle invite", (Throwable)var3);
+					return false;
 				}
+			}, Util.ioPool()).thenAcceptAsync(boolean_ -> {
+				if (boolean_) {
+					this.pendingInvitationSelectionList.removeInvitation(entry);
+					this.updateButtonStates();
+					RealmsDataFetcher realmsDataFetcher = this.minecraft.realmsDataFetcher();
+					if (bl) {
+						realmsDataFetcher.serverListUpdateTask.reset();
+					}
 
-				realmsDataFetcher.pendingInvitesTask.reset();
-			}
-		}, this.screenExecutor);
+					realmsDataFetcher.pendingInvitesTask.reset();
+				}
+			}, this.screenExecutor);
+		}
 	}
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-		super.render(guiGraphics, i, j, f);
 		this.toolTip = null;
+		super.render(guiGraphics, i, j, f);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 12, -1);
 		if (this.toolTip != null) {
 			guiGraphics.renderTooltip(this.font, this.toolTip, i, j);
@@ -133,12 +131,9 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 	}
 
 	void updateButtonStates() {
-		this.acceptButton.visible = this.shouldAcceptAndRejectButtonBeVisible(this.selectedInvite);
-		this.rejectButton.visible = this.shouldAcceptAndRejectButtonBeVisible(this.selectedInvite);
-	}
-
-	private boolean shouldAcceptAndRejectButtonBeVisible(int i) {
-		return i != -1;
+		RealmsPendingInvitesScreen.Entry entry = this.pendingInvitationSelectionList.getSelected();
+		this.acceptButton.visible = entry != null;
+		this.rejectButton.visible = entry != null;
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -201,7 +196,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
 			@Override
 			public void onClick(int i) {
-				RealmsPendingInvitesScreen.this.handleInvitation(i, true);
+				RealmsPendingInvitesScreen.this.handleInvitation(true);
 			}
 		}
 
@@ -223,7 +218,7 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 
 			@Override
 			public void onClick(int i) {
-				RealmsPendingInvitesScreen.this.handleInvitation(i, false);
+				RealmsPendingInvitesScreen.this.handleInvitation(false);
 			}
 		}
 	}
@@ -234,10 +229,6 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 			super(Minecraft.getInstance(), RealmsPendingInvitesScreen.this.width, RealmsPendingInvitesScreen.this.height - 72, 32, 36);
 		}
 
-		public void removeAtIndex(int i) {
-			this.remove(i);
-		}
-
 		@Override
 		public int getRowWidth() {
 			return 260;
@@ -246,16 +237,15 @@ public class RealmsPendingInvitesScreen extends RealmsScreen {
 		@Override
 		public void setSelectedIndex(int i) {
 			super.setSelectedIndex(i);
-			this.selectInviteListItem(i);
-		}
-
-		public void selectInviteListItem(int i) {
-			RealmsPendingInvitesScreen.this.selectedInvite = i;
 			RealmsPendingInvitesScreen.this.updateButtonStates();
 		}
 
 		public boolean hasPendingInvites() {
 			return this.getItemCount() == 0;
+		}
+
+		public void removeInvitation(RealmsPendingInvitesScreen.Entry entry) {
+			this.removeEntry(entry);
 		}
 	}
 }

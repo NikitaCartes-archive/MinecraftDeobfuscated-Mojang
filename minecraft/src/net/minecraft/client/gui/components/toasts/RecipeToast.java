@@ -9,9 +9,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
-import net.minecraft.world.item.crafting.display.SlotDisplay;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
 
 @Environment(EnvType.CLIENT)
 public class RecipeToast implements Toast {
@@ -78,9 +79,9 @@ public class RecipeToast implements Toast {
 			toastManager.addToast(recipeToast);
 		}
 
-		SlotDisplay.ResolutionContext resolutionContext = SlotDisplay.ResolutionContext.forLevel(toastManager.getMinecraft().level);
-		ItemStack itemStack = recipeDisplay.craftingStation().resolveForFirstStack(resolutionContext);
-		ItemStack itemStack2 = recipeDisplay.result().resolveForFirstStack(resolutionContext);
+		ContextMap contextMap = SlotDisplayContext.fromLevel(toastManager.getMinecraft().level);
+		ItemStack itemStack = recipeDisplay.craftingStation().resolveForFirstStack(contextMap);
+		ItemStack itemStack2 = recipeDisplay.result().resolveForFirstStack(contextMap);
 		recipeToast.addItem(itemStack, itemStack2);
 	}
 

@@ -1001,7 +1001,9 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 		);
 		VanillaRecipeProvider.smithingTrims()
 			.filter(trimTemplate -> set.contains(trimTemplate.template()))
-			.forEach(trimTemplate -> builder.addCriterion("armor_trimmed_" + trimTemplate.id(), RecipeCraftedTrigger.TriggerInstance.craftedItem(trimTemplate.id())));
+			.forEach(
+				trimTemplate -> builder.addCriterion("armor_trimmed_" + trimTemplate.id().location(), RecipeCraftedTrigger.TriggerInstance.craftedItem(trimTemplate.id()))
+			);
 		return builder;
 	}
 
@@ -1009,7 +1011,7 @@ public class VanillaAdventureAdvancements implements AdvancementSubProvider {
 		builder.requirements(AdvancementRequirements.Strategy.OR);
 		VanillaRecipeProvider.smithingTrims()
 			.map(VanillaRecipeProvider.TrimTemplate::id)
-			.forEach(resourceKey -> builder.addCriterion("armor_trimmed_" + resourceKey, RecipeCraftedTrigger.TriggerInstance.craftedItem(resourceKey)));
+			.forEach(resourceKey -> builder.addCriterion("armor_trimmed_" + resourceKey.location(), RecipeCraftedTrigger.TriggerInstance.craftedItem(resourceKey)));
 		return builder;
 	}
 

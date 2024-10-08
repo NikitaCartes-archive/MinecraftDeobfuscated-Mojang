@@ -7,7 +7,6 @@ import net.minecraft.client.model.HorseModel;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.state.HorseRenderState;
 import net.minecraft.core.component.DataComponents;
@@ -38,8 +37,7 @@ public class HorseArmorLayer extends RenderLayer<HorseRenderState, HorseModel> {
 			HorseModel horseModel = horseRenderState.isBaby ? this.babyModel : this.adultModel;
 			ResourceLocation resourceLocation = (ResourceLocation)equippable.model().get();
 			horseModel.setupAnim(horseRenderState);
-			this.equipmentRenderer
-				.renderLayers(EquipmentModel.LayerType.HORSE_BODY, resourceLocation, horseModel, itemStack, RenderType::entityCutoutNoCull, poseStack, multiBufferSource, i);
+			this.equipmentRenderer.renderLayers(EquipmentModel.LayerType.HORSE_BODY, resourceLocation, horseModel, itemStack, poseStack, multiBufferSource, i);
 		}
 	}
 }

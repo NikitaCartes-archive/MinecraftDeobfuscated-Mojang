@@ -52,7 +52,9 @@ public abstract class AbstractCookingRecipe extends SingleItemRecipe {
 				this.input().display(),
 				SlotDisplay.AnyFuel.INSTANCE,
 				new SlotDisplay.ItemStackSlotDisplay(this.result()),
-				new SlotDisplay.ItemSlotDisplay(this.furnaceIcon())
+				new SlotDisplay.ItemSlotDisplay(this.furnaceIcon()),
+				this.cookingTime,
+				this.experience
 			)
 		);
 	}

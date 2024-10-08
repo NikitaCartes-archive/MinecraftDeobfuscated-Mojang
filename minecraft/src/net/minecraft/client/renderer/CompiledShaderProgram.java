@@ -12,7 +12,6 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,7 @@ public class CompiledShaderProgram implements AutoCloseable {
 	private final IntList samplerLocations = new IntArrayList();
 	private final List<Uniform> uniforms = new ArrayList();
 	private final Map<String, Uniform> uniformsByName = new HashMap();
+	private final Map<String, ShaderProgramConfig.Uniform> uniformConfigs = new HashMap();
 	private final int programId;
 	@Nullable
 	public Uniform MODEL_VIEW_MATRIX;
@@ -100,6 +100,7 @@ public class CompiledShaderProgram implements AutoCloseable {
 				uniform2.setLocation(i);
 				this.uniforms.add(uniform2);
 				this.uniformsByName.put(string, uniform2);
+				this.uniformConfigs.put(string, uniform);
 			}
 		}
 
@@ -178,6 +179,11 @@ public class CompiledShaderProgram implements AutoCloseable {
 		return (Uniform)this.uniformsByName.get(string);
 	}
 
+	@Nullable
+	public ShaderProgramConfig.Uniform getUniformConfig(String string) {
+		return (ShaderProgramConfig.Uniform)this.uniformConfigs.get(string);
+	}
+
 	public AbstractUniform safeGetUniform(String string) {
 		Uniform uniform = this.getUniform(string);
 		return (AbstractUniform)(uniform == null ? DUMMY_UNIFORM : uniform);
@@ -188,33 +194,11 @@ public class CompiledShaderProgram implements AutoCloseable {
 	}
 
 	private Uniform parseUniformNode(ShaderProgramConfig.Uniform uniform) {
-		String string = uniform.name();
 		int i = Uniform.getTypeFromString(uniform.type());
 		int j = uniform.count();
-		float[] fs = new float[Math.max(j, 16)];
-		int k = 0;
-
-		for (float f : uniform.values()) {
-			fs[k++] = f;
-		}
-
-		if (j > 1 && uniform.values().size() == 1) {
-			while (k < j) {
-				fs[k] = fs[0];
-				k++;
-			}
-		}
-
-		int l = j > 1 && j <= 4 && i < 8 ? j - 1 : 0;
-		Uniform uniform2 = new Uniform(string, i + l, j);
-		if (i <= 3) {
-			uniform2.setSafe((int)fs[0], (int)fs[1], (int)fs[2], (int)fs[3]);
-		} else if (i <= 7) {
-			uniform2.setSafe(fs[0], fs[1], fs[2], fs[3]);
-		} else {
-			uniform2.set(Arrays.copyOfRange(fs, 0, j));
-		}
-
+		int k = j > 1 && j <= 4 && i < 8 ? j - 1 : 0;
+		Uniform uniform2 = new Uniform(uniform.name(), i + k, j);
+		uniform2.setFromConfig(uniform);
 		return uniform2;
 	}
 

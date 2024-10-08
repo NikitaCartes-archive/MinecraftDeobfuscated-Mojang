@@ -2,8 +2,8 @@ package net.minecraft.world.level.storage.loot.providers.score;
 
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.scores.ScoreHolder;
 
 public interface ScoreboardNameProvider {
@@ -12,5 +12,5 @@ public interface ScoreboardNameProvider {
 
 	LootScoreProviderType getType();
 
-	Set<LootContextParam<?>> getReferencedContextParams();
+	Set<ContextKey<?>> getReferencedContextParams();
 }
