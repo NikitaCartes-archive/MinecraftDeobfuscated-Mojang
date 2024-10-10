@@ -1,5 +1,6 @@
 package net.minecraft.client.renderer;
 
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.framegraph.FrameGraphBuilder;
 import com.mojang.blaze3d.framegraph.FramePass;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -11,7 +12,6 @@ import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexSorting;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +76,7 @@ public class PostPass {
 				RenderSystem.depthFunc(519);
 				RenderSystem.setShader(this.shader);
 				RenderSystem.backupProjectionMatrix();
-				RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
+				RenderSystem.setProjectionMatrix(matrix4f, ProjectionType.ORTHOGRAPHIC);
 				BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
 				bufferBuilder.addVertex(0.0F, 0.0F, 500.0F);
 				bufferBuilder.addVertex((float)renderTarget.width, 0.0F, 500.0F);

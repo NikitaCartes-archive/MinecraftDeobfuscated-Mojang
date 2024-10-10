@@ -26,6 +26,7 @@ public class CoreShaders {
 	public static final ShaderProgram RENDERTYPE_TRANSLUCENT = register("rendertype_translucent", DefaultVertexFormat.BLOCK);
 	public static final ShaderProgram RENDERTYPE_TRANSLUCENT_MOVING_BLOCK = register("rendertype_translucent_moving_block", DefaultVertexFormat.BLOCK);
 	public static final ShaderProgram RENDERTYPE_ARMOR_CUTOUT_NO_CULL = register("rendertype_armor_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY);
+	public static final ShaderProgram RENDERTYPE_ARMOR_TRANSLUCENT = register("rendertype_armor_translucent", DefaultVertexFormat.NEW_ENTITY);
 	public static final ShaderProgram RENDERTYPE_ENTITY_SOLID = register("rendertype_entity_solid", DefaultVertexFormat.NEW_ENTITY);
 	public static final ShaderProgram RENDERTYPE_ENTITY_CUTOUT = register("rendertype_entity_cutout", DefaultVertexFormat.NEW_ENTITY);
 	public static final ShaderProgram RENDERTYPE_ENTITY_CUTOUT_NO_CULL = register("rendertype_entity_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY);

@@ -19,7 +19,7 @@ import net.minecraft.world.level.ItemLike;
 public record ItemCost(Holder<Item> item, int count, DataComponentPredicate components, ItemStack itemStack) {
 	public static final Codec<ItemCost> CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					ItemStack.ITEM_NON_AIR_CODEC.fieldOf("id").forGetter(ItemCost::item),
+					Item.CODEC.fieldOf("id").forGetter(ItemCost::item),
 					ExtraCodecs.POSITIVE_INT.fieldOf("count").orElse(1).forGetter(ItemCost::count),
 					DataComponentPredicate.CODEC.optionalFieldOf("components", DataComponentPredicate.EMPTY).forGetter(ItemCost::components)
 				)

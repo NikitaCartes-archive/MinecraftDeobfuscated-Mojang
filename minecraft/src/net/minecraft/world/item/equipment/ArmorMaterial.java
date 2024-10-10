@@ -43,7 +43,7 @@ public record ArmorMaterial(
 			);
 	}
 
-	public Item.Properties animalProperties(Item.Properties properties, SoundEvent soundEvent, boolean bl, HolderSet<EntityType<?>> holderSet) {
+	public Item.Properties animalProperties(Item.Properties properties, Holder<SoundEvent> holder, boolean bl, HolderSet<EntityType<?>> holderSet) {
 		if (bl) {
 			properties = properties.durability(ArmorType.BODY.getDurability(this.durability)).repairable(this.repairIngredient);
 		}
@@ -51,12 +51,7 @@ public record ArmorMaterial(
 		return properties.attributes(this.createAttributes(ArmorType.BODY))
 			.component(
 				DataComponents.EQUIPPABLE,
-				Equippable.builder(EquipmentSlot.BODY)
-					.setEquipSound(Holder.direct(soundEvent))
-					.setModel(this.modelId)
-					.setAllowedEntities(holderSet)
-					.setDamageOnHurt(bl)
-					.build()
+				Equippable.builder(EquipmentSlot.BODY).setEquipSound(holder).setModel(this.modelId).setAllowedEntities(holderSet).setDamageOnHurt(bl).build()
 			);
 	}
 

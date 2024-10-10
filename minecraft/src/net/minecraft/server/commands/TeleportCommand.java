@@ -185,10 +185,10 @@ public class TeleportCommand {
 	) throws CommandSyntaxException {
 		Vec3 vec3 = coordinates.getPosition(commandSourceStack);
 		Vec2 vec2 = coordinates2 == null ? null : coordinates2.getRotation(commandSourceStack);
-		Set<Relative> set = getRelatives(coordinates, coordinates2, commandSourceStack.getEntity().level().dimension() == serverLevel.dimension());
 
 		for (Entity entity : collection) {
-			if (coordinates2 == null) {
+			Set<Relative> set = getRelatives(coordinates, coordinates2, entity.level().dimension() == serverLevel.dimension());
+			if (vec2 == null) {
 				performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, entity.getYRot(), entity.getXRot(), lookAt);
 			} else {
 				performTeleport(commandSourceStack, entity, serverLevel, vec3.x, vec3.y, vec3.z, set, vec2.y, vec2.x, lookAt);
@@ -241,17 +241,12 @@ public class TeleportCommand {
 			}
 		}
 
-		if (coordinates2 == null) {
+		if (coordinates2 == null || coordinates2.isXRelative()) {
 			set.add(Relative.X_ROT);
-			set.add(Relative.Y_ROT);
-		} else {
-			if (coordinates2.isXRelative()) {
-				set.add(Relative.X_ROT);
-			}
+		}
 
-			if (coordinates2.isYRelative()) {
-				set.add(Relative.Y_ROT);
-			}
+		if (coordinates2 == null || coordinates2.isYRelative()) {
+			set.add(Relative.Y_ROT);
 		}
 
 		return set;

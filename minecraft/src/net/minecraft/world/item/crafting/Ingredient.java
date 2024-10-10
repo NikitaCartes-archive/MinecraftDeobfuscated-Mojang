@@ -31,7 +31,7 @@ public final class Ingredient implements Predicate<ItemStack> {
 			holderSet -> holderSet.size() == 0 ? Optional.empty() : Optional.of(new Ingredient(holderSet)),
 			optional -> (HolderSet)optional.map(ingredient -> ingredient.values).orElse(HolderSet.direct())
 		);
-	public static final Codec<HolderSet<Item>> NON_AIR_HOLDER_SET_CODEC = HolderSetCodec.create(Registries.ITEM, ItemStack.ITEM_NON_AIR_CODEC, false);
+	public static final Codec<HolderSet<Item>> NON_AIR_HOLDER_SET_CODEC = HolderSetCodec.create(Registries.ITEM, Item.CODEC, false);
 	public static final Codec<Ingredient> CODEC = ExtraCodecs.nonEmptyHolderSet(NON_AIR_HOLDER_SET_CODEC).xmap(Ingredient::new, ingredient -> ingredient.values);
 	private final HolderSet<Item> values;
 	@Nullable

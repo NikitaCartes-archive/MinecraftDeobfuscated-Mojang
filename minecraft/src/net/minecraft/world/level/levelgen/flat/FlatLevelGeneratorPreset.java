@@ -5,13 +5,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryFileCodec;
-import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.world.item.Item;
 
 public record FlatLevelGeneratorPreset(Holder<Item> displayItem, FlatLevelGeneratorSettings settings) {
 	public static final Codec<FlatLevelGeneratorPreset> DIRECT_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
-					RegistryFixedCodec.create(Registries.ITEM).fieldOf("display").forGetter(flatLevelGeneratorPreset -> flatLevelGeneratorPreset.displayItem),
+					Item.CODEC.fieldOf("display").forGetter(flatLevelGeneratorPreset -> flatLevelGeneratorPreset.displayItem),
 					FlatLevelGeneratorSettings.CODEC.fieldOf("settings").forGetter(flatLevelGeneratorPreset -> flatLevelGeneratorPreset.settings)
 				)
 				.apply(instance, FlatLevelGeneratorPreset::new)

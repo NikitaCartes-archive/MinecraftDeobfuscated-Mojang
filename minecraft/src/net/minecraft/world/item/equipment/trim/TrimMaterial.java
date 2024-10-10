@@ -13,7 +13,6 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFileCodec;
-import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.Item;
@@ -24,7 +23,7 @@ public record TrimMaterial(
 	public static final Codec<TrimMaterial> DIRECT_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ExtraCodecs.RESOURCE_PATH_CODEC.fieldOf("asset_name").forGetter(TrimMaterial::assetName),
-					RegistryFixedCodec.create(Registries.ITEM).fieldOf("ingredient").forGetter(TrimMaterial::ingredient),
+					Item.CODEC.fieldOf("ingredient").forGetter(TrimMaterial::ingredient),
 					Codec.FLOAT.fieldOf("item_model_index").forGetter(TrimMaterial::itemModelIndex),
 					Codec.unboundedMap(ResourceLocation.CODEC, Codec.STRING)
 						.optionalFieldOf("override_armor_materials", Map.of())

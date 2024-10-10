@@ -15,7 +15,12 @@ public abstract class ItemCombinerMenu extends AbstractContainerMenu {
 	protected final ContainerLevelAccess access;
 	protected final Player player;
 	protected final Container inputSlots;
-	protected final ResultContainer resultSlots = new ResultContainer();
+	protected final ResultContainer resultSlots = new ResultContainer() {
+		@Override
+		public void setChanged() {
+			ItemCombinerMenu.this.slotsChanged(this);
+		}
+	};
 	private final int resultSlotIndex;
 
 	protected boolean mayPickup(Player player, boolean bl) {

@@ -26,13 +26,13 @@ public class SimpleSoundInstance extends AbstractSoundInstance {
 
 	public static SimpleSoundInstance forUI(SoundEvent soundEvent, float f, float g) {
 		return new SimpleSoundInstance(
-			soundEvent.getLocation(), SoundSource.MASTER, g, f, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
+			soundEvent.location(), SoundSource.MASTER, g, f, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
 		);
 	}
 
 	public static SimpleSoundInstance forMusic(SoundEvent soundEvent) {
 		return new SimpleSoundInstance(
-			soundEvent.getLocation(), SoundSource.MUSIC, 1.0F, 1.0F, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
+			soundEvent.location(), SoundSource.MUSIC, 1.0F, 1.0F, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
 		);
 	}
 
@@ -44,7 +44,7 @@ public class SimpleSoundInstance extends AbstractSoundInstance {
 
 	public static SimpleSoundInstance forLocalAmbience(SoundEvent soundEvent, float f, float g) {
 		return new SimpleSoundInstance(
-			soundEvent.getLocation(), SoundSource.AMBIENT, g, f, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
+			soundEvent.location(), SoundSource.AMBIENT, g, f, SoundInstance.createUnseededRandom(), false, 0, SoundInstance.Attenuation.NONE, 0.0, 0.0, 0.0, true
 		);
 	}
 
@@ -73,7 +73,7 @@ public class SimpleSoundInstance extends AbstractSoundInstance {
 		double e,
 		double h
 	) {
-		this(soundEvent.getLocation(), soundSource, f, g, randomSource, bl, i, attenuation, d, e, h, false);
+		this(soundEvent.location(), soundSource, f, g, randomSource, bl, i, attenuation, d, e, h, false);
 	}
 
 	public SimpleSoundInstance(

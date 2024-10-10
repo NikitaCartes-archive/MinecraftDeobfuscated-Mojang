@@ -103,6 +103,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.component.DeathProtection;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -1298,7 +1299,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
 			bl = true;
 		}
 
-		if (!damageSource.is(DamageTypeTags.BYPASSES_SHIELD) && this.isBlocking() && !bl) {
+		ItemStack itemStack = this.getItemBlockingWith();
+		if (!damageSource.is(DamageTypeTags.BYPASSES_SHIELD) && itemStack != null && itemStack.getItem() instanceof ShieldItem && !bl) {
 			Vec3 vec3 = damageSource.getSourcePosition();
 			if (vec3 != null) {
 				Vec3 vec32 = this.calculateViewVector(0.0F, this.getYHeadRot());
@@ -1893,12 +1895,13 @@ public abstract class LivingEntity extends Entity implements Attackable {
 		}
 	}
 
-	private void makePoofParticles() {
+	public void makePoofParticles() {
 		for (int i = 0; i < 20; i++) {
 			double d = this.random.nextGaussian() * 0.02;
 			double e = this.random.nextGaussian() * 0.02;
 			double f = this.random.nextGaussian() * 0.02;
-			this.level().addParticle(ParticleTypes.POOF, this.getRandomX(1.0), this.getRandomY(), this.getRandomZ(1.0), d, e, f);
+			double g = 10.0;
+			this.level().addParticle(ParticleTypes.POOF, this.getRandomX(1.0) - d * 10.0, this.getRandomY() - e * 10.0, this.getRandomZ(1.0) - f * 10.0, d, e, f);
 		}
 	}
 

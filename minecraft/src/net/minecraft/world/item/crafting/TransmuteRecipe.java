@@ -11,7 +11,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -116,7 +115,7 @@ public class TransmuteRecipe implements CraftingRecipe {
 						CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(transmuteRecipe -> transmuteRecipe.category),
 						Ingredient.CODEC.fieldOf("input").forGetter(transmuteRecipe -> transmuteRecipe.input),
 						Ingredient.CODEC.fieldOf("material").forGetter(transmuteRecipe -> transmuteRecipe.material),
-						RegistryFixedCodec.create(Registries.ITEM).fieldOf("result").forGetter(transmuteRecipe -> transmuteRecipe.result)
+						Item.CODEC.fieldOf("result").forGetter(transmuteRecipe -> transmuteRecipe.result)
 					)
 					.apply(instance, TransmuteRecipe::new)
 		);

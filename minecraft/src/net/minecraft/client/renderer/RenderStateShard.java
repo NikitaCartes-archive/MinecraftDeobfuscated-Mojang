@@ -22,7 +22,6 @@ import org.joml.Matrix4fStack;
 
 @Environment(EnvType.CLIENT)
 public abstract class RenderStateShard {
-	private static final float VIEW_SCALE_Z_EPSILON = 2.4414062E-4F;
 	public static final double MAX_ENCHANTMENT_GLINT_SPEED_MILLIS = 8.0;
 	protected final String name;
 	private final Runnable setupState;
@@ -162,6 +161,9 @@ public abstract class RenderStateShard {
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ARMOR_CUTOUT_NO_CULL_SHADER = new RenderStateShard.ShaderStateShard(
 		CoreShaders.RENDERTYPE_ARMOR_CUTOUT_NO_CULL
+	);
+	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ARMOR_TRANSLUCENT_SHADER = new RenderStateShard.ShaderStateShard(
+		CoreShaders.RENDERTYPE_ARMOR_TRANSLUCENT
 	);
 	protected static final RenderStateShard.ShaderStateShard RENDERTYPE_ENTITY_SOLID_SHADER = new RenderStateShard.ShaderStateShard(
 		CoreShaders.RENDERTYPE_ENTITY_SOLID
@@ -305,7 +307,7 @@ public abstract class RenderStateShard {
 	protected static final RenderStateShard.LayeringStateShard VIEW_OFFSET_Z_LAYERING = new RenderStateShard.LayeringStateShard("view_offset_z_layering", () -> {
 		Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
 		matrix4fStack.pushMatrix();
-		matrix4fStack.scale(0.99975586F, 0.99975586F, 0.99975586F);
+		RenderSystem.getProjectionType().applyLayeringTransform(matrix4fStack, 1.0F);
 	}, () -> {
 		Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
 		matrix4fStack.popMatrix();
@@ -314,7 +316,7 @@ public abstract class RenderStateShard {
 		"view_offset_z_layering_forward", () -> {
 			Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
 			matrix4fStack.pushMatrix();
-			matrix4fStack.scale(1.0002441F, 1.0002441F, 1.0002441F);
+			RenderSystem.getProjectionType().applyLayeringTransform(matrix4fStack, -1.0F);
 		}, () -> {
 			Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
 			matrix4fStack.popMatrix();

@@ -23,7 +23,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.portal.TeleportTransition;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -118,17 +117,7 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 					entity.unRide();
 				}
 
-				Vec3 vec33;
-				if (this.getDeltaMovement().lengthSqr() > 0.0) {
-					AABB aABB = entity.getBoundingBox();
-					Vec3 vec3 = new Vec3(aABB.getXsize(), aABB.getYsize(), aABB.getZsize()).scale(0.5000099999997474);
-					Vec3 vec32 = new Vec3(Math.signum(this.getDeltaMovement().x), Math.signum(this.getDeltaMovement().y), Math.signum(this.getDeltaMovement().z));
-					vec33 = vec32.multiply(vec3).add(0.0, aABB.getYsize() * 0.5, 0.0);
-				} else {
-					vec33 = Vec3.ZERO;
-				}
-
-				Vec3 vec34 = this.position().subtract(vec33);
+				Vec3 vec3 = this.oldPosition();
 				if (entity instanceof ServerPlayer serverPlayer) {
 					if (serverPlayer.connection.isAcceptingMessages()) {
 						if (this.random.nextFloat() < 0.05F && serverLevel.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
@@ -139,8 +128,12 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 							}
 						}
 
+						if (this.isOnPortalCooldown()) {
+							entity.setPortalCooldown();
+						}
+
 						ServerPlayer serverPlayer2 = serverPlayer.teleport(
-							new TeleportTransition(serverLevel, vec34, Vec3.ZERO, 0.0F, 0.0F, Relative.union(Relative.ROTATION, Relative.DELTA), TeleportTransition.DO_NOTHING)
+							new TeleportTransition(serverLevel, vec3, Vec3.ZERO, 0.0F, 0.0F, Relative.union(Relative.ROTATION, Relative.DELTA), TeleportTransition.DO_NOTHING)
 						);
 						if (serverPlayer2 != null) {
 							serverPlayer2.resetFallDistance();
@@ -148,17 +141,17 @@ public class ThrownEnderpearl extends ThrowableItemProjectile {
 							serverPlayer2.hurtServer(serverPlayer.serverLevel(), this.damageSources().enderPearl(), 5.0F);
 						}
 
-						this.playSound(serverLevel, vec34);
+						this.playSound(serverLevel, vec3);
 					}
 				} else {
 					Entity entity2 = entity.teleport(
-						new TeleportTransition(serverLevel, vec34, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), TeleportTransition.DO_NOTHING)
+						new TeleportTransition(serverLevel, vec3, entity.getDeltaMovement(), entity.getYRot(), entity.getXRot(), TeleportTransition.DO_NOTHING)
 					);
 					if (entity2 != null) {
 						entity2.resetFallDistance();
 					}
 
-					this.playSound(serverLevel, vec34);
+					this.playSound(serverLevel, vec3);
 				}
 
 				this.discard();

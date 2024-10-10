@@ -260,8 +260,14 @@ public abstract class LivingEntityRenderer<T extends LivingEntity, S extends Liv
 			livingEntityRenderState.yRot *= -1.0F;
 		}
 
-		livingEntityRenderState.walkAnimationPos = livingEntity.walkAnimation.position(f);
-		livingEntityRenderState.walkAnimationSpeed = livingEntity.walkAnimation.speed(f);
+		if (!livingEntity.isPassenger() && livingEntity.isAlive()) {
+			livingEntityRenderState.walkAnimationPos = livingEntity.walkAnimation.position(f);
+			livingEntityRenderState.walkAnimationSpeed = livingEntity.walkAnimation.speed(f);
+		} else {
+			livingEntityRenderState.walkAnimationPos = 0.0F;
+			livingEntityRenderState.walkAnimationSpeed = 0.0F;
+		}
+
 		if (livingEntity.getVehicle() instanceof LivingEntity livingEntity2) {
 			livingEntityRenderState.wornHeadAnimationPos = livingEntity2.walkAnimation.position(f);
 		} else {

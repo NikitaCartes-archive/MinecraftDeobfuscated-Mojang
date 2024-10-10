@@ -36,7 +36,7 @@ public class WinterDropItemTagsProvider extends ItemTagsProvider {
 		this.copy(BlockTags.WOODEN_TRAPDOORS, ItemTags.WOODEN_TRAPDOORS);
 		this.copy(BlockTags.DIRT, ItemTags.DIRT);
 		this.tag(ItemTags.BOATS).add(Items.PALE_OAK_BOAT);
-		this.tag(ItemTags.CHEST_BOATS).add(Items.PALE_OAK_BOAT);
+		this.tag(ItemTags.CHEST_BOATS).add(Items.PALE_OAK_CHEST_BOAT);
 		this.copy(BlockTags.STANDING_SIGNS, ItemTags.SIGNS);
 		this.copy(BlockTags.CEILING_HANGING_SIGNS, ItemTags.HANGING_SIGNS);
 	}

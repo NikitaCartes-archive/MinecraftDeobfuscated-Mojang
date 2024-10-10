@@ -10,7 +10,6 @@ import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.RegistryFileCodec;
-import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
@@ -18,7 +17,7 @@ public record TrimPattern(ResourceLocation assetId, Holder<Item> templateItem, C
 	public static final Codec<TrimPattern> DIRECT_CODEC = RecordCodecBuilder.create(
 		instance -> instance.group(
 					ResourceLocation.CODEC.fieldOf("asset_id").forGetter(TrimPattern::assetId),
-					RegistryFixedCodec.create(Registries.ITEM).fieldOf("template_item").forGetter(TrimPattern::templateItem),
+					Item.CODEC.fieldOf("template_item").forGetter(TrimPattern::templateItem),
 					ComponentSerialization.CODEC.fieldOf("description").forGetter(TrimPattern::description),
 					Codec.BOOL.fieldOf("decal").orElse(false).forGetter(TrimPattern::decal)
 				)

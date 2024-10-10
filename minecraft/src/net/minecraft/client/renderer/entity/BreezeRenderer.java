@@ -39,6 +39,7 @@ public class BreezeRenderer extends MobRenderer<Breeze, BreezeRenderState, Breez
 
 	public void extractRenderState(Breeze breeze, BreezeRenderState breezeRenderState, float f) {
 		super.extractRenderState(breeze, breezeRenderState, f);
+		breezeRenderState.idle.copyFrom(breeze.idle);
 		breezeRenderState.shoot.copyFrom(breeze.shoot);
 		breezeRenderState.slide.copyFrom(breeze.slide);
 		breezeRenderState.slideBack.copyFrom(breeze.slideBack);

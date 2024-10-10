@@ -29,7 +29,7 @@ public class WinterDropBlockLoot extends BlockLootSubProvider {
 		this.dropSelf(Blocks.PALE_OAK_FENCE_GATE);
 		this.dropSelf(Blocks.PALE_OAK_FENCE);
 		this.add(Blocks.PALE_MOSS_CARPET, block -> this.createMossyCarpetBlockDrops(block));
-		this.dropSelf(Blocks.PALE_HANGING_MOSS);
+		this.add(Blocks.PALE_HANGING_MOSS, itemLike -> this.createShearsOrSilkTouchOnlyDrop(itemLike));
 		this.dropSelf(Blocks.PALE_MOSS_BLOCK);
 		this.dropPottedContents(Blocks.POTTED_PALE_OAK_SAPLING);
 		this.add(Blocks.PALE_OAK_SLAB, block -> this.createSlabItemTable(block));

@@ -3,6 +3,8 @@ package net.minecraft.world.item;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.mojang.logging.LogUtils;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -69,6 +71,9 @@ import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 
 public class Item implements FeatureElement, ItemLike {
+	public static final Codec<Holder<Item>> CODEC = BuiltInRegistries.ITEM
+		.holderByNameCodec()
+		.validate(holder -> holder.is(Items.AIR.builtInRegistryHolder()) ? DataResult.error(() -> "Item must not be minecraft:air") : DataResult.success(holder));
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final Map<Block, Item> BY_BLOCK = Maps.<Block, Item>newHashMap();
 	public static final ResourceLocation BASE_ATTACK_DAMAGE_ID = ResourceLocation.withDefaultNamespace("base_attack_damage");

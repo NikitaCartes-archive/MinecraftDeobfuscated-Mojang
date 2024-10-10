@@ -13,7 +13,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.context.ContextMap;
@@ -127,8 +126,7 @@ public interface SlotDisplay {
 
 	public static record ItemSlotDisplay(Holder<Item> item) implements SlotDisplay {
 		public static final MapCodec<SlotDisplay.ItemSlotDisplay> MAP_CODEC = RecordCodecBuilder.mapCodec(
-			instance -> instance.group(RegistryFixedCodec.create(Registries.ITEM).fieldOf("item").forGetter(SlotDisplay.ItemSlotDisplay::item))
-					.apply(instance, SlotDisplay.ItemSlotDisplay::new)
+			instance -> instance.group(Item.CODEC.fieldOf("item").forGetter(SlotDisplay.ItemSlotDisplay::item)).apply(instance, SlotDisplay.ItemSlotDisplay::new)
 		);
 		public static final StreamCodec<RegistryFriendlyByteBuf, SlotDisplay.ItemSlotDisplay> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.holderRegistry(Registries.ITEM), SlotDisplay.ItemSlotDisplay::item, SlotDisplay.ItemSlotDisplay::new

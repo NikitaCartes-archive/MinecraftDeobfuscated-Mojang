@@ -131,6 +131,7 @@ public class Font {
 			}
 		}
 
+		stringRenderOutput.renderCharacters();
 		Font.StringRenderOutput stringRenderOutput2 = new Font.StringRenderOutput(
 			this, multiBufferSource, f, g, adjustColor(i), false, matrix4f, Font.DisplayMode.POLYGON_OFFSET, k
 		);
@@ -371,25 +372,28 @@ public class Font {
 				bakedGlyph.renderEffect(effect, this.pose, vertexConsumer, this.packedLightCoords);
 			}
 
-			for (BakedGlyph.GlyphInstance glyphInstance : this.glyphInstances) {
-				BakedGlyph bakedGlyph2 = glyphInstance.glyph();
-				VertexConsumer vertexConsumer2 = this.bufferSource.getBuffer(bakedGlyph2.renderType(this.mode));
-				bakedGlyph2.renderChar(glyphInstance, this.pose, vertexConsumer2, this.packedLightCoords);
-			}
-
+			this.renderCharacters();
 			if (this.effects != null) {
 				if (bakedGlyph == null) {
 					bakedGlyph = this.this$0.getFontSet(Style.DEFAULT_FONT).whiteGlyph();
 				}
 
-				VertexConsumer vertexConsumer3 = this.bufferSource.getBuffer(bakedGlyph.renderType(this.mode));
+				VertexConsumer vertexConsumer2 = this.bufferSource.getBuffer(bakedGlyph.renderType(this.mode));
 
 				for (BakedGlyph.Effect effect2 : this.effects) {
-					bakedGlyph.renderEffect(effect2, this.pose, vertexConsumer3, this.packedLightCoords);
+					bakedGlyph.renderEffect(effect2, this.pose, vertexConsumer2, this.packedLightCoords);
 				}
 			}
 
 			return this.x;
+		}
+
+		void renderCharacters() {
+			for (BakedGlyph.GlyphInstance glyphInstance : this.glyphInstances) {
+				BakedGlyph bakedGlyph = glyphInstance.glyph();
+				VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph.renderType(this.mode));
+				bakedGlyph.renderChar(glyphInstance, this.pose, vertexConsumer, this.packedLightCoords);
+			}
 		}
 	}
 }

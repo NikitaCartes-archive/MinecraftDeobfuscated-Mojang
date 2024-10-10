@@ -26,7 +26,7 @@ public abstract class AbstractSoundInstance implements SoundInstance {
 	protected RandomSource random;
 
 	protected AbstractSoundInstance(SoundEvent soundEvent, SoundSource soundSource, RandomSource randomSource) {
-		this(soundEvent.getLocation(), soundSource, randomSource);
+		this(soundEvent.location(), soundSource, randomSource);
 	}
 
 	protected AbstractSoundInstance(ResourceLocation resourceLocation, SoundSource soundSource, RandomSource randomSource) {

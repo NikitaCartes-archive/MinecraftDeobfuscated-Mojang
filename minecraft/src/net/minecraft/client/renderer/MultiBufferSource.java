@@ -93,7 +93,7 @@ public interface MultiBufferSource {
 			if (meshData != null) {
 				if (renderType.sortOnUpload()) {
 					ByteBufferBuilder byteBufferBuilder = (ByteBufferBuilder)this.fixedBuffers.getOrDefault(renderType, this.sharedBuffer);
-					meshData.sortQuads(byteBufferBuilder, RenderSystem.getVertexSorting());
+					meshData.sortQuads(byteBufferBuilder, RenderSystem.getProjectionType().vertexSorting());
 				}
 
 				renderType.draw(meshData);

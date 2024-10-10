@@ -2,6 +2,7 @@ package com.mojang.blaze3d.systems;
 
 import com.google.common.collect.Queues;
 import com.mojang.blaze3d.DontObfuscate;
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.TracyFrameCapture;
 import com.mojang.blaze3d.buffers.BufferType;
 import com.mojang.blaze3d.buffers.BufferUsage;
@@ -11,7 +12,6 @@ import com.mojang.blaze3d.platform.GLX;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.logging.LogUtils;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -74,8 +74,8 @@ public class RenderSystem {
 	});
 	private static Matrix4f projectionMatrix = new Matrix4f();
 	private static Matrix4f savedProjectionMatrix = new Matrix4f();
-	private static VertexSorting vertexSorting = VertexSorting.DISTANCE_TO_ORIGIN;
-	private static VertexSorting savedVertexSorting = VertexSorting.DISTANCE_TO_ORIGIN;
+	private static ProjectionType projectionType = ProjectionType.PERSPECTIVE;
+	private static ProjectionType savedProjectionType = ProjectionType.PERSPECTIVE;
 	private static final Matrix4fStack modelViewStack = new Matrix4fStack(16);
 	private static Matrix4f textureMatrix = new Matrix4f();
 	private static final int[] shaderTextures = new int[12];
@@ -672,10 +672,10 @@ public class RenderSystem {
 		return i >= 0 && i < shaderTextures.length ? shaderTextures[i] : 0;
 	}
 
-	public static void setProjectionMatrix(Matrix4f matrix4f, VertexSorting vertexSorting) {
+	public static void setProjectionMatrix(Matrix4f matrix4f, ProjectionType projectionType) {
 		assertOnRenderThread();
 		projectionMatrix = new Matrix4f(matrix4f);
-		RenderSystem.vertexSorting = vertexSorting;
+		RenderSystem.projectionType = projectionType;
 	}
 
 	public static void setTextureMatrix(Matrix4f matrix4f) {
@@ -691,13 +691,13 @@ public class RenderSystem {
 	public static void backupProjectionMatrix() {
 		assertOnRenderThread();
 		savedProjectionMatrix = projectionMatrix;
-		savedVertexSorting = vertexSorting;
+		savedProjectionType = projectionType;
 	}
 
 	public static void restoreProjectionMatrix() {
 		assertOnRenderThread();
 		projectionMatrix = savedProjectionMatrix;
-		vertexSorting = savedVertexSorting;
+		projectionType = savedProjectionType;
 	}
 
 	public static Matrix4f getProjectionMatrix() {
@@ -740,9 +740,9 @@ public class RenderSystem {
 		return shaderGameTime;
 	}
 
-	public static VertexSorting getVertexSorting() {
+	public static ProjectionType getProjectionType() {
 		assertOnRenderThread();
-		return vertexSorting;
+		return projectionType;
 	}
 
 	@Environment(EnvType.CLIENT)

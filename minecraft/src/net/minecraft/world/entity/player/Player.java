@@ -2117,6 +2117,11 @@ public abstract class Player extends LivingEntity {
 		return false;
 	}
 
+	@Override
+	public boolean isControlledByClient() {
+		return true;
+	}
+
 	public static enum BedSleepingProblem {
 		NOT_POSSIBLE_HERE,
 		NOT_POSSIBLE_NOW(Component.translatable("block.minecraft.bed.no_sleep")),

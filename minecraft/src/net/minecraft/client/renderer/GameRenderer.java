@@ -1,12 +1,12 @@
 package net.minecraft.client.renderer;
 
+import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.resource.CrossFrameResourcePool;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.logging.LogUtils;
 import com.mojang.math.Axis;
 import java.io.IOException;
@@ -363,7 +363,7 @@ public class GameRenderer implements AutoCloseable {
 	private void renderItemInHand(Camera camera, float f, Matrix4f matrix4f) {
 		if (!this.panoramicMode) {
 			Matrix4f matrix4f2 = this.getProjectionMatrix(this.getFov(camera, f, false));
-			RenderSystem.setProjectionMatrix(matrix4f2, VertexSorting.DISTANCE_TO_ORIGIN);
+			RenderSystem.setProjectionMatrix(matrix4f2, ProjectionType.PERSPECTIVE);
 			PoseStack poseStack = new PoseStack();
 			poseStack.pushPose();
 			poseStack.mulPose(matrix4f.invert(new Matrix4f()));
@@ -465,14 +465,12 @@ public class GameRenderer implements AutoCloseable {
 				.setOrtho(
 					0.0F, (float)((double)window.getWidth() / window.getGuiScale()), (float)((double)window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, 21000.0F
 				);
-			RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
-			float f = 1000.0F;
+			RenderSystem.setProjectionMatrix(matrix4f, ProjectionType.ORTHOGRAPHIC);
 			Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
 			matrix4fStack.pushMatrix();
-			matrix4fStack.translation(0.0F, 0.0F, -10000.0F);
+			matrix4fStack.translation(0.0F, 0.0F, -11000.0F);
 			Lighting.setupFor3DItems();
 			GuiGraphics guiGraphics = new GuiGraphics(this.minecraft, this.renderBuffers.bufferSource());
-			guiGraphics.pose().translate(0.0F, 0.0F, -1000.0F);
 			if (bl2 && bl && this.minecraft.level != null) {
 				profilerFiller.popPush("gui");
 				if (!this.minecraft.options.hideGui) {
@@ -488,8 +486,8 @@ public class GameRenderer implements AutoCloseable {
 			if (this.minecraft.getOverlay() != null) {
 				try {
 					this.minecraft.getOverlay().render(guiGraphics, i, j, deltaTracker.getGameTimeDeltaTicks());
-				} catch (Throwable var18) {
-					CrashReport crashReport = CrashReport.forThrowable(var18, "Rendering overlay");
+				} catch (Throwable var17) {
+					CrashReport crashReport = CrashReport.forThrowable(var17, "Rendering overlay");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Overlay render details");
 					crashReportCategory.setDetail("Overlay name", (CrashReportDetail<String>)(() -> this.minecraft.getOverlay().getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
@@ -497,8 +495,8 @@ public class GameRenderer implements AutoCloseable {
 			} else if (bl2 && this.minecraft.screen != null) {
 				try {
 					this.minecraft.screen.renderWithTooltip(guiGraphics, i, j, deltaTracker.getGameTimeDeltaTicks());
-				} catch (Throwable var17) {
-					CrashReport crashReport = CrashReport.forThrowable(var17, "Rendering screen");
+				} catch (Throwable var16) {
+					CrashReport crashReport = CrashReport.forThrowable(var16, "Rendering screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen render details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					crashReportCategory.setDetail(
@@ -526,8 +524,8 @@ public class GameRenderer implements AutoCloseable {
 					if (this.minecraft.screen != null) {
 						this.minecraft.screen.handleDelayedNarration();
 					}
-				} catch (Throwable var16) {
-					CrashReport crashReport = CrashReport.forThrowable(var16, "Narrating screen");
+				} catch (Throwable var15) {
+					CrashReport crashReport = CrashReport.forThrowable(var15, "Narrating screen");
 					CrashReportCategory crashReportCategory = crashReport.addCategory("Screen details");
 					crashReportCategory.setDetail("Screen name", (CrashReportDetail<String>)(() -> this.minecraft.screen.getClass().getCanonicalName()));
 					throw new ReportedException(crashReport);
@@ -664,7 +662,7 @@ public class GameRenderer implements AutoCloseable {
 
 		float n = Math.max(h, (float)this.minecraft.options.fov().get().intValue());
 		Matrix4f matrix4f2 = this.getProjectionMatrix(n);
-		RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.DISTANCE_TO_ORIGIN);
+		RenderSystem.setProjectionMatrix(matrix4f, ProjectionType.PERSPECTIVE);
 		Quaternionf quaternionf = camera.rotation().conjugate(new Quaternionf());
 		Matrix4f matrix4f3 = new Matrix4f().rotation(quaternionf);
 		this.minecraft.levelRenderer.prepareCullFrustum(camera.getPosition(), matrix4f3, matrix4f2);

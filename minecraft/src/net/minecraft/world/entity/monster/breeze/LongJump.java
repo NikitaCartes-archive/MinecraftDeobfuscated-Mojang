@@ -16,6 +16,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Unit;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -25,6 +26,7 @@ import net.minecraft.world.entity.ai.behavior.Swim;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -196,15 +198,18 @@ public class LongJump extends Behavior<Breeze> {
 
 	private static boolean canJumpFromCurrentPosition(ServerLevel serverLevel, Breeze breeze) {
 		BlockPos blockPos = breeze.blockPosition();
-
-		for (int i = 1; i <= 4; i++) {
-			BlockPos blockPos2 = blockPos.relative(Direction.UP, i);
-			if (!serverLevel.getBlockState(blockPos2).isAir() && !serverLevel.getFluidState(blockPos2).is(FluidTags.WATER)) {
-				return false;
+		if (serverLevel.getBlockState(blockPos).is(Blocks.HONEY_BLOCK)) {
+			return false;
+		} else {
+			for (int i = 1; i <= 4; i++) {
+				BlockPos blockPos2 = blockPos.relative(Direction.UP, i);
+				if (!serverLevel.getBlockState(blockPos2).isAir() && !serverLevel.getFluidState(blockPos2).is(FluidTags.WATER)) {
+					return false;
+				}
 			}
-		}
 
-		return true;
+			return true;
+		}
 	}
 
 	private static Optional<Vec3> calculateOptimalJumpVector(Breeze breeze, RandomSource randomSource, Vec3 vec3) {
@@ -212,6 +217,11 @@ public class LongJump extends Behavior<Breeze> {
 			float f = 0.058333334F * (float)breeze.getAttributeValue(Attributes.FOLLOW_RANGE);
 			Optional<Vec3> optional = LongJumpUtil.calculateJumpVectorForAngle(breeze, vec3, f, i, false);
 			if (optional.isPresent()) {
+				if (breeze.hasEffect(MobEffects.JUMP)) {
+					double d = ((Vec3)optional.get()).normalize().y * (double)breeze.getJumpBoostPower();
+					return optional.map(vec3x -> vec3x.add(0.0, d, 0.0));
+				}
+
 				return optional;
 			}
 		}

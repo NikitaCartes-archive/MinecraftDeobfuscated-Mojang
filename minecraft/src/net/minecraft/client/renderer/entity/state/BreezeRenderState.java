@@ -6,6 +6,7 @@ import net.minecraft.world.entity.AnimationState;
 
 @Environment(EnvType.CLIENT)
 public class BreezeRenderState extends LivingEntityRenderState {
+	public final AnimationState idle = new AnimationState();
 	public final AnimationState shoot = new AnimationState();
 	public final AnimationState slide = new AnimationState();
 	public final AnimationState slideBack = new AnimationState();

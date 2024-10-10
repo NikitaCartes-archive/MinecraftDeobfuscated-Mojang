@@ -42,22 +42,16 @@ public class AdventureModePredicate {
 	private static final Component UNKNOWN_USE = Component.translatable("item.canUse.unknown").withStyle(ChatFormatting.GRAY);
 	private final List<BlockPredicate> predicates;
 	private final boolean showInTooltip;
-	private final List<Component> tooltip;
+	@Nullable
+	private List<Component> cachedTooltip;
 	@Nullable
 	private BlockInWorld lastCheckedBlock;
 	private boolean lastResult;
 	private boolean checksBlockEntity;
 
-	private AdventureModePredicate(List<BlockPredicate> list, boolean bl, List<Component> list2) {
-		this.predicates = list;
-		this.showInTooltip = bl;
-		this.tooltip = list2;
-	}
-
 	public AdventureModePredicate(List<BlockPredicate> list, boolean bl) {
 		this.predicates = list;
 		this.showInTooltip = bl;
-		this.tooltip = computeTooltip(list);
 	}
 
 	private static boolean areSameBlocks(BlockInWorld blockInWorld, @Nullable BlockInWorld blockInWorld2, boolean bl) {
@@ -95,12 +89,20 @@ public class AdventureModePredicate {
 		}
 	}
 
+	private List<Component> tooltip() {
+		if (this.cachedTooltip == null) {
+			this.cachedTooltip = computeTooltip(this.predicates);
+		}
+
+		return this.cachedTooltip;
+	}
+
 	public void addToTooltip(Consumer<Component> consumer) {
-		this.tooltip.forEach(consumer);
+		this.tooltip().forEach(consumer);
 	}
 
 	public AdventureModePredicate withTooltip(boolean bl) {
-		return new AdventureModePredicate(this.predicates, bl, this.tooltip);
+		return new AdventureModePredicate(this.predicates, bl);
 	}
 
 	private static List<Component> computeTooltip(List<BlockPredicate> list) {

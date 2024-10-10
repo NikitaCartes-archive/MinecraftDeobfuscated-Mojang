@@ -887,10 +887,10 @@ public class RealmsMainScreen extends RealmsScreen {
 			return i + j - RealmsMainScreen.this.font.width(component) - 20;
 		}
 
-		protected void renderGameMode(RealmsServer realmsServer, GuiGraphics guiGraphics, int i, int j, int k) {
+		protected int renderGameMode(RealmsServer realmsServer, GuiGraphics guiGraphics, int i, int j, int k) {
 			boolean bl = realmsServer.isHardcore;
 			int l = realmsServer.gameMode;
-			int m = 0;
+			int m = i;
 			if (GameType.isValidId(l)) {
 				Component component = RealmsMainScreen.getGameModeComponent(l, bl);
 				m = this.gameModeTextX(i, j, component);
@@ -898,8 +898,11 @@ public class RealmsMainScreen extends RealmsScreen {
 			}
 
 			if (bl) {
-				guiGraphics.blitSprite(RenderType::guiTextured, RealmsMainScreen.HARDCORE_MODE_SPRITE, m - 10, this.secondLineY(k), 8, 8);
+				m -= 10;
+				guiGraphics.blitSprite(RenderType::guiTextured, RealmsMainScreen.HARDCORE_MODE_SPRITE, m, this.secondLineY(k), 8, 8);
 			}
+
+			return m;
 		}
 
 		protected int firstLineY(int i) {
@@ -1088,11 +1091,12 @@ public class RealmsMainScreen extends RealmsScreen {
 				guiGraphics.drawString(RealmsMainScreen.this.font, component, r, q, -8355712, false);
 			}
 
+			int s = k;
 			if (!this.server.isMinigameActive()) {
-				this.renderGameMode(this.server, guiGraphics, k, l, q);
+				s = this.renderGameMode(this.server, guiGraphics, k, l, q);
 			}
 
-			guiGraphics.drawString(RealmsMainScreen.this.font, this.server.getDescription(), p, this.secondLineY(q), -8355712, false);
+			this.renderClampedString(guiGraphics, this.server.getDescription(), p, this.secondLineY(q), s, -8355712);
 			this.renderThirdLine(guiGraphics, j, k, this.server);
 			this.renderStatusLights(this.server, guiGraphics, k + l, j, n, o);
 			this.tooltip.refreshTooltipForNextRenderPass(bl, this.isFocused(), new ScreenRectangle(k, j, l, m));
@@ -1236,8 +1240,8 @@ public class RealmsMainScreen extends RealmsScreen {
 				Component component = Component.literal(string).withStyle(ChatFormatting.GRAY);
 				guiGraphics.drawString(RealmsMainScreen.this.font, Component.translatable("mco.selectServer.minigameName", component).withColor(-171), l, n, -1, false);
 			} else {
-				guiGraphics.drawString(RealmsMainScreen.this.font, this.serverData.getDescription(), l, this.secondLineY(m), -8355712, false);
-				this.renderGameMode(this.serverData, guiGraphics, j, k, m);
+				int o = this.renderGameMode(this.serverData, guiGraphics, j, k, m);
+				this.renderClampedString(guiGraphics, this.serverData.getDescription(), l, this.secondLineY(m), o, -8355712);
 			}
 		}
 

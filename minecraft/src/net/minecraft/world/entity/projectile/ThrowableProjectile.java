@@ -1,8 +1,11 @@
 package net.minecraft.world.entity.projectile;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
@@ -40,9 +43,10 @@ public abstract class ThrowableProjectile extends Projectile {
 
 	@Override
 	public void tick() {
-		HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
+		this.handleFirstTickBubbleColumn();
 		this.applyGravity();
 		this.applyInertia();
+		HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
 		Vec3 vec3;
 		if (hitResult.getType() != HitResult.Type.MISS) {
 			vec3 = hitResult.getLocation();
@@ -75,6 +79,17 @@ public abstract class ThrowableProjectile extends Projectile {
 		}
 
 		this.setDeltaMovement(vec3.scale((double)g));
+	}
+
+	private void handleFirstTickBubbleColumn() {
+		if (this.firstTick) {
+			for (BlockPos blockPos : BlockPos.betweenClosed(this.getBoundingBox())) {
+				BlockState blockState = this.level().getBlockState(blockPos);
+				if (blockState.is(Blocks.BUBBLE_COLUMN)) {
+					blockState.entityInside(this.level(), blockPos, this);
+				}
+			}
+		}
 	}
 
 	@Override
