@@ -63,7 +63,7 @@ public abstract class ChunkAccess implements BiomeManager.NoiseBiomeSource, Ligh
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final LongSet EMPTY_REFERENCE_SET = new LongOpenHashSet();
 	protected final ShortList[] postProcessing;
-	protected volatile boolean unsaved;
+	private volatile boolean unsaved;
 	private volatile boolean isLightCorrect;
 	protected final ChunkPos chunkPos;
 	private long inhabitedTime;
@@ -209,7 +209,7 @@ public abstract class ChunkAccess implements BiomeManager.NoiseBiomeSource, Ligh
 	@Override
 	public void setStartForStructure(Structure structure, StructureStart structureStart) {
 		this.structureStarts.put(structure, structureStart);
-		this.unsaved = true;
+		this.markUnsaved();
 	}
 
 	public Map<Structure, StructureStart> getAllStarts() {
@@ -219,7 +219,7 @@ public abstract class ChunkAccess implements BiomeManager.NoiseBiomeSource, Ligh
 	public void setAllStarts(Map<Structure, StructureStart> map) {
 		this.structureStarts.clear();
 		this.structureStarts.putAll(map);
-		this.unsaved = true;
+		this.markUnsaved();
 	}
 
 	@Override
@@ -230,7 +230,7 @@ public abstract class ChunkAccess implements BiomeManager.NoiseBiomeSource, Ligh
 	@Override
 	public void addReferenceForStructure(Structure structure, long l) {
 		((LongSet)this.structuresRefences.computeIfAbsent(structure, structurex -> new LongOpenHashSet())).add(l);
-		this.unsaved = true;
+		this.markUnsaved();
 	}
 
 	@Override
@@ -242,7 +242,7 @@ public abstract class ChunkAccess implements BiomeManager.NoiseBiomeSource, Ligh
 	public void setAllReferences(Map<Structure, LongSet> map) {
 		this.structuresRefences.clear();
 		this.structuresRefences.putAll(map);
-		this.unsaved = true;
+		this.markUnsaved();
 	}
 
 	public boolean isYSpaceEmpty(int i, int j) {
@@ -267,8 +267,17 @@ public abstract class ChunkAccess implements BiomeManager.NoiseBiomeSource, Ligh
 		return this.getSection(this.getSectionIndexFromSectionY(i)).hasOnlyAir();
 	}
 
-	public void setUnsaved(boolean bl) {
-		this.unsaved = bl;
+	public void markUnsaved() {
+		this.unsaved = true;
+	}
+
+	public boolean tryMarkSaved() {
+		if (this.unsaved) {
+			this.unsaved = false;
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public boolean isUnsaved() {
@@ -386,7 +395,7 @@ public abstract class ChunkAccess implements BiomeManager.NoiseBiomeSource, Ligh
 
 	public void setLightCorrect(boolean bl) {
 		this.isLightCorrect = bl;
-		this.setUnsaved(true);
+		this.markUnsaved();
 	}
 
 	@Override

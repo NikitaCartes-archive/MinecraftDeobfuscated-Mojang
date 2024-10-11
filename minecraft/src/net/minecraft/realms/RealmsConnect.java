@@ -3,6 +3,7 @@ package net.minecraft.realms;
 import com.mojang.logging.LogUtils;
 import com.mojang.realmsclient.dto.RealmsServer;
 import java.net.InetSocketAddress;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -73,7 +74,8 @@ public class RealmsConnect {
 
 						RealmsConnect.this.connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), minecraft.getUser().getProfileId()));
 						minecraft.updateReportEnvironment(ReportEnvironment.realm(realmsServer));
-						minecraft.quickPlayLog().setWorldData(QuickPlayLog.Type.REALMS, String.valueOf(realmsServer.id), realmsServer.name);
+						minecraft.quickPlayLog()
+							.setWorldData(QuickPlayLog.Type.REALMS, String.valueOf(realmsServer.id), (String)Objects.requireNonNullElse(realmsServer.name, "unknown"));
 						minecraft.getDownloadedPackSource().configureForServerControl(RealmsConnect.this.connection, ServerPackManager.PackPromptStatus.ALLOWED);
 					} catch (Exception var5) {
 						minecraft.getDownloadedPackSource().cleanupAfterDisconnect();

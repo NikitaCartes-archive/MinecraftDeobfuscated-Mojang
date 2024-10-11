@@ -143,7 +143,7 @@ public class ChunkHolder extends GenerationChunkHolder {
 		if (chunkAccess == null) {
 			return false;
 		} else {
-			chunkAccess.setUnsaved(true);
+			chunkAccess.markUnsaved();
 			LevelChunk levelChunk = this.getTickingChunk();
 			if (levelChunk == null) {
 				return false;

@@ -50,13 +50,14 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class AbstractArrow extends Projectile {
 	private static final double ARROW_BASE_DAMAGE = 2.0;
+	public static final int SHAKE_TIME = 7;
 	private static final EntityDataAccessor<Byte> ID_FLAGS = SynchedEntityData.defineId(AbstractArrow.class, EntityDataSerializers.BYTE);
 	private static final EntityDataAccessor<Byte> PIERCE_LEVEL = SynchedEntityData.defineId(AbstractArrow.class, EntityDataSerializers.BYTE);
+	private static final EntityDataAccessor<Boolean> IN_GROUND = SynchedEntityData.defineId(AbstractArrow.class, EntityDataSerializers.BOOLEAN);
 	private static final int FLAG_CRIT = 1;
 	private static final int FLAG_NOPHYSICS = 2;
 	@Nullable
 	private BlockState lastState;
-	protected boolean inGround;
 	protected int inGroundTime;
 	public AbstractArrow.Pickup pickup = AbstractArrow.Pickup.DISALLOWED;
 	public int shakeTime;
@@ -126,6 +127,7 @@ public abstract class AbstractArrow extends Projectile {
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		builder.define(ID_FLAGS, (byte)0);
 		builder.define(PIERCE_LEVEL, (byte)0);
+		builder.define(IN_GROUND, false);
 	}
 
 	@Override
@@ -144,12 +146,23 @@ public abstract class AbstractArrow extends Projectile {
 	public void lerpMotion(double d, double e, double f) {
 		super.lerpMotion(d, e, f);
 		this.life = 0;
+		if (this.isInGround() && Mth.lengthSquared(d, e, f) > 0.0) {
+			this.setInGround(false);
+		}
+	}
+
+	@Override
+	public void onSyncedDataUpdated(EntityDataAccessor<?> entityDataAccessor) {
+		super.onSyncedDataUpdated(entityDataAccessor);
+		if (!this.firstTick && this.shakeTime <= 0 && entityDataAccessor.equals(IN_GROUND) && this.isInGround()) {
+			this.shakeTime = 7;
+		}
 	}
 
 	@Override
 	public void tick() {
 		boolean bl = !this.isNoPhysics();
-		if (bl) {
+		if (bl && !this.isInGround()) {
 			this.applyGravity();
 		}
 
@@ -172,7 +185,7 @@ public abstract class AbstractArrow extends Projectile {
 
 				for (AABB aABB : voxelShape.toAabbs()) {
 					if (aABB.move(blockPos).contains(vec32)) {
-						this.inGround = true;
+						this.setInGround(true);
 						break;
 					}
 				}
@@ -187,11 +200,13 @@ public abstract class AbstractArrow extends Projectile {
 			this.clearFire();
 		}
 
-		if (this.inGround && bl) {
-			if (this.lastState != blockState && this.shouldFall()) {
-				this.startFalling();
-			} else if (!this.level().isClientSide) {
-				this.tickDespawn();
+		if (this.isInGround() && bl) {
+			if (!this.level().isClientSide()) {
+				if (this.lastState != blockState && this.shouldFall()) {
+					this.startFalling();
+				} else {
+					this.tickDespawn();
+				}
 			}
 
 			this.inGroundTime++;
@@ -296,16 +311,24 @@ public abstract class AbstractArrow extends Projectile {
 	}
 
 	private boolean shouldFall() {
-		return this.inGround && this.level().noCollision(new AABB(this.position(), this.position()).inflate(0.06));
+		return this.isInGround() && this.level().noCollision(new AABB(this.position(), this.position()).inflate(0.06));
 	}
 
 	private void startFalling() {
-		this.inGround = false;
+		this.setInGround(false);
 		Vec3 vec3 = this.getDeltaMovement();
 		this.setDeltaMovement(
 			vec3.multiply((double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F), (double)(this.random.nextFloat() * 0.2F))
 		);
 		this.life = 0;
+	}
+
+	protected boolean isInGround() {
+		return this.entityData.get(IN_GROUND);
+	}
+
+	protected void setInGround(boolean bl) {
+		this.entityData.set(IN_GROUND, bl);
 	}
 
 	@Override
@@ -464,7 +487,7 @@ public abstract class AbstractArrow extends Projectile {
 		this.setPos(this.position().subtract(vec33));
 		this.setDeltaMovement(Vec3.ZERO);
 		this.playSound(this.getHitGroundSoundEvent(), 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
-		this.inGround = true;
+		this.setInGround(true);
 		this.shakeTime = 7;
 		this.setCritArrow(false);
 		this.setPierceLevel((byte)0);
@@ -525,7 +548,7 @@ public abstract class AbstractArrow extends Projectile {
 		}
 
 		compoundTag.putByte("shake", (byte)this.shakeTime);
-		compoundTag.putBoolean("inGround", this.inGround);
+		compoundTag.putBoolean("inGround", this.isInGround());
 		compoundTag.putByte("pickup", (byte)this.pickup.ordinal());
 		compoundTag.putDouble("damage", this.baseDamage);
 		compoundTag.putBoolean("crit", this.isCritArrow());
@@ -546,7 +569,7 @@ public abstract class AbstractArrow extends Projectile {
 		}
 
 		this.shakeTime = compoundTag.getByte("shake") & 255;
-		this.inGround = compoundTag.getBoolean("inGround");
+		this.setInGround(compoundTag.getBoolean("inGround"));
 		if (compoundTag.contains("damage", 99)) {
 			this.baseDamage = compoundTag.getDouble("damage");
 		}
@@ -586,7 +609,7 @@ public abstract class AbstractArrow extends Projectile {
 
 	@Override
 	public void playerTouch(Player player) {
-		if (!this.level().isClientSide && (this.inGround || this.isNoPhysics()) && this.shakeTime <= 0) {
+		if (!this.level().isClientSide && (this.isInGround() || this.isNoPhysics()) && this.shakeTime <= 0) {
 			if (this.tryPickup(player)) {
 				player.take(this, 1);
 				this.discard();
@@ -683,7 +706,7 @@ public abstract class AbstractArrow extends Projectile {
 
 	@Override
 	public boolean isPickable() {
-		return super.isPickable() && !this.inGround;
+		return super.isPickable() && !this.isInGround();
 	}
 
 	@Override

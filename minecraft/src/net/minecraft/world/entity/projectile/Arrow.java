@@ -72,14 +72,14 @@ public class Arrow extends AbstractArrow {
 	public void tick() {
 		super.tick();
 		if (this.level().isClientSide) {
-			if (this.inGround) {
+			if (this.isInGround()) {
 				if (this.inGroundTime % 5 == 0) {
 					this.makeParticle(1);
 				}
 			} else {
 				this.makeParticle(2);
 			}
-		} else if (this.inGround && this.inGroundTime != 0 && !this.getPotionContents().equals(PotionContents.EMPTY) && this.inGroundTime >= 600) {
+		} else if (this.isInGround() && this.inGroundTime != 0 && !this.getPotionContents().equals(PotionContents.EMPTY) && this.inGroundTime >= 600) {
 			this.level().broadcastEntityEvent(this, (byte)0);
 			this.setPickupItemStack(new ItemStack(Items.ARROW));
 		}

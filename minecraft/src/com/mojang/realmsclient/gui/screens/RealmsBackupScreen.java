@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -145,7 +146,7 @@ public class RealmsBackupScreen extends RealmsScreen {
 									new DownloadTask(
 										this.serverData.id,
 										this.slotId,
-										this.serverData.name
+										(String)Objects.requireNonNullElse(this.serverData.name, "")
 											+ " ("
 											+ ((RealmsWorldOptions)this.serverData.slots.get(this.serverData.activeSlot)).getSlotName(this.serverData.activeSlot)
 											+ ")",

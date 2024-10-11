@@ -5,6 +5,7 @@ import com.mojang.logging.LogUtils;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -154,7 +155,7 @@ public class ServerList {
 	private static boolean set(ServerData serverData, List<ServerData> list) {
 		for (int i = 0; i < list.size(); i++) {
 			ServerData serverData2 = (ServerData)list.get(i);
-			if (serverData2.name.equals(serverData.name) && serverData2.ip.equals(serverData.ip)) {
+			if (Objects.equals(serverData2.name, serverData.name) && serverData2.ip.equals(serverData.ip)) {
 				list.set(i, serverData);
 				return true;
 			}

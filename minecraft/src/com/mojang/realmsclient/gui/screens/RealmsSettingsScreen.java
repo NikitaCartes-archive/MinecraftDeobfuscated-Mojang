@@ -1,6 +1,7 @@
 package com.mojang.realmsclient.gui.screens;
 
 import com.mojang.realmsclient.dto.RealmsServer;
+import java.util.Objects;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
@@ -51,7 +52,7 @@ public class RealmsSettingsScreen extends RealmsScreen {
 		this.addRenderableWidget(button);
 		this.nameEdit = new EditBox(this.minecraft.font, i, row(4), 212, 20, Component.translatable("mco.configure.world.name"));
 		this.nameEdit.setMaxLength(32);
-		this.nameEdit.setValue(this.serverData.getName());
+		this.nameEdit.setValue((String)Objects.requireNonNullElse(this.serverData.getName(), ""));
 		this.addRenderableWidget(this.nameEdit);
 		this.descEdit = new EditBox(this.minecraft.font, i, row(8), 212, 20, Component.translatable("mco.configure.world.description"));
 		this.descEdit.setMaxLength(32);

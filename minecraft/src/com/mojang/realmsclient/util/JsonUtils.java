@@ -45,12 +45,7 @@ public class JsonUtils {
 	}
 
 	public static String getRequiredStringOr(String string, JsonObject jsonObject, String string2) {
-		JsonElement jsonElement = jsonObject.get(string);
-		if (jsonElement != null) {
-			return jsonElement.isJsonNull() ? string2 : jsonElement.getAsString();
-		} else {
-			return string2;
-		}
+		return getStringOr(string, jsonObject, string2);
 	}
 
 	@Nullable

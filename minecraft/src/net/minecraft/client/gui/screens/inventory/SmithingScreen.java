@@ -160,9 +160,6 @@ public class SmithingScreen extends ItemCombinerScreen<SmithingMenu> {
 	}
 
 	private boolean hasRecipeError() {
-		return this.menu.getSlot(0).hasItem()
-			&& this.menu.getSlot(1).hasItem()
-			&& this.menu.getSlot(2).hasItem()
-			&& !this.menu.getSlot(this.menu.getResultSlot()).hasItem();
+		return this.menu.hasRecipeError();
 	}
 }

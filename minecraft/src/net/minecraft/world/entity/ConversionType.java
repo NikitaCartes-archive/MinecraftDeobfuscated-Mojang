@@ -27,6 +27,12 @@ public enum ConversionType {
 				entity.startRiding(mob2);
 			}
 
+			Entity entity3 = mob.getVehicle();
+			if (entity3 != null) {
+				mob.stopRiding();
+				mob2.startRiding(entity3);
+			}
+
 			if (conversionParams.keepEquipment()) {
 				for (EquipmentSlot equipmentSlot : EquipmentSlot.VALUES) {
 					ItemStack itemStack = mob.getItemBySlot(equipmentSlot);
@@ -44,9 +50,9 @@ public enum ConversionType {
 			mob2.yBodyRot = mob.yBodyRot;
 			mob2.setOnGround(mob.onGround());
 			mob.getSleepingPos().ifPresent(mob2::setSleepingPos);
-			Entity entity3 = mob.getLeashHolder();
-			if (entity3 != null) {
-				mob2.setLeashedTo(entity3, true);
+			Entity entity2 = mob.getLeashHolder();
+			if (entity2 != null) {
+				mob2.setLeashedTo(entity2, true);
 			}
 
 			this.convertCommon(mob, mob2, conversionParams);

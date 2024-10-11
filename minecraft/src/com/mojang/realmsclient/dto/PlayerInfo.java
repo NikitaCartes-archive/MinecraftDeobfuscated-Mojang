@@ -2,12 +2,14 @@ package com.mojang.realmsclient.dto;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class PlayerInfo extends ValueObject implements ReflectionBasedSerialization {
 	@SerializedName("name")
+	@Nullable
 	private String name;
 	@SerializedName("uuid")
 	private UUID uuid;
@@ -19,7 +21,7 @@ public class PlayerInfo extends ValueObject implements ReflectionBasedSerializat
 	private boolean online;
 
 	public String getName() {
-		return this.name;
+		return this.name == null ? "" : this.name;
 	}
 
 	public void setName(String string) {

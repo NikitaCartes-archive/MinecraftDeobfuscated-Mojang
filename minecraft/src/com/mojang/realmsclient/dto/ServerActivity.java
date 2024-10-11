@@ -2,11 +2,13 @@ package com.mojang.realmsclient.dto;
 
 import com.google.gson.JsonObject;
 import com.mojang.realmsclient.util.JsonUtils;
+import javax.annotation.Nullable;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class ServerActivity extends ValueObject {
+	@Nullable
 	public String profileUuid;
 	public long joinTime;
 	public long leaveTime;

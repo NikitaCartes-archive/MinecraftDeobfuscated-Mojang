@@ -141,7 +141,7 @@ public class FillBiomeCommand {
 
 			for (ChunkAccess chunkAccess : list) {
 				chunkAccess.fillBiomesFromNoise(makeResolver(mutableInt, chunkAccess, boundingBox, holder, predicate), serverLevel.getChunkSource().randomState().sampler());
-				chunkAccess.setUnsaved(true);
+				chunkAccess.markUnsaved();
 			}
 
 			serverLevel.getChunkSource().chunkMap.resendBiomesForChunks(list);

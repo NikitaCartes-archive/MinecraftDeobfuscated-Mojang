@@ -29,10 +29,13 @@ public class RealmsServer extends ValueObject {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final int NO_VALUE = -1;
 	public long id;
+	@Nullable
 	public String remoteSubscriptionId;
+	@Nullable
 	public String name;
 	public String motd;
 	public RealmsServer.State state;
+	@Nullable
 	public String owner;
 	public UUID ownerUUID = Util.NIL_UUID;
 	public List<PlayerInfo> players;
@@ -47,6 +50,7 @@ public class RealmsServer extends ValueObject {
 	@Nullable
 	public String minigameName;
 	public int minigameId;
+	@Nullable
 	public String minigameImage;
 	public long parentRealmId = -1L;
 	@Nullable
@@ -58,6 +62,7 @@ public class RealmsServer extends ValueObject {
 		return this.motd;
 	}
 
+	@Nullable
 	public String getName() {
 		return this.name;
 	}
@@ -82,7 +87,7 @@ public class RealmsServer extends ValueObject {
 			realmsServer.id = JsonUtils.getLongOr("id", jsonObject, -1L);
 			realmsServer.remoteSubscriptionId = JsonUtils.getStringOr("remoteSubscriptionId", jsonObject, null);
 			realmsServer.name = JsonUtils.getStringOr("name", jsonObject, null);
-			realmsServer.motd = JsonUtils.getStringOr("motd", jsonObject, null);
+			realmsServer.motd = JsonUtils.getStringOr("motd", jsonObject, "");
 			realmsServer.state = getState(JsonUtils.getStringOr("state", jsonObject, RealmsServer.State.CLOSED.name()));
 			realmsServer.owner = JsonUtils.getStringOr("owner", jsonObject, null);
 			if (jsonObject.get("players") != null && jsonObject.get("players").isJsonArray()) {
@@ -322,11 +327,13 @@ public class RealmsServer extends ValueObject {
 	}
 
 	public String getWorldName(int i) {
-		return this.name + " (" + ((RealmsWorldOptions)this.slots.get(i)).getSlotName(i) + ")";
+		return this.name == null
+			? ((RealmsWorldOptions)this.slots.get(i)).getSlotName(i)
+			: this.name + " (" + ((RealmsWorldOptions)this.slots.get(i)).getSlotName(i) + ")";
 	}
 
 	public ServerData toServerData(String string) {
-		return new ServerData(this.name, string, ServerData.Type.REALM);
+		return new ServerData((String)Objects.requireNonNullElse(this.name, "unknown server"), string, ServerData.Type.REALM);
 	}
 
 	@Environment(EnvType.CLIENT)
@@ -364,7 +371,7 @@ public class RealmsServer extends ValueObject {
 				.compareTrueFirst(realmsServer.isSnapshotRealm(), realmsServer2.isSnapshotRealm())
 				.compareTrueFirst(realmsServer.state == RealmsServer.State.UNINITIALIZED, realmsServer2.state == RealmsServer.State.UNINITIALIZED)
 				.compareTrueFirst(realmsServer.expiredTrial, realmsServer2.expiredTrial)
-				.compareTrueFirst(realmsServer.owner.equals(this.refOwner), realmsServer2.owner.equals(this.refOwner))
+				.compareTrueFirst(Objects.equals(realmsServer.owner, this.refOwner), Objects.equals(realmsServer2.owner, this.refOwner))
 				.compareFalseFirst(realmsServer.expired, realmsServer2.expired)
 				.compareTrueFirst(realmsServer.state == RealmsServer.State.OPEN, realmsServer2.state == RealmsServer.State.OPEN)
 				.compare(realmsServer.id, realmsServer2.id)

@@ -90,6 +90,6 @@ public class StringUtil {
 	}
 
 	public static boolean isBlank(@Nullable String string) {
-		return string != null && string.length() != 0 ? string.chars().allMatch(StringUtil::isWhitespace) : true;
+		return string != null && !string.isEmpty() ? string.chars().allMatch(StringUtil::isWhitespace) : true;
 	}
 }

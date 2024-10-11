@@ -14,6 +14,7 @@ import com.mojang.realmsclient.gui.screens.RealmsPopups;
 import com.mojang.realmsclient.gui.screens.RealmsTermsScreen;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -78,17 +79,23 @@ public class GetServerDetailsTask extends LongRunningTask {
 			return;
 		}
 
-		boolean bl2 = realmsServerAddress.resourcePackUrl != null && realmsServerAddress.resourcePackHash != null;
-		Screen screen = (Screen)(bl2
-			? this.resourcePackDownloadConfirmationScreen(realmsServerAddress, generatePackId(this.server), this::connectScreen)
-			: this.connectScreen(realmsServerAddress));
-		setScreen(screen);
+		if (realmsServerAddress.address == null) {
+			this.error(Component.translatable("mco.errorMessage.connectionFailure"));
+		} else {
+			boolean bl2 = realmsServerAddress.resourcePackUrl != null && realmsServerAddress.resourcePackHash != null;
+			Screen screen = (Screen)(bl2
+				? this.resourcePackDownloadConfirmationScreen(realmsServerAddress, generatePackId(this.server), this::connectScreen)
+				: this.connectScreen(realmsServerAddress));
+			setScreen(screen);
+		}
 	}
 
 	private static UUID generatePackId(RealmsServer realmsServer) {
 		return realmsServer.minigameName != null
 			? UUID.nameUUIDFromBytes(("minigame:" + realmsServer.minigameName).getBytes(StandardCharsets.UTF_8))
-			: UUID.nameUUIDFromBytes(("realms:" + realmsServer.name + ":" + realmsServer.activeSlot).getBytes(StandardCharsets.UTF_8));
+			: UUID.nameUUIDFromBytes(
+				("realms:" + (String)Objects.requireNonNullElse(realmsServer.name, "") + ":" + realmsServer.activeSlot).getBytes(StandardCharsets.UTF_8)
+			);
 	}
 
 	@Override
@@ -139,15 +146,19 @@ public class GetServerDetailsTask extends LongRunningTask {
 
 	private CompletableFuture<?> scheduleResourcePackDownload(RealmsServerAddress realmsServerAddress, UUID uUID) {
 		try {
-			DownloadedPackSource downloadedPackSource = Minecraft.getInstance().getDownloadedPackSource();
-			CompletableFuture<Void> completableFuture = downloadedPackSource.waitForPackFeedback(uUID);
-			downloadedPackSource.allowServerPacks();
-			downloadedPackSource.pushPack(uUID, new URL(realmsServerAddress.resourcePackUrl), realmsServerAddress.resourcePackHash);
-			return completableFuture;
+			if (realmsServerAddress.resourcePackUrl != null) {
+				return CompletableFuture.failedFuture(new IllegalStateException("resourcePackUrl was null"));
+			} else if (realmsServerAddress.resourcePackHash != null) {
+				return CompletableFuture.failedFuture(new IllegalStateException("resourcePackHash was null"));
+			} else {
+				DownloadedPackSource downloadedPackSource = Minecraft.getInstance().getDownloadedPackSource();
+				CompletableFuture<Void> completableFuture = downloadedPackSource.waitForPackFeedback(uUID);
+				downloadedPackSource.allowServerPacks();
+				downloadedPackSource.pushPack(uUID, new URL(realmsServerAddress.resourcePackUrl), realmsServerAddress.resourcePackHash);
+				return completableFuture;
+			}
 		} catch (Exception var5) {
-			CompletableFuture<Void> completableFuturex = new CompletableFuture();
-			completableFuturex.completeExceptionally(var5);
-			return completableFuturex;
+			return CompletableFuture.failedFuture(var5);
 		}
 	}
 }

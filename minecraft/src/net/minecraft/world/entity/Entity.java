@@ -754,7 +754,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			boolean bl = Iterables.any(this.blocksInside, blockStatex -> blockStatex.is(BlockTags.FIRE) || blockStatex.is(Blocks.LAVA));
 			this.movementThisTick.clear();
 			this.blocksInside.clear();
-			if (!bl) {
+			if (!bl && this.isAlive()) {
 				if (this.remainingFireTicks <= 0) {
 					this.setRemainingFireTicks(-this.getFireImmuneTicks());
 				}
@@ -3470,9 +3470,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 		double e = clientboundAddEntityPacket.getY();
 		double f = clientboundAddEntityPacket.getZ();
 		this.syncPacketPositionCodec(d, e, f);
-		this.moveTo(d, e, f);
-		this.setXRot(clientboundAddEntityPacket.getXRot());
-		this.setYRot(clientboundAddEntityPacket.getYRot());
+		this.moveTo(d, e, f, clientboundAddEntityPacket.getYRot(), clientboundAddEntityPacket.getXRot());
 		this.setId(i);
 		this.setUUID(clientboundAddEntityPacket.getUUID());
 	}

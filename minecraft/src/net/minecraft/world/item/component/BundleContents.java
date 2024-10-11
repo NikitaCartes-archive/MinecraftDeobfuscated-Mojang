@@ -2,6 +2,7 @@ package net.minecraft.world.item.component;
 
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -19,7 +20,9 @@ import org.apache.commons.lang3.math.Fraction;
 
 public final class BundleContents implements TooltipComponent {
 	public static final BundleContents EMPTY = new BundleContents(List.of());
-	public static final Codec<BundleContents> CODEC = ItemStack.CODEC.listOf().xmap(BundleContents::new, bundleContents -> bundleContents.items);
+	public static final Codec<BundleContents> CODEC = ItemStack.CODEC
+		.listOf()
+		.flatXmap(BundleContents::checkAndCreate, bundleContents -> DataResult.success(bundleContents.items));
 	public static final StreamCodec<RegistryFriendlyByteBuf, BundleContents> STREAM_CODEC = ItemStack.STREAM_CODEC
 		.apply(ByteBufCodecs.list())
 		.map(BundleContents::new, bundleContents -> bundleContents.items);
@@ -34,6 +37,15 @@ public final class BundleContents implements TooltipComponent {
 		this.items = list;
 		this.weight = fraction;
 		this.selectedItem = i;
+	}
+
+	private static DataResult<BundleContents> checkAndCreate(List<ItemStack> list) {
+		try {
+			Fraction fraction = computeContentWeight(list);
+			return DataResult.success(new BundleContents(list, fraction, -1));
+		} catch (ArithmeticException var2) {
+			return DataResult.error(() -> "Excessive total bundle weight");
+		}
 	}
 
 	public BundleContents(List<ItemStack> list) {

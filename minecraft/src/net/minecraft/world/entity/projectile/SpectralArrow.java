@@ -29,7 +29,7 @@ public class SpectralArrow extends AbstractArrow {
 	@Override
 	public void tick() {
 		super.tick();
-		if (this.level().isClientSide && !this.inGround) {
+		if (this.level().isClientSide && !this.isInGround()) {
 			this.level().addParticle(ParticleTypes.INSTANT_EFFECT, this.getX(), this.getY(), this.getZ(), 0.0, 0.0, 0.0);
 		}
 	}

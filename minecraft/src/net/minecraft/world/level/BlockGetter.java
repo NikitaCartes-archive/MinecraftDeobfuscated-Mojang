@@ -180,15 +180,15 @@ public interface BlockGetter extends LevelHeightAccessor {
 			return iterable;
 		} else {
 			Set<BlockPos> set = new ObjectLinkedOpenHashSet<>();
+			Vec3 vec34 = vec33.normalize().scale(1.0E-7);
+			Vec3 vec35 = aABB.getMinPosition().add(vec34);
+			Vec3 vec36 = aABB.getMinPosition().subtract(vec33).subtract(vec34);
+			addCollisionsAlongTravel(set, vec36, vec35, aABB);
 
 			for (BlockPos blockPos : iterable) {
 				set.add(blockPos.immutable());
 			}
 
-			Vec3 vec34 = vec33.normalize().scale(1.0E-7);
-			Vec3 vec35 = aABB.getMinPosition().add(vec34);
-			Vec3 vec36 = aABB.getMinPosition().subtract(vec33).subtract(vec34);
-			addCollisionsAlongTravel(set, vec36, vec35, aABB);
 			return set;
 		}
 	}

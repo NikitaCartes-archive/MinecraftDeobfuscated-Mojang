@@ -3,6 +3,7 @@ package net.minecraft.world.inventory;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -30,6 +31,7 @@ public class SmithingMenu extends ItemCombinerMenu {
 	private final RecipePropertySet baseItemTest;
 	private final RecipePropertySet templateItemTest;
 	private final RecipePropertySet additionItemTest;
+	private final DataSlot hasRecipeError = DataSlot.standalone();
 
 	public SmithingMenu(int i, Inventory inventory) {
 		this(i, inventory, ContainerLevelAccess.NULL);
@@ -45,6 +47,7 @@ public class SmithingMenu extends ItemCombinerMenu {
 		this.baseItemTest = level.recipeAccess().propertySet(RecipePropertySet.SMITHING_BASE);
 		this.templateItemTest = level.recipeAccess().propertySet(RecipePropertySet.SMITHING_TEMPLATE);
 		this.additionItemTest = level.recipeAccess().propertySet(RecipePropertySet.SMITHING_ADDITION);
+		this.addDataSlot(this.hasRecipeError).set(0);
 	}
 
 	private static ItemCombinerMenuSlotDefinition createInputSlotDefinitions(RecipeAccess recipeAccess) {
@@ -91,6 +94,15 @@ public class SmithingMenu extends ItemCombinerMenu {
 	}
 
 	@Override
+	public void slotsChanged(Container container) {
+		super.slotsChanged(container);
+		if (this.level instanceof ServerLevel) {
+			boolean bl = this.getSlot(0).hasItem() && this.getSlot(1).hasItem() && this.getSlot(2).hasItem() && !this.getSlot(this.getResultSlot()).hasItem();
+			this.hasRecipeError.set(bl ? 1 : 0);
+		}
+	}
+
+	@Override
 	public void createResult() {
 		SmithingRecipeInput smithingRecipeInput = this.createRecipeInput();
 		Optional<RecipeHolder<SmithingRecipe>> optional;
@@ -122,5 +134,9 @@ public class SmithingMenu extends ItemCombinerMenu {
 		} else {
 			return this.baseItemTest.test(itemStack) && !this.getSlot(1).hasItem() ? true : this.additionItemTest.test(itemStack) && !this.getSlot(2).hasItem();
 		}
+	}
+
+	public boolean hasRecipeError() {
+		return this.hasRecipeError.get() > 0;
 	}
 }

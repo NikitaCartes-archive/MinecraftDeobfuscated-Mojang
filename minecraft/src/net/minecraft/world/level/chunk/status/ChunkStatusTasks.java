@@ -194,6 +194,7 @@ public class ChunkStatusTasks {
 			levelChunk.setLoaded(true);
 			levelChunk.registerAllBlockEntitiesAfterLevelLoad();
 			levelChunk.registerTickContainerInLevel(serverLevel);
+			levelChunk.setUnsavedListener(worldGenContext.unsavedListener());
 			return levelChunk;
 		}, worldGenContext.mainThreadExecutor());
 	}
