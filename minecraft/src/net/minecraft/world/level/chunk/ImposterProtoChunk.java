@@ -174,8 +174,13 @@ public class ImposterProtoChunk extends ProtoChunk {
 	}
 
 	@Override
+	public boolean canBeSerialized() {
+		return false;
+	}
+
+	@Override
 	public boolean tryMarkSaved() {
-		return this.wrapped.tryMarkSaved();
+		return false;
 	}
 
 	@Override

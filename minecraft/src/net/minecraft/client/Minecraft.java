@@ -17,7 +17,6 @@ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.blaze3d.TracyFrameCapture;
 import com.mojang.blaze3d.pipeline.MainTarget;
 import com.mojang.blaze3d.pipeline.RenderTarget;
-import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.blaze3d.platform.ClientShutdownWatchdog;
 import com.mojang.blaze3d.platform.DisplayData;
 import com.mojang.blaze3d.platform.FramerateLimitTracker;
@@ -2600,7 +2599,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 	public Component grabPanoramixScreenshot(File file, int i, int j) {
 		int k = this.window.getWidth();
 		int l = this.window.getHeight();
-		RenderTarget renderTarget = new TextureTarget(i, j, true);
+		RenderTarget renderTarget = this.getMainRenderTarget();
 		float f = this.player.getXRot();
 		float g = this.player.getYRot();
 		float h = this.player.xRotO;
@@ -2612,6 +2611,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.gameRenderer.setPanoramicMode(true);
 			this.window.setWidth(i);
 			this.window.setHeight(j);
+			renderTarget.resize(i, j);
 
 			for (int n = 0; n < 6; n++) {
 				switch (n) {
@@ -2670,7 +2670,7 @@ public class Minecraft extends ReentrantBlockableEventLoop<Runnable> implements 
 			this.gameRenderer.setRenderBlockOutline(true);
 			this.window.setWidth(k);
 			this.window.setHeight(l);
-			renderTarget.destroyBuffers();
+			renderTarget.resize(k, l);
 			this.gameRenderer.setPanoramicMode(false);
 			this.getMainRenderTarget().bindWrite(true);
 		}

@@ -66,11 +66,21 @@ public class Font {
 	public int drawInBatch(
 		String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, Font.DisplayMode displayMode, int j, int k
 	) {
-		return this.drawInBatch(string, f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k, this.isBidirectional());
+		if (this.isBidirectional()) {
+			string = this.bidirectionalShaping(string);
+		}
+
+		return this.drawInternal(string, f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k, true);
 	}
 
 	public int drawInBatch(
-		String string,
+		Component component, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, Font.DisplayMode displayMode, int j, int k
+	) {
+		return this.drawInBatch(component, f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k, true);
+	}
+
+	public int drawInBatch(
+		Component component,
 		float f,
 		float g,
 		int i,
@@ -82,13 +92,7 @@ public class Font {
 		int k,
 		boolean bl2
 	) {
-		return this.drawInternal(string, f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k, bl2);
-	}
-
-	public int drawInBatch(
-		Component component, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, Font.DisplayMode displayMode, int j, int k
-	) {
-		return this.drawInBatch(component.getVisualOrderText(), f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k);
+		return this.drawInternal(component.getVisualOrderText(), f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k, bl2);
 	}
 
 	public int drawInBatch(
@@ -103,7 +107,7 @@ public class Font {
 		int j,
 		int k
 	) {
-		return this.drawInternal(formattedCharSequence, f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k);
+		return this.drawInternal(formattedCharSequence, f, g, i, bl, matrix4f, multiBufferSource, displayMode, j, k, true);
 	}
 
 	public void drawInBatch8xOutline(
@@ -156,18 +160,14 @@ public class Font {
 		int k,
 		boolean bl2
 	) {
-		if (bl2) {
-			string = this.bidirectionalShaping(string);
-		}
-
 		i = adjustColor(i);
 		Matrix4f matrix4f2 = new Matrix4f(matrix4f);
 		if (bl) {
-			this.renderText(string, f, g, i, true, matrix4f, multiBufferSource, displayMode, j, k);
+			this.renderText(string, f, g, i, true, matrix4f, multiBufferSource, displayMode, j, k, bl2);
 			matrix4f2.translate(SHADOW_OFFSET);
 		}
 
-		f = this.renderText(string, f, g, i, false, matrix4f2, multiBufferSource, displayMode, j, k);
+		f = this.renderText(string, f, g, i, false, matrix4f2, multiBufferSource, displayMode, j, k, bl2);
 		return (int)f + (bl ? 1 : 0);
 	}
 
@@ -181,23 +181,34 @@ public class Font {
 		MultiBufferSource multiBufferSource,
 		Font.DisplayMode displayMode,
 		int j,
-		int k
+		int k,
+		boolean bl2
 	) {
 		i = adjustColor(i);
 		Matrix4f matrix4f2 = new Matrix4f(matrix4f);
 		if (bl) {
-			this.renderText(formattedCharSequence, f, g, i, true, matrix4f, multiBufferSource, displayMode, j, k);
+			this.renderText(formattedCharSequence, f, g, i, true, matrix4f, multiBufferSource, displayMode, j, k, bl2);
 			matrix4f2.translate(SHADOW_OFFSET);
 		}
 
-		f = this.renderText(formattedCharSequence, f, g, i, false, matrix4f2, multiBufferSource, displayMode, j, k);
+		f = this.renderText(formattedCharSequence, f, g, i, false, matrix4f2, multiBufferSource, displayMode, j, k, bl2);
 		return (int)f + (bl ? 1 : 0);
 	}
 
 	private float renderText(
-		String string, float f, float g, int i, boolean bl, Matrix4f matrix4f, MultiBufferSource multiBufferSource, Font.DisplayMode displayMode, int j, int k
+		String string,
+		float f,
+		float g,
+		int i,
+		boolean bl,
+		Matrix4f matrix4f,
+		MultiBufferSource multiBufferSource,
+		Font.DisplayMode displayMode,
+		int j,
+		int k,
+		boolean bl2
 	) {
-		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(this, multiBufferSource, f, g, i, j, bl, matrix4f, displayMode, k);
+		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(this, multiBufferSource, f, g, i, j, bl, matrix4f, displayMode, k, bl2);
 		StringDecomposer.iterateFormatted(string, Style.EMPTY, stringRenderOutput);
 		return stringRenderOutput.finish(f);
 	}
@@ -212,9 +223,10 @@ public class Font {
 		MultiBufferSource multiBufferSource,
 		Font.DisplayMode displayMode,
 		int j,
-		int k
+		int k,
+		boolean bl2
 	) {
-		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(this, multiBufferSource, f, g, i, j, bl, matrix4f, displayMode, k);
+		Font.StringRenderOutput stringRenderOutput = new Font.StringRenderOutput(this, multiBufferSource, f, g, i, j, bl, matrix4f, displayMode, k, bl2);
 		formattedCharSequence.accept(stringRenderOutput);
 		return stringRenderOutput.finish(f);
 	}
@@ -280,6 +292,7 @@ public class Font {
 		private final Matrix4f pose;
 		private final Font.DisplayMode mode;
 		private final int packedLightCoords;
+		private final boolean inverseDepth;
 		float x;
 		float y;
 		private final List<BakedGlyph.GlyphInstance> glyphInstances;
@@ -305,7 +318,7 @@ public class Font {
 			final Font.DisplayMode displayMode,
 			final int j
 		) {
-			this(font, multiBufferSource, f, g, i, 0, bl, matrix4f, displayMode, j);
+			this(font, multiBufferSource, f, g, i, 0, bl, matrix4f, displayMode, j, true);
 		}
 
 		public StringRenderOutput(
@@ -318,7 +331,8 @@ public class Font {
 			final boolean bl,
 			final Matrix4f matrix4f,
 			final Font.DisplayMode displayMode,
-			final int k
+			final int k,
+			final boolean bl2
 		) {
 			this.this$0 = font;
 			this.glyphInstances = new ArrayList();
@@ -332,6 +346,7 @@ public class Font {
 			this.pose = matrix4f;
 			this.mode = displayMode;
 			this.packedLightCoords = k;
+			this.inverseDepth = bl2;
 		}
 
 		@Override
@@ -352,11 +367,11 @@ public class Font {
 
 			float h = this.dropShadow ? 1.0F : 0.0F;
 			if (style.isStrikethrough()) {
-				this.addEffect(new BakedGlyph.Effect(g + h, this.y + h + 4.5F, this.x + h + f, this.y + h + 4.5F - 1.0F, 0.01F, k));
+				this.addEffect(new BakedGlyph.Effect(g + h, this.y + h + 4.5F, this.x + h + f, this.y + h + 4.5F - 1.0F, this.getOverTextEffectDepth(), k));
 			}
 
 			if (style.isUnderlined()) {
-				this.addEffect(new BakedGlyph.Effect(g + h, this.y + h + 9.0F, this.x + h + f, this.y + h + 9.0F - 1.0F, 0.01F, k));
+				this.addEffect(new BakedGlyph.Effect(g + h, this.y + h + 9.0F, this.x + h + f, this.y + h + 9.0F - 1.0F, this.getOverTextEffectDepth(), k));
 			}
 
 			this.x += f;
@@ -366,7 +381,7 @@ public class Font {
 		float finish(float f) {
 			BakedGlyph bakedGlyph = null;
 			if (this.backgroundColor != 0) {
-				BakedGlyph.Effect effect = new BakedGlyph.Effect(f - 1.0F, this.y + 9.0F, this.x, this.y - 1.0F, -0.01F, this.backgroundColor);
+				BakedGlyph.Effect effect = new BakedGlyph.Effect(f - 1.0F, this.y + 9.0F, this.x, this.y - 1.0F, this.getUnderTextEffectDepth(), this.backgroundColor);
 				bakedGlyph = this.this$0.getFontSet(Style.DEFAULT_FONT).whiteGlyph();
 				VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph.renderType(this.mode));
 				bakedGlyph.renderEffect(effect, this.pose, vertexConsumer, this.packedLightCoords);
@@ -394,6 +409,14 @@ public class Font {
 				VertexConsumer vertexConsumer = this.bufferSource.getBuffer(bakedGlyph.renderType(this.mode));
 				bakedGlyph.renderChar(glyphInstance, this.pose, vertexConsumer, this.packedLightCoords);
 			}
+		}
+
+		private float getOverTextEffectDepth() {
+			return this.inverseDepth ? 0.01F : -0.01F;
+		}
+
+		private float getUnderTextEffectDepth() {
+			return this.inverseDepth ? -0.01F : 0.01F;
 		}
 	}
 }

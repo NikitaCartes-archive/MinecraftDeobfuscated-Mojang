@@ -1677,8 +1677,8 @@ public class ClientPacketListener extends ClientCommonPacketListenerImpl impleme
 	private void refreshRecipeBook(ClientRecipeBook clientRecipeBook) {
 		clientRecipeBook.rebuildCollections();
 		this.searchTrees.updateRecipes(clientRecipeBook, this.level);
-		if (this.minecraft.screen instanceof RecipeUpdateListener) {
-			((RecipeUpdateListener)this.minecraft.screen).recipesUpdated();
+		if (this.minecraft.screen instanceof RecipeUpdateListener recipeUpdateListener) {
+			recipeUpdateListener.recipesUpdated();
 		}
 	}
 

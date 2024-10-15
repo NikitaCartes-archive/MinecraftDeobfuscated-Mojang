@@ -230,9 +230,7 @@ public class GuiGraphics {
 	public int drawString(Font font, @Nullable String string, int i, int j, int k, boolean bl) {
 		return string == null
 			? 0
-			: font.drawInBatch(
-				string, (float)i, (float)j, k, bl, this.pose.last().pose(), this.bufferSource, Font.DisplayMode.NORMAL, 0, 15728880, font.isBidirectional()
-			);
+			: font.drawInBatch(string, (float)i, (float)j, k, bl, this.pose.last().pose(), this.bufferSource, Font.DisplayMode.NORMAL, 0, 15728880);
 	}
 
 	public int drawString(Font font, FormattedCharSequence formattedCharSequence, int i, int j, int k) {
@@ -785,8 +783,10 @@ public class GuiGraphics {
 	private void renderItemCount(Font font, ItemStack itemStack, int i, int j, @Nullable String string) {
 		if (itemStack.getCount() != 1 || string != null) {
 			String string2 = string == null ? String.valueOf(itemStack.getCount()) : string;
+			this.pose.pushPose();
 			this.pose.translate(0.0F, 0.0F, 200.0F);
 			this.drawString(font, string2, i + 19 - 2 - font.width(string2), j + 6 + 3, -1, true);
+			this.pose.popPose();
 		}
 	}
 

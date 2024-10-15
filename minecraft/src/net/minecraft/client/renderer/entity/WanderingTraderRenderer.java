@@ -1,6 +1,5 @@
 package net.minecraft.client.renderer.entity;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.VillagerModel;
@@ -23,11 +22,6 @@ public class WanderingTraderRenderer extends MobRenderer<WanderingTrader, Villag
 
 	public ResourceLocation getTextureLocation(VillagerRenderState villagerRenderState) {
 		return VILLAGER_BASE_SKIN;
-	}
-
-	protected void scale(VillagerRenderState villagerRenderState, PoseStack poseStack) {
-		float f = 0.9375F;
-		poseStack.scale(0.9375F, 0.9375F, 0.9375F);
 	}
 
 	public VillagerRenderState createRenderState() {

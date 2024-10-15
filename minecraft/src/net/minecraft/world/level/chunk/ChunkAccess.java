@@ -354,6 +354,10 @@ public abstract class ChunkAccess implements BiomeManager.NoiseBiomeSource, Ligh
 
 	public abstract TickContainerAccess<Fluid> getFluidTicks();
 
+	public boolean canBeSerialized() {
+		return true;
+	}
+
 	public abstract ChunkAccess.PackedTicks getTicksForSerialization(long l);
 
 	public UpgradeData getUpgradeData() {
