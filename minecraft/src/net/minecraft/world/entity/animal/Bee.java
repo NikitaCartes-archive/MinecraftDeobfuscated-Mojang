@@ -389,12 +389,8 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	}
 
 	private boolean isHiveNearFire() {
-		if (this.hivePos == null) {
-			return false;
-		} else {
-			BlockEntity blockEntity = this.level().getBlockEntity(this.hivePos);
-			return blockEntity instanceof BeehiveBlockEntity && ((BeehiveBlockEntity)blockEntity).isFireNearby();
-		}
+		BeehiveBlockEntity beehiveBlockEntity = this.getBeehiveBlockEntity();
+		return beehiveBlockEntity != null && beehiveBlockEntity.isFireNearby();
 	}
 
 	@Override
@@ -486,15 +482,17 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		}
 	}
 
-	boolean isHiveValid() {
-		if (!this.hasHive()) {
-			return false;
-		} else if (this.isTooFarAway(this.hivePos)) {
-			return false;
+	@Nullable
+	BeehiveBlockEntity getBeehiveBlockEntity() {
+		if (this.hivePos == null) {
+			return null;
 		} else {
-			BlockEntity blockEntity = this.level().getBlockEntity(this.hivePos);
-			return blockEntity != null && blockEntity.getType() == BlockEntityType.BEEHIVE;
+			return this.isTooFarAway(this.hivePos) ? null : (BeehiveBlockEntity)this.level().getBlockEntity(this.hivePos, BlockEntityType.BEEHIVE).orElse(null);
 		}
+	}
+
+	boolean isHiveValid() {
+		return this.getBeehiveBlockEntity() != null;
 	}
 
 	public boolean hasNectar() {
@@ -714,15 +712,15 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 	class BeeEnterHiveGoal extends Bee.BaseBeeGoal {
 		@Override
 		public boolean canBeeUse() {
-			if (Bee.this.hasHive()
-				&& Bee.this.wantsToEnterHive()
-				&& Bee.this.hivePos.closerToCenterThan(Bee.this.position(), 2.0)
-				&& Bee.this.level().getBlockEntity(Bee.this.hivePos) instanceof BeehiveBlockEntity beehiveBlockEntity) {
-				if (!beehiveBlockEntity.isFull()) {
-					return true;
-				}
+			if (Bee.this.hivePos != null && Bee.this.wantsToEnterHive() && Bee.this.hivePos.closerToCenterThan(Bee.this.position(), 2.0)) {
+				BeehiveBlockEntity beehiveBlockEntity = Bee.this.getBeehiveBlockEntity();
+				if (beehiveBlockEntity != null) {
+					if (!beehiveBlockEntity.isFull()) {
+						return true;
+					}
 
-				Bee.this.hivePos = null;
+					Bee.this.hivePos = null;
+				}
 			}
 
 			return false;
@@ -735,7 +733,8 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 
 		@Override
 		public void start() {
-			if (Bee.this.level().getBlockEntity(Bee.this.hivePos) instanceof BeehiveBlockEntity beehiveBlockEntity) {
+			BeehiveBlockEntity beehiveBlockEntity = Bee.this.getBeehiveBlockEntity();
+			if (beehiveBlockEntity != null) {
 				beehiveBlockEntity.addOccupant(Bee.this);
 			}
 		}
@@ -759,6 +758,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		@Override
 		public boolean canBeeUse() {
 			return Bee.this.hivePos != null
+				&& !Bee.this.isTooFarAway(Bee.this.hivePos)
 				&& !Bee.this.hasRestriction()
 				&& Bee.this.wantsToEnterHive()
 				&& !this.hasReachedTarget(Bee.this.hivePos)
@@ -817,7 +817,7 @@ public class Bee extends Animal implements NeutralMob, FlyingAnimal {
 		}
 
 		private boolean pathfindDirectlyTowards(BlockPos blockPos) {
-			int i = Bee.this.closerThan(Bee.this.hivePos, 3) ? 1 : 2;
+			int i = Bee.this.closerThan(blockPos, 3) ? 1 : 2;
 			Bee.this.navigation.setMaxVisitedNodesMultiplier(10.0F);
 			Bee.this.navigation.moveTo((double)blockPos.getX(), (double)blockPos.getY(), (double)blockPos.getZ(), i, 1.0);
 			return Bee.this.navigation.getPath() != null && Bee.this.navigation.getPath().canReach();

@@ -217,6 +217,13 @@ public class Vec3i implements Comparable<Vec3i> {
 		return (int)(f + g + h);
 	}
 
+	public int distChessboard(Vec3i vec3i) {
+		int i = Math.abs(this.getX() - vec3i.getX());
+		int j = Math.abs(this.getY() - vec3i.getY());
+		int k = Math.abs(this.getZ() - vec3i.getZ());
+		return Math.max(Math.max(i, j), k);
+	}
+
 	public int get(Direction.Axis axis) {
 		return axis.choose(this.x, this.y, this.z);
 	}

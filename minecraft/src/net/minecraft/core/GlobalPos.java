@@ -28,4 +28,8 @@ public record GlobalPos(ResourceKey<Level> dimension, BlockPos pos) {
 	public String toString() {
 		return this.dimension + " " + this.pos;
 	}
+
+	public boolean isCloseEnough(ResourceKey<Level> resourceKey, BlockPos blockPos, int i) {
+		return this.dimension.equals(resourceKey) && this.pos.distChessboard(blockPos) <= i;
+	}
 }

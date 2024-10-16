@@ -13,6 +13,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.level.chunk.status.ChunkPyramid;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 public class ChunkPos {
 	public static final Codec<ChunkPos> CODEC = Codec.INT_STREAM
@@ -31,6 +33,8 @@ public class ChunkPos {
 	};
 	private static final int SAFETY_MARGIN = 1056;
 	public static final long INVALID_CHUNK_POS = asLong(1875066, 1875066);
+	private static final int SAFETY_MARGIN_CHUNKS = (32 + ChunkPyramid.GENERATION_PYRAMID.getStepTo(ChunkStatus.FULL).accumulatedDependencies().size() + 1) * 2;
+	public static final int MAX_COORDINATE_VALUE = SectionPos.blockToSectionCoord(BlockPos.MAX_HORIZONTAL_COORDINATE) - SAFETY_MARGIN_CHUNKS;
 	public static final ChunkPos ZERO = new ChunkPos(0, 0);
 	private static final long COORD_BITS = 32L;
 	private static final long COORD_MASK = 4294967295L;

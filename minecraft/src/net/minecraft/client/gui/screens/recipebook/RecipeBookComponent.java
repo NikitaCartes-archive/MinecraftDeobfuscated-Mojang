@@ -295,6 +295,7 @@ public abstract class RecipeBookComponent<T extends RecipeBookMenu> implements R
 		this.stackedContents.clear();
 		this.minecraft.player.getInventory().fillStackedContents(this.stackedContents);
 		this.menu.fillCraftSlotsStackedContents(this.stackedContents);
+		this.selectMatchingRecipes();
 		this.updateCollections(false, this.isFiltering());
 	}
 

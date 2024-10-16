@@ -48,15 +48,15 @@ public class BlockPos extends Vec3i {
 	};
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final BlockPos ZERO = new BlockPos(0, 0, 0);
-	private static final int PACKED_X_LENGTH = 1 + Mth.log2(Mth.smallestEncompassingPowerOfTwo(30000000));
-	private static final int PACKED_Z_LENGTH = PACKED_X_LENGTH;
-	public static final int PACKED_Y_LENGTH = 64 - PACKED_X_LENGTH - PACKED_Z_LENGTH;
-	private static final long PACKED_X_MASK = (1L << PACKED_X_LENGTH) - 1L;
+	public static final int PACKED_HORIZONTAL_LENGTH = 1 + Mth.log2(Mth.smallestEncompassingPowerOfTwo(30000000));
+	public static final int PACKED_Y_LENGTH = 64 - 2 * PACKED_HORIZONTAL_LENGTH;
+	private static final long PACKED_X_MASK = (1L << PACKED_HORIZONTAL_LENGTH) - 1L;
 	private static final long PACKED_Y_MASK = (1L << PACKED_Y_LENGTH) - 1L;
-	private static final long PACKED_Z_MASK = (1L << PACKED_Z_LENGTH) - 1L;
+	private static final long PACKED_Z_MASK = (1L << PACKED_HORIZONTAL_LENGTH) - 1L;
 	private static final int Y_OFFSET = 0;
 	private static final int Z_OFFSET = PACKED_Y_LENGTH;
-	private static final int X_OFFSET = PACKED_Y_LENGTH + PACKED_Z_LENGTH;
+	private static final int X_OFFSET = PACKED_Y_LENGTH + PACKED_HORIZONTAL_LENGTH;
+	public static final int MAX_HORIZONTAL_COORDINATE = (1 << PACKED_HORIZONTAL_LENGTH) / 2 - 1;
 
 	public BlockPos(int i, int j, int k) {
 		super(i, j, k);
@@ -75,7 +75,7 @@ public class BlockPos extends Vec3i {
 	}
 
 	public static int getX(long l) {
-		return (int)(l << 64 - X_OFFSET - PACKED_X_LENGTH >> 64 - PACKED_X_LENGTH);
+		return (int)(l << 64 - X_OFFSET - PACKED_HORIZONTAL_LENGTH >> 64 - PACKED_HORIZONTAL_LENGTH);
 	}
 
 	public static int getY(long l) {
@@ -83,7 +83,7 @@ public class BlockPos extends Vec3i {
 	}
 
 	public static int getZ(long l) {
-		return (int)(l << 64 - Z_OFFSET - PACKED_Z_LENGTH >> 64 - PACKED_Z_LENGTH);
+		return (int)(l << 64 - Z_OFFSET - PACKED_HORIZONTAL_LENGTH >> 64 - PACKED_HORIZONTAL_LENGTH);
 	}
 
 	public static BlockPos of(long l) {

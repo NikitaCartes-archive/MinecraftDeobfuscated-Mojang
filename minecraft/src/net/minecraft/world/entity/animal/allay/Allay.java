@@ -82,6 +82,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 	private static final float SPINNING_ANIMATION_DURATION = 15.0F;
 	private static final int DUPLICATION_COOLDOWN_TICKS = 6000;
 	private static final int NUM_OF_DUPLICATION_HEARTS = 3;
+	public static final int MAX_NOTEBLOCK_DISTANCE = 1024;
 	private static final EntityDataAccessor<Boolean> DATA_DANCING = SynchedEntityData.defineId(Allay.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_CAN_DUPLICATE = SynchedEntityData.defineId(Allay.class, EntityDataSerializers.BOOLEAN);
 	protected static final ImmutableList<SensorType<? extends Sensor<? super Allay>>> SENSOR_TYPES = ImmutableList.of(
@@ -615,7 +616,7 @@ public class Allay extends PathfinderMob implements InventoryCarrier, VibrationS
 					return true;
 				} else {
 					GlobalPos globalPos = (GlobalPos)optional.get();
-					return globalPos.dimension().equals(serverLevel.dimension()) && globalPos.pos().equals(blockPos);
+					return globalPos.isCloseEnough(serverLevel.dimension(), Allay.this.blockPosition(), 1024) && globalPos.pos().equals(blockPos);
 				}
 			}
 		}

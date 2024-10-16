@@ -37,6 +37,9 @@ public abstract class GenerationChunkHolder {
 
 	public GenerationChunkHolder(ChunkPos chunkPos) {
 		this.pos = chunkPos;
+		if (chunkPos.getChessboardDistance(ChunkPos.ZERO) > ChunkPos.MAX_COORDINATE_VALUE) {
+			throw new IllegalStateException("Trying to create chunk out of reasonable bounds: " + chunkPos);
+		}
 	}
 
 	public CompletableFuture<ChunkResult<ChunkAccess>> scheduleChunkGenerationTask(ChunkStatus chunkStatus, ChunkMap chunkMap) {

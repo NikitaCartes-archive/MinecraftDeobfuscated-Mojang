@@ -144,7 +144,7 @@ public abstract class AbstractArrow extends Projectile {
 
 	@Override
 	public void lerpMotion(double d, double e, double f) {
-		super.lerpMotion(d, e, f);
+		this.setDeltaMovement(d, e, f);
 		this.life = 0;
 		if (this.isInGround() && Mth.lengthSquared(d, e, f) > 0.0) {
 			this.setInGround(false);
@@ -163,14 +163,6 @@ public abstract class AbstractArrow extends Projectile {
 	public void tick() {
 		boolean bl = !this.isNoPhysics();
 		Vec3 vec3 = this.getDeltaMovement();
-		if (this.xRotO == 0.0F && this.yRotO == 0.0F) {
-			double d = vec3.horizontalDistance();
-			this.setYRot((float)(Mth.atan2(vec3.x, vec3.z) * 180.0F / (float)Math.PI));
-			this.setXRot((float)(Mth.atan2(vec3.y, d) * 180.0F / (float)Math.PI));
-			this.yRotO = this.getYRot();
-			this.xRotO = this.getXRot();
-		}
-
 		BlockPos blockPos = this.blockPosition();
 		BlockState blockState = this.level().getBlockState(blockPos);
 		if (!blockState.isAir() && bl) {

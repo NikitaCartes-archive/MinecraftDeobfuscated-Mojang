@@ -41,6 +41,7 @@ public class SculkSpreader {
 	public static final float MAX_DECAY_FACTOR = 0.5F;
 	private static final int MAX_CURSORS = 32;
 	public static final int SHRIEKER_PLACEMENT_RATE = 11;
+	public static final int MAX_CURSOR_DISTANCE = 1024;
 	final boolean isWorldGeneration;
 	private final TagKey<Block> replaceableBlocks;
 	private final int growthSpawnCost;
@@ -145,22 +146,24 @@ public class SculkSpreader {
 			Object2IntMap<BlockPos> object2IntMap = new Object2IntOpenHashMap<>();
 
 			for (SculkSpreader.ChargeCursor chargeCursor : this.cursors) {
-				chargeCursor.update(levelAccessor, blockPos, randomSource, this, bl);
-				if (chargeCursor.charge <= 0) {
-					levelAccessor.levelEvent(3006, chargeCursor.getPos(), 0);
-				} else {
-					BlockPos blockPos2 = chargeCursor.getPos();
-					object2IntMap.computeInt(blockPos2, (blockPosx, integer) -> (integer == null ? 0 : integer) + chargeCursor.charge);
-					SculkSpreader.ChargeCursor chargeCursor2 = (SculkSpreader.ChargeCursor)map.get(blockPos2);
-					if (chargeCursor2 == null) {
-						map.put(blockPos2, chargeCursor);
-						list.add(chargeCursor);
-					} else if (!this.isWorldGeneration() && chargeCursor.charge + chargeCursor2.charge <= 1000) {
-						chargeCursor2.mergeWith(chargeCursor);
+				if (!chargeCursor.isPosUnreasonable(blockPos)) {
+					chargeCursor.update(levelAccessor, blockPos, randomSource, this, bl);
+					if (chargeCursor.charge <= 0) {
+						levelAccessor.levelEvent(3006, chargeCursor.getPos(), 0);
 					} else {
-						list.add(chargeCursor);
-						if (chargeCursor.charge < chargeCursor2.charge) {
+						BlockPos blockPos2 = chargeCursor.getPos();
+						object2IntMap.computeInt(blockPos2, (blockPosx, integer) -> (integer == null ? 0 : integer) + chargeCursor.charge);
+						SculkSpreader.ChargeCursor chargeCursor2 = (SculkSpreader.ChargeCursor)map.get(blockPos2);
+						if (chargeCursor2 == null) {
 							map.put(blockPos2, chargeCursor);
+							list.add(chargeCursor);
+						} else if (!this.isWorldGeneration() && chargeCursor.charge + chargeCursor2.charge <= 1000) {
+							chargeCursor2.mergeWith(chargeCursor);
+						} else {
+							list.add(chargeCursor);
+							if (chargeCursor.charge < chargeCursor2.charge) {
+								map.put(blockPos2, chargeCursor);
+							}
 						}
 					}
 				}
@@ -223,6 +226,10 @@ public class SculkSpreader {
 
 		public BlockPos getPos() {
 			return this.pos;
+		}
+
+		boolean isPosUnreasonable(BlockPos blockPos) {
+			return this.pos.distChessboard(blockPos) > 1024;
 		}
 
 		public int getCharge() {
