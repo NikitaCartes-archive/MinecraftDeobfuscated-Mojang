@@ -142,13 +142,13 @@ public abstract class BlockableEventLoop<R extends Runnable> implements Profiler
 	}
 
 	protected void doRunTask(R runnable) {
-		try {
-			try (Zone zone = TracyClient.beginZone("Task", SharedConstants.IS_RUNNING_IN_IDE)) {
-				runnable.run();
-			}
+		try (Zone zone = TracyClient.beginZone("Task", SharedConstants.IS_RUNNING_IN_IDE)) {
+			runnable.run();
 		} catch (Exception var7) {
 			LOGGER.error(LogUtils.FATAL_MARKER, "Error executing task on {}", this.name(), var7);
-			throw var7;
+			if (isNonRecoverable(var7)) {
+				throw var7;
+			}
 		}
 	}
 
