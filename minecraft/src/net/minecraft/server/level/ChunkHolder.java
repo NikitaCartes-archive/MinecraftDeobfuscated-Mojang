@@ -166,8 +166,12 @@ public class ChunkHolder extends GenerationChunkHolder {
 		}
 	}
 
+	public boolean hasChangesToBroadcast() {
+		return this.hasChangedSections || !this.skyChangedLightSectionFilter.isEmpty() || !this.blockChangedLightSectionFilter.isEmpty();
+	}
+
 	public void broadcastChanges(LevelChunk levelChunk) {
-		if (this.hasChangedSections || !this.skyChangedLightSectionFilter.isEmpty() || !this.blockChangedLightSectionFilter.isEmpty()) {
+		if (this.hasChangesToBroadcast()) {
 			Level level = levelChunk.getLevel();
 			if (!this.skyChangedLightSectionFilter.isEmpty() || !this.blockChangedLightSectionFilter.isEmpty()) {
 				List<ServerPlayer> list = this.playerProvider.getPlayers(this.pos, true);

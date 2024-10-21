@@ -657,18 +657,15 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
 			boolean bl = !Mth.equal(vec3.x, vec32.x);
 			boolean bl2 = !Mth.equal(vec3.z, vec32.z);
 			this.horizontalCollision = bl || bl2;
-			if (Math.abs(vec3.y) > 0.0 || this.isControlledByOrIsLocalPlayer()) {
-				this.verticalCollision = vec3.y != vec32.y;
-				this.verticalCollisionBelow = this.verticalCollision && vec3.y < 0.0;
-				this.setOnGroundWithMovement(this.verticalCollisionBelow, this.horizontalCollision, vec32);
-			}
-
+			this.verticalCollision = vec3.y != vec32.y;
+			this.verticalCollisionBelow = this.verticalCollision && vec3.y < 0.0;
 			if (this.horizontalCollision) {
 				this.minorHorizontalCollision = this.isHorizontalCollisionMinor(vec32);
 			} else {
 				this.minorHorizontalCollision = false;
 			}
 
+			this.setOnGroundWithMovement(this.verticalCollisionBelow, this.horizontalCollision, vec32);
 			BlockPos blockPos = this.getOnPosLegacy();
 			BlockState blockState = this.level().getBlockState(blockPos);
 			if (!this.level().isClientSide() || this.isControlledByLocalInstance()) {

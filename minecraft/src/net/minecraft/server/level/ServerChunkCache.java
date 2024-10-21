@@ -549,6 +549,12 @@ public class ServerChunkCache extends ChunkSource {
 		this.distanceManager.removeTicketsOnClosing();
 	}
 
+	public void onChunkReadyToSend(ChunkHolder chunkHolder) {
+		if (chunkHolder.hasChangesToBroadcast()) {
+			this.chunkHoldersToBroadcast.add(chunkHolder);
+		}
+	}
+
 	static record ChunkAndHolder(LevelChunk chunk, ChunkHolder holder) {
 	}
 

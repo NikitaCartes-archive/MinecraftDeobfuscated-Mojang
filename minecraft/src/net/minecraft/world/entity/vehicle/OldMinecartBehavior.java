@@ -105,7 +105,6 @@ public class OldMinecartBehavior extends MinecartBehavior {
 			}
 
 			this.minecart.applyEffectsFromBlocks();
-			this.minecart.applyEffectsFromBlocks();
 			this.setXRot(0.0F);
 			double d = this.minecart.xo - this.getX();
 			double e = this.minecart.zo - this.getZ();

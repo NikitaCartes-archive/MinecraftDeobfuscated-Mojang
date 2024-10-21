@@ -691,9 +691,9 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 				this.level.startTickingChunk(levelChunk);
 				CompletableFuture<?> completableFuturex = chunkHolder.getSendSyncFuture();
 				if (completableFuturex.isDone()) {
-					this.onChunkReadyToSend(levelChunk);
+					this.onChunkReadyToSend(chunkHolder, levelChunk);
 				} else {
-					completableFuturex.thenAcceptAsync(object -> this.onChunkReadyToSend(levelChunk), this.mainThreadExecutor);
+					completableFuturex.thenAcceptAsync(object -> this.onChunkReadyToSend(chunkHolder, levelChunk), this.mainThreadExecutor);
 				}
 
 				return levelChunk;
@@ -705,7 +705,7 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 		return completableFuture2;
 	}
 
-	private void onChunkReadyToSend(LevelChunk levelChunk) {
+	private void onChunkReadyToSend(ChunkHolder chunkHolder, LevelChunk levelChunk) {
 		ChunkPos chunkPos = levelChunk.getPos();
 
 		for (ServerPlayer serverPlayer : this.playerMap.getAllPlayers()) {
@@ -713,6 +713,8 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
 				markChunkPendingToSend(serverPlayer, levelChunk);
 			}
 		}
+
+		this.level.getChunkSource().onChunkReadyToSend(chunkHolder);
 	}
 
 	public CompletableFuture<ChunkResult<LevelChunk>> prepareAccessibleChunk(ChunkHolder chunkHolder) {

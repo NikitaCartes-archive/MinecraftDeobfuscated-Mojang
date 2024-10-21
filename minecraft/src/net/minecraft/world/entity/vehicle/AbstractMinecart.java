@@ -387,6 +387,16 @@ public abstract class AbstractMinecart extends VehicleEntity {
 			}
 		} else {
 			super.move(moverType, vec3);
+			this.applyEffectsFromBlocks();
+		}
+	}
+
+	@Override
+	public void applyEffectsFromBlocks() {
+		if (!useExperimentalMovement(this.level())) {
+			this.applyEffectsFromBlocks(this.position(), this.position());
+		} else {
+			super.applyEffectsFromBlocks();
 		}
 	}
 
