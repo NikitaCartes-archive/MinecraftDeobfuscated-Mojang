@@ -106,6 +106,7 @@ import net.minecraft.util.datafix.fixes.EntityPufferfishRenameFix;
 import net.minecraft.util.datafix.fixes.EntityRavagerRenameFix;
 import net.minecraft.util.datafix.fixes.EntityRedundantChanceTagsFix;
 import net.minecraft.util.datafix.fixes.EntityRidingToPassengersFix;
+import net.minecraft.util.datafix.fixes.EntitySalmonSizeFix;
 import net.minecraft.util.datafix.fixes.EntityShulkerColorFix;
 import net.minecraft.util.datafix.fixes.EntityShulkerRotationFix;
 import net.minecraft.util.datafix.fixes.EntitySkeletonSplitFix;
@@ -1360,6 +1361,8 @@ public class DataFixers {
 		Schema schema236 = dataFixerBuilder.addSchema(4071, V4071::new);
 		dataFixerBuilder.addFixer(new AddNewChoices(schema236, "Added Creaking", References.ENTITY));
 		dataFixerBuilder.addFixer(new AddNewChoices(schema236, "Added Creaking Heart", References.BLOCK_ENTITY));
+		Schema schema237 = dataFixerBuilder.addSchema(4081, SAME_NAMESPACED);
+		dataFixerBuilder.addFixer(new EntitySalmonSizeFix(schema237));
 	}
 
 	private static UnaryOperator<String> createRenamerNoNamespace(Map<String, String> map) {

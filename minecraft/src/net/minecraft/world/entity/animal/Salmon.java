@@ -150,7 +150,7 @@ public class Salmon extends AbstractSchoolingFish implements VariantHolder<Salmo
 		}
 
 		static Salmon.Variant byName(String string) {
-			return (Salmon.Variant)CODEC.byName(string, SMALL);
+			return (Salmon.Variant)CODEC.byName(string, MEDIUM);
 		}
 	}
 }
